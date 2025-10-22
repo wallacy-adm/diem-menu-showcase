@@ -37,15 +37,15 @@ All colors MUST be HSL.
     --input: 215 20% 18%;
     --ring: 145 85% 38%;
 
-    --radius: 0.75rem;
+    --radius: 0.875rem;
 
     /* Promo badge */
     --promo: 25 95% 53%;
     --promo-foreground: 0 0% 100%;
 
     /* Shadows for cards */
-    --shadow-card: 0 10px 30px -5px rgba(0, 0, 0, 0.3);
-    --shadow-card-hover: 0 15px 40px -5px rgba(13, 176, 96, 0.2);
+    --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.15);
+    --shadow-card-hover: 0 8px 24px rgba(13, 176, 96, 0.15), 0 2px 8px rgba(0, 0, 0, 0.2);
 
     /* Transitions */
     --transition-smooth: all 160ms cubic-bezier(0.4, 0, 0.2, 1);

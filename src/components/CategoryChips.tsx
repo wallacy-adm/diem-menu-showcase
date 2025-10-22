@@ -15,7 +15,7 @@ export const CategoryChips = ({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div className="sticky top-[88px] md:top-[96px] z-40 bg-background/95 backdrop-blur-sm border-b border-border py-3 shadow-sm">
+    <div className="sticky top-[88px] md:top-[96px] z-40 bg-background/98 backdrop-blur-md border-b border-border py-4 shadow-sm">
       <div
         ref={scrollContainerRef}
         className="container mx-auto px-4 overflow-x-auto scrollbar-hide"
@@ -24,16 +24,16 @@ export const CategoryChips = ({
           msOverflowStyle: "none",
         }}
       >
-        <div className="flex gap-2 min-w-max pb-1">
+        <div className="flex gap-3 min-w-max pb-1">
           {categories.map((category) => (
             <button
               key={category}
               onClick={() => onCategoryClick(category)}
               className={cn(
-                "px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-smooth border",
+                "px-6 py-3 rounded-full text-sm font-semibold whitespace-nowrap transition-smooth",
                 activeCategory === category
-                  ? "bg-primary text-primary-foreground border-primary shadow-md"
-                  : "bg-secondary text-secondary-foreground border-border hover:bg-secondary/80 hover:border-primary/50"
+                  ? "bg-primary text-black shadow-lg scale-105"
+                  : "bg-secondary/60 text-foreground hover:bg-secondary hover:scale-102 border border-border/50"
               )}
               aria-label={`Ver categoria ${category}`}
             >

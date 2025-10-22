@@ -32,35 +32,35 @@ export const ProductCard = ({
     <>
       <article
         className={cn(
-          "bg-card rounded-lg border border-border overflow-hidden transition-smooth hover:shadow-card-hover shadow-card group cursor-pointer"
+          "bg-card rounded-xl border border-border overflow-hidden transition-smooth hover:shadow-card-hover shadow-card group cursor-pointer"
         )}
         onClick={() => setIsModalOpen(true)}
       >
-        <div className="flex gap-4 p-4">
+        <div className="flex gap-5 p-5">
           <div className="flex-1 min-w-0 flex flex-col">
-            <div className="mb-2">
-              <h3 className="text-lg font-semibold text-foreground mb-1 line-clamp-2 group-hover:text-primary transition-smooth">
+            <div className="mb-3">
+              <h3 className="text-xl font-bold text-foreground mb-2 line-clamp-2 group-hover:text-primary transition-smooth">
                 {name}
               </h3>
-              <p className="text-sm text-muted-foreground line-clamp-2">
+              <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed">
                 {description}
               </p>
             </div>
 
-            <div className="mt-auto pt-2 flex items-end justify-between gap-3">
-              <div className="flex flex-col gap-1">
-                <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-bold text-primary">
+            <div className="mt-auto pt-3 flex items-end justify-between gap-4">
+              <div className="flex flex-col gap-2">
+                <div className="flex items-baseline gap-2 flex-wrap">
+                  <span className="text-3xl font-bold text-primary">
                     R$ {price.toFixed(2).replace(".", ",")}
                   </span>
                   {hasPromo && (
-                    <span className="text-sm text-muted-foreground line-through">
+                    <span className="text-base text-muted-foreground line-through">
                       R$ {oldPrice.toFixed(2).replace(".", ",")}
                     </span>
                   )}
                 </div>
                 {hasPromo && (
-                  <Badge className="w-fit bg-[hsl(var(--promo))] text-[hsl(var(--promo-foreground))] hover:bg-[hsl(var(--promo))]/90">
+                  <Badge className="w-fit bg-[hsl(var(--promo))] text-[hsl(var(--promo-foreground))] hover:bg-[hsl(var(--promo))]/90 text-xs px-3 py-1">
                     Promoção
                   </Badge>
                 )}
@@ -69,7 +69,7 @@ export const ProductCard = ({
               <Button
                 size="sm"
                 variant="outline"
-                className="flex-shrink-0 border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-smooth"
+                className="flex-shrink-0 border-primary/60 text-primary hover:bg-primary hover:text-black hover:border-primary transition-smooth font-semibold"
                 onClick={(e) => {
                   e.stopPropagation();
                   setIsModalOpen(true);
@@ -81,7 +81,7 @@ export const ProductCard = ({
             </div>
           </div>
 
-          <div className="relative w-28 h-28 md:w-32 md:h-32 flex-shrink-0 rounded-md overflow-hidden bg-secondary">
+          <div className="relative w-32 h-32 md:w-40 md:h-40 flex-shrink-0 rounded-xl overflow-hidden bg-secondary">
             {!imageLoaded && (
               <div className="absolute inset-0 bg-secondary animate-pulse" />
             )}
@@ -90,7 +90,7 @@ export const ProductCard = ({
               alt={name}
               loading="lazy"
               className={cn(
-                "w-full h-full object-cover transition-smooth group-hover:scale-105",
+                "w-full h-full object-cover transition-smooth group-hover:scale-110",
                 imageLoaded ? "opacity-100" : "opacity-0"
               )}
               onLoad={() => setImageLoaded(true)}

@@ -25,15 +25,15 @@ export const ProductModal = ({ isOpen, onClose, product }: ProductModalProps) =>
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-lg bg-card border-border">
+      <DialogContent className="sm:max-w-2xl bg-card border-border rounded-2xl">
         <DialogHeader>
-          <DialogTitle className="text-2xl text-foreground pr-8">
+          <DialogTitle className="text-3xl font-bold text-foreground pr-8 leading-tight">
             {product.name}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
-          <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-secondary">
+        <div className="space-y-6">
+          <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-secondary">
             <img
               src={product.image}
               alt={product.name}
@@ -42,24 +42,24 @@ export const ProductModal = ({ isOpen, onClose, product }: ProductModalProps) =>
           </div>
 
           <div>
-            <Badge variant="secondary" className="mb-3">
+            <Badge variant="secondary" className="mb-4 px-4 py-1.5 text-sm">
               {product.category}
             </Badge>
-            <p className="text-muted-foreground leading-relaxed">
+            <p className="text-muted-foreground leading-relaxed text-base">
               {product.description}
             </p>
           </div>
 
-          <div className="flex items-baseline gap-3 pt-4 border-t border-border">
-            <span className="text-3xl font-bold text-primary">
+          <div className="flex items-baseline gap-4 pt-6 border-t border-border">
+            <span className="text-4xl font-bold text-primary">
               R$ {product.price.toFixed(2).replace(".", ",")}
             </span>
             {hasPromo && (
               <>
-                <span className="text-lg text-muted-foreground line-through">
+                <span className="text-xl text-muted-foreground line-through">
                   R$ {product.oldPrice!.toFixed(2).replace(".", ",")}
                 </span>
-                <Badge className="bg-[hsl(var(--promo))] text-[hsl(var(--promo-foreground))] hover:bg-[hsl(var(--promo))]/90">
+                <Badge className="bg-[hsl(var(--promo))] text-[hsl(var(--promo-foreground))] hover:bg-[hsl(var(--promo))]/90 px-4 py-1.5 text-sm">
                   Promoção
                 </Badge>
               </>
