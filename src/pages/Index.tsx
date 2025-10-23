@@ -53,7 +53,7 @@ const Index = () => {
     setActiveCategory(category);
     const element = sectionRefs.current[category];
     if (element) {
-      const headerOffset = 60;
+      const headerOffset = 120;
       const elementPosition = element.getBoundingClientRect().top;
       const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
 

@@ -69,8 +69,8 @@ export const ProductCard = ({
           </div>
 
           {/* Image Right */}
-          <div className="w-32 h-32 flex-shrink-0">
-            <div className="relative w-full h-full rounded-xl overflow-hidden bg-muted">
+          <div className="w-[120px] h-[120px] flex-shrink-0">
+            <div className="relative w-full h-full rounded-[14px] overflow-hidden bg-muted">
               {!imageLoaded && (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />

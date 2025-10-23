@@ -68,6 +68,13 @@ export const ProductModal = ({ isOpen, onClose, product }: ProductModalProps) =>
               R$ {product.price.toFixed(2)}
             </div>
           </div>
+
+          {/* Aviso */}
+          <div className="mt-4 p-3 bg-muted/30 rounded-lg border border-border/30">
+            <p className="text-sm text-muted-foreground text-center">
+              Apenas visualização — pedidos não são feitos por aqui.
+            </p>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

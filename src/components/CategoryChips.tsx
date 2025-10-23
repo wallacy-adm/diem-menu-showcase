@@ -30,10 +30,10 @@ export const CategoryChips = ({
               key={category.name}
               onClick={() => onCategoryClick(category.name)}
               className={cn(
-                "px-4 py-2.5 rounded-lg text-sm font-semibold whitespace-nowrap transition-all border-2 flex items-center gap-2",
+                "px-4 py-2.5 rounded-lg text-sm font-semibold whitespace-nowrap transition-all border flex items-center gap-2 max-w-[200px] overflow-hidden text-ellipsis",
                 activeCategory === category.name
-                  ? "bg-primary text-black border-primary shadow-md"
-                  : "bg-card/50 text-foreground border-transparent hover:bg-card hover:border-border"
+                  ? "bg-[#00D084] text-black border-[#00D084] shadow-md border-b-4"
+                  : "bg-[#14161a] text-foreground border-border/30 hover:bg-[#1a1d23]"
               )}
               aria-label={`Ver categoria ${category.name}`}
             >
