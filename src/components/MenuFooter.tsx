@@ -16,13 +16,13 @@ export const MenuFooter = () => {
   });
 
   return (
-    <footer className="mt-12 py-6 border-t border-border bg-card/50">
-      <div className="container mx-auto px-4 text-center">
-        <p className="text-xs text-muted-foreground">
+    <footer className="mt-12 py-8 border-t border-border/30 bg-background">
+      <div className="container mx-auto px-4 text-center space-y-3">
+        <p className="text-sm text-muted-foreground">
           {settings?.footer_note ||
             "Imagens meramente ilustrativas. Produtos e preços sujeitos a alteração."}
         </p>
-        <p className="text-xs text-muted-foreground/70 mt-2">
+        <p className="text-xs text-muted-foreground/60">
           © {new Date().getFullYear()} {settings?.brand_name || "Carpe Diem Motel"}. Todos os direitos reservados.
         </p>
       </div>

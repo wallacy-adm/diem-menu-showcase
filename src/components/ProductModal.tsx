@@ -22,6 +22,9 @@ interface ProductModalProps {
 
 export const ProductModal = ({ isOpen, onClose, product }: ProductModalProps) => {
   const hasPromo = product.oldPrice && product.oldPrice > product.price;
+  const discountPercentage = hasPromo 
+    ? Math.round(((product.oldPrice! - product.price) / product.oldPrice!) * 100)
+    : 0;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -50,20 +53,20 @@ export const ProductModal = ({ isOpen, onClose, product }: ProductModalProps) =>
             </p>
           </div>
 
-          <div className="flex items-baseline gap-4 pt-6 border-t border-border">
-            <span className="text-4xl font-bold text-primary">
-              R$ {product.price.toFixed(2).replace(".", ",")}
-            </span>
+          <div className="pt-6 border-t border-border space-y-2">
             {hasPromo && (
-              <>
-                <span className="text-xl text-muted-foreground line-through">
-                  R$ {product.oldPrice!.toFixed(2).replace(".", ",")}
-                </span>
-                <Badge className="bg-[hsl(var(--promo))] text-[hsl(var(--promo-foreground))] hover:bg-[hsl(var(--promo))]/90 px-4 py-1.5 text-sm">
-                  Promoção
+              <div className="flex items-center gap-3">
+                <Badge className="bg-[hsl(var(--discount-badge))] text-white hover:bg-[hsl(var(--discount-badge))]/90 px-3 py-1 text-sm font-bold">
+                  -{discountPercentage}%
                 </Badge>
-              </>
+                <span className="text-lg text-muted-foreground line-through">
+                  R$ {product.oldPrice!.toFixed(2)}
+                </span>
+              </div>
             )}
+            <div className="text-4xl font-extrabold text-[hsl(var(--primary))]">
+              R$ {product.price.toFixed(2)}
+            </div>
           </div>
         </div>
       </DialogContent>

@@ -26,78 +26,69 @@ export const ProductCard = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
 
-  const hasPromo = oldPrice && oldPrice > price;
+  const hasPromotion = oldPrice && oldPrice > price;
+  const discountPercentage = hasPromotion 
+    ? Math.round(((oldPrice - price) / oldPrice) * 100)
+    : 0;
 
   return (
     <>
-      <article
-        className={cn(
-          "bg-card rounded-xl border border-border overflow-hidden transition-smooth hover:shadow-card-hover shadow-card group cursor-pointer"
-        )}
+      <div 
+        className="bg-card rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 border border-border/30 cursor-pointer"
         onClick={() => setIsModalOpen(true)}
       >
-        <div className="flex gap-5 p-5">
-          <div className="flex-1 min-w-0 flex flex-col">
-            <div className="mb-3">
-              <h3 className="text-xl font-bold text-foreground mb-2 line-clamp-2 group-hover:text-primary transition-smooth">
+        <div className="flex gap-4 p-4">
+          {/* Content Left */}
+          <div className="flex-1 flex flex-col justify-between">
+            {/* Product Info */}
+            <div>
+              <h3 className="text-lg font-bold text-foreground mb-2 line-clamp-2">
                 {name}
               </h3>
-              <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed">
+              <p className="text-sm text-muted-foreground line-clamp-3 mb-3">
                 {description}
               </p>
             </div>
 
-            <div className="mt-auto pt-3 flex items-end justify-between gap-4">
-              <div className="flex flex-col gap-2">
-                <div className="flex items-baseline gap-2 flex-wrap">
-                  <span className="text-3xl font-bold text-primary">
-                    R$ {price.toFixed(2).replace(".", ",")}
+            {/* Price Section */}
+            <div className="flex flex-col gap-1">
+              {hasPromotion && (
+                <div className="flex items-center gap-2">
+                  <span className="inline-block bg-[hsl(var(--discount-badge))] text-white text-xs font-bold px-2 py-0.5 rounded">
+                    -{discountPercentage}%
                   </span>
-                  {hasPromo && (
-                    <span className="text-base text-muted-foreground line-through">
-                      R$ {oldPrice.toFixed(2).replace(".", ",")}
-                    </span>
-                  )}
+                  <span className="text-sm text-muted-foreground line-through">
+                    R$ {oldPrice?.toFixed(2)}
+                  </span>
                 </div>
-                {hasPromo && (
-                  <Badge className="w-fit bg-[hsl(var(--promo))] text-[hsl(var(--promo-foreground))] hover:bg-[hsl(var(--promo))]/90 text-xs px-3 py-1">
-                    Promoção
-                  </Badge>
-                )}
+              )}
+              <div className="text-2xl font-extrabold text-[hsl(var(--primary))]">
+                R$ {price.toFixed(2)}
               </div>
-
-              <Button
-                size="sm"
-                variant="outline"
-                className="flex-shrink-0 border-primary/60 text-primary hover:bg-primary hover:text-black hover:border-primary transition-smooth font-semibold"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsModalOpen(true);
-                }}
-                aria-label={`Ver detalhes de ${name}`}
-              >
-                Detalhes
-              </Button>
             </div>
           </div>
 
-          <div className="relative w-32 h-32 md:w-40 md:h-40 flex-shrink-0 rounded-xl overflow-hidden bg-secondary">
-            {!imageLoaded && (
-              <div className="absolute inset-0 bg-secondary animate-pulse" />
-            )}
-            <img
-              src={image}
-              alt={name}
-              loading="lazy"
-              className={cn(
-                "w-full h-full object-cover transition-smooth group-hover:scale-110",
-                imageLoaded ? "opacity-100" : "opacity-0"
+          {/* Image Right */}
+          <div className="w-32 h-32 flex-shrink-0">
+            <div className="relative w-full h-full rounded-xl overflow-hidden bg-muted">
+              {!imageLoaded && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+                </div>
               )}
-              onLoad={() => setImageLoaded(true)}
-            />
+              <img
+                src={image || "/placeholder.svg"}
+                alt={name}
+                onLoad={() => setImageLoaded(true)}
+                className={cn(
+                  "w-full h-full object-cover transition-opacity duration-300",
+                  imageLoaded ? "opacity-100" : "opacity-0"
+                )}
+              />
+            </div>
           </div>
         </div>
-      </article>
+      </div>
 
       <ProductModal
         isOpen={isModalOpen}

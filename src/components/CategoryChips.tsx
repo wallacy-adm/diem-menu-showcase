@@ -2,7 +2,7 @@ import { useRef } from "react";
 import { cn } from "@/lib/utils";
 
 interface CategoryChipsProps {
-  categories: string[];
+  categories: Array<{ name: string; emoji: string }>;
   activeCategory: string;
   onCategoryClick: (category: string) => void;
 }
@@ -15,29 +15,30 @@ export const CategoryChips = ({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div className="sticky top-[88px] md:top-[96px] z-40 bg-background/98 backdrop-blur-md border-b border-border py-4 shadow-sm">
+    <div className="sticky top-0 z-40 bg-background border-b border-border/50 shadow-lg">
       <div
         ref={scrollContainerRef}
-        className="container mx-auto px-4 overflow-x-auto scrollbar-hide"
+        className="container mx-auto px-4 py-3 overflow-x-auto scrollbar-hide"
         style={{
           scrollbarWidth: "none",
           msOverflowStyle: "none",
         }}
       >
-        <div className="flex gap-3 min-w-max pb-1">
+        <div className="flex gap-2 min-w-max">
           {categories.map((category) => (
             <button
-              key={category}
-              onClick={() => onCategoryClick(category)}
+              key={category.name}
+              onClick={() => onCategoryClick(category.name)}
               className={cn(
-                "px-6 py-3 rounded-full text-sm font-semibold whitespace-nowrap transition-smooth",
-                activeCategory === category
-                  ? "bg-primary text-black shadow-lg scale-105"
-                  : "bg-secondary/60 text-foreground hover:bg-secondary hover:scale-102 border border-border/50"
+                "px-4 py-2.5 rounded-lg text-sm font-semibold whitespace-nowrap transition-all border-2 flex items-center gap-2",
+                activeCategory === category.name
+                  ? "bg-primary text-black border-primary shadow-md"
+                  : "bg-card/50 text-foreground border-transparent hover:bg-card hover:border-border"
               )}
-              aria-label={`Ver categoria ${category}`}
+              aria-label={`Ver categoria ${category.name}`}
             >
-              {category}
+              <span className="text-base">{category.emoji}</span>
+              <span>{category.name}</span>
             </button>
           ))}
         </div>

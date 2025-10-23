@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      categories: {
+        Row: {
+          created_at: string
+          emoji: string
+          id: string
+          name: string
+          sort_order: number
+          updated_at: string
+          visible: boolean
+        }
+        Insert: {
+          created_at?: string
+          emoji?: string
+          id?: string
+          name: string
+          sort_order?: number
+          updated_at?: string
+          visible?: boolean
+        }
+        Update: {
+          created_at?: string
+          emoji?: string
+          id?: string
+          name?: string
+          sort_order?: number
+          updated_at?: string
+          visible?: boolean
+        }
+        Relationships: []
+      }
       menu_items: {
         Row: {
           category: string
@@ -27,6 +57,7 @@ export type Database = {
           price: number
           sort_order: number
           updated_at: string
+          visible: boolean
         }
         Insert: {
           category: string
@@ -40,6 +71,7 @@ export type Database = {
           price: number
           sort_order?: number
           updated_at?: string
+          visible?: boolean
         }
         Update: {
           category?: string
@@ -53,6 +85,7 @@ export type Database = {
           price?: number
           sort_order?: number
           updated_at?: string
+          visible?: boolean
         }
         Relationships: []
       }
