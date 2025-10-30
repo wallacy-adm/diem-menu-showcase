@@ -53,7 +53,7 @@ const Index = () => {
     setActiveCategory(category);
     const element = sectionRefs.current[category];
     if (element) {
-      const headerOffset = 120;
+      const headerOffset = 80;
       const elementPosition = element.getBoundingClientRect().top;
       const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
 
@@ -84,7 +84,7 @@ const Index = () => {
     });
 
     return () => observer.disconnect();
-  }, [groupedItems]);
+  }, [categories]);
 
   if (isLoading) {
     return (
@@ -115,8 +115,6 @@ const Index = () => {
         {categories.map((category) => {
           const items = groupedItems?.[category.name] || [];
           
-          if (items.length === 0) return null;
-          
           return (
             <section
               key={category.name}
@@ -124,26 +122,32 @@ const Index = () => {
               data-category={category.name}
               className="mb-10 scroll-mt-20"
             >
-              <h2 className="text-xl font-extrabold text-foreground mb-5 uppercase tracking-wide flex items-center gap-2">
+              <h2 className="text-xl font-extrabold text-white mb-5 uppercase tracking-wide flex items-center gap-2" style={{ fontWeight: 800 }}>
                 <span className="text-2xl">{category.emoji}</span>
                 {category.name}
                 <span className="text-2xl">{category.emoji}</span>
               </h2>
 
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
-                {items.map((item) => (
-                  <ProductCard
-                    key={item.id}
-                    id={item.id}
-                    name={item.name}
-                    description={item.description}
-                    price={Number(item.price)}
-                    oldPrice={item.old_price ? Number(item.old_price) : undefined}
-                    image={item.image}
-                    category={item.category}
-                  />
-                ))}
-              </div>
+              {items.length > 0 ? (
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
+                  {items.map((item) => (
+                    <ProductCard
+                      key={item.id}
+                      id={item.id}
+                      name={item.name}
+                      description={item.description}
+                      price={Number(item.price)}
+                      oldPrice={item.old_price ? Number(item.old_price) : undefined}
+                      image={item.image}
+                      category={item.category}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <p className="text-[#b3b3b3] text-sm text-center py-8">
+                  Nenhum produto disponível nesta categoria no momento.
+                </p>
+              )}
             </section>
           );
         })}

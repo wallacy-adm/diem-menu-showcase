@@ -10,9 +10,9 @@ All colors MUST be HSL.
   :root {
     /* Dark theme - Olaclick Style */
     --background: 0 0% 5%;
-    --foreground: 0 0% 98%;
+    --foreground: 0 0% 100%;
 
-    --card: 0 0% 8%;
+    --card: 0 0% 10%;
     --card-foreground: 0 0% 98%;
 
     --popover: 0 0% 5%;

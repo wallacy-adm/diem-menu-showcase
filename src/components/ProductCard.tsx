@@ -34,7 +34,7 @@ export const ProductCard = ({
   return (
     <>
       <div 
-        className="bg-card rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 border border-border/30 cursor-pointer"
+        className="bg-[#1a1a1a] rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 border border-border/30 cursor-pointer"
         onClick={() => setIsModalOpen(true)}
       >
         <div className="flex gap-4 p-4">
@@ -42,10 +42,10 @@ export const ProductCard = ({
           <div className="flex-1 flex flex-col justify-between">
             {/* Product Info */}
             <div>
-              <h3 className="text-lg font-bold text-foreground mb-2 line-clamp-2">
+              <h3 className="text-[17px] md:text-[18px] font-extrabold text-white mb-2 line-clamp-2" style={{ fontWeight: 800 }}>
                 {name}
               </h3>
-              <p className="text-sm text-muted-foreground line-clamp-3 mb-3">
+              <p className="text-sm text-[#b3b3b3] line-clamp-3 mb-3">
                 {description}
               </p>
             </div>
@@ -54,15 +54,15 @@ export const ProductCard = ({
             <div className="flex flex-col gap-1">
               {hasPromotion && (
                 <div className="flex items-center gap-2">
-                  <span className="inline-block bg-[hsl(var(--discount-badge))] text-white text-xs font-bold px-2 py-0.5 rounded">
+                  <span className="inline-block bg-[#ff8c00] text-white text-xs font-bold px-2 py-0.5 rounded">
                     -{discountPercentage}%
                   </span>
-                  <span className="text-sm text-muted-foreground line-through">
+                  <span className="text-sm text-[#8a8a8a] line-through">
                     R$ {oldPrice?.toFixed(2)}
                   </span>
                 </div>
               )}
-              <div className="text-2xl font-extrabold text-[hsl(var(--primary))]">
+              <div className="text-2xl font-extrabold text-[#00D084]" style={{ fontWeight: 800 }}>
                 R$ {price.toFixed(2)}
               </div>
             </div>
@@ -79,6 +79,9 @@ export const ProductCard = ({
               <img
                 src={image || "/placeholder.svg"}
                 alt={name}
+                loading="lazy"
+                width="120"
+                height="120"
                 onLoad={() => setImageLoaded(true)}
                 className={cn(
                   "w-full h-full object-cover transition-opacity duration-300",

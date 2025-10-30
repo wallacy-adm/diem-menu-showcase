@@ -36,9 +36,9 @@ export const MenuHeader = () => {
 
         {/* Status Badge */}
         <div className="absolute top-4 left-4 z-10">
-          <div className="flex items-center gap-2 bg-black/80 backdrop-blur-sm px-4 py-2 rounded-full border border-[hsl(var(--status-open))]">
-            <div className="w-2 h-2 bg-[hsl(var(--status-open))] rounded-full animate-pulse" />
-            <span className="text-[hsl(var(--status-open))] font-semibold text-sm">Aberto</span>
+          <div className="flex items-center gap-2 bg-black/80 backdrop-blur-sm px-4 py-2 rounded-full border border-[#00D084]">
+            <div className="w-2 h-2 bg-[#00D084] rounded-full animate-pulse" />
+            <span className="text-[#00D084] font-semibold text-sm">Aberto</span>
           </div>
         </div>
 
@@ -48,7 +48,7 @@ export const MenuHeader = () => {
             onClick={() => setIsModalOpen(true)}
             variant="ghost"
             size="icon"
-            className="rounded-full bg-black/50 backdrop-blur-sm border border-muted-foreground/30 hover:bg-black/70 hover:border-muted-foreground/50 transition-all"
+            className="rounded-full bg-black/50 backdrop-blur-sm border border-gray-500 hover:bg-black/70 hover:border-gray-400 transition-all"
             aria-label="Informações"
           >
             <Info className="h-5 w-5 text-white" />
@@ -62,23 +62,18 @@ export const MenuHeader = () => {
             <img 
               src={logoImage} 
               alt={settings?.brand_name || "Carpe Diem Motel"} 
-              className="w-28 h-28 md:w-32 md:h-32 rounded-2xl border-4 border-white shadow-2xl object-cover"
+              className="w-[120px] h-[120px] rounded-lg border-2 border-white shadow-2xl object-cover"
             />
           </div>
 
-          {/* Brand Name */}
-          <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-3 tracking-tight">
-            {settings?.brand_name || "Carpe Diem Motel"}
+          {/* Tagline */}
+          <h1 className="text-2xl font-extrabold text-white mb-2" style={{ fontWeight: 800 }}>
+            {settings?.tagline || "Aproveite o Momento!"}
           </h1>
 
-          {/* Tagline */}
-          <p className="text-xl md:text-2xl text-white/90 font-bold mb-4">
-            {settings?.tagline || "Aproveite o Momento!"}
-          </p>
-
-          {/* Address */}
-          <p className="text-sm md:text-base text-muted-foreground max-w-md leading-relaxed">
-            {settings?.address || "BR-104, Km 118, Lagoa Seca – PB"}
+          {/* Brand Name & Address */}
+          <p className="text-sm text-[#b3b3b3] max-w-md leading-relaxed">
+            {settings?.brand_name || "Carpe Diem Motel"} – {settings?.address || "BR-104, Km 118, Lagoa Seca – PB"}
           </p>
         </div>
       </header>
