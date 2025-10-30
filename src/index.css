@@ -9,7 +9,7 @@ All colors MUST be HSL.
 @layer base {
   :root {
     /* Dark theme - Olaclick Style */
-    --background: 0 0% 5%;
+    --background: 0 0% 4.7%;
     --foreground: 0 0% 100%;
 
     --card: 0 0% 10%;

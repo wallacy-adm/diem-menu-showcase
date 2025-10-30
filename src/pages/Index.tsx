@@ -53,7 +53,7 @@ const Index = () => {
     setActiveCategory(category);
     const element = sectionRefs.current[category];
     if (element) {
-      const headerOffset = 80;
+      const headerOffset = 120;
       const elementPosition = element.getBoundingClientRect().top;
       const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
 
@@ -74,7 +74,7 @@ const Index = () => {
         });
       },
       {
-        rootMargin: "-80px 0px -60% 0px",
+        rootMargin: "-120px 0px -60% 0px",
         threshold: 0.1,
       }
     );

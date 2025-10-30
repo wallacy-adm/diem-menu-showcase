@@ -25,13 +25,13 @@ export const MenuHeader = () => {
 
   return (
     <>
-      <header className="relative h-[420px] md:h-[520px] overflow-hidden bg-background">
+      <header className="relative h-[400px] md:h-[480px] overflow-hidden bg-background">
         {/* Hero Background Image */}
         <div 
           className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: `url(${heroImage})` }}
         >
-          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-background" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-black/80" />
         </div>
 
         {/* Status Badge */}
