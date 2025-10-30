@@ -25,54 +25,50 @@ export const MenuHeader = () => {
 
   return (
     <>
-      <header className="relative h-[400px] md:h-[480px] overflow-hidden bg-background">
-        {/* Hero Background Image */}
+      <header className="relative min-h-[240px] overflow-hidden bg-black">
+        {/* Hero Background Image with Gradient Overlay */}
         <div 
           className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${heroImage})` }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-black/80" />
-        </div>
+          style={{ 
+            backgroundImage: `linear-gradient(180deg, rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url(${heroImage})`
+          }}
+        />
 
-        {/* Status Badge */}
-        <div className="absolute top-4 left-4 z-10">
-          <div className="flex items-center gap-2 bg-black/80 backdrop-blur-sm px-4 py-2 rounded-full border border-[#00D084]">
-            <div className="w-2 h-2 bg-[#00D084] rounded-full animate-pulse" />
-            <span className="text-[#00D084] font-semibold text-sm">Aberto</span>
+        {/* Top Bar with Status and Info */}
+        <div className="absolute top-3 left-3 right-3 z-10 flex justify-between items-center gap-2">
+          {/* Status Badge */}
+          <div className="flex items-center gap-2 bg-black/55 backdrop-blur-sm px-2.5 py-1.5 rounded-full border border-[#2a2a2a]">
+            <div className="w-2 h-2 bg-[#d6f5e6] rounded-full animate-pulse" />
+            <span className="text-[#d6f5e6] text-xs">Aberto</span>
           </div>
-        </div>
 
-        {/* Info Button */}
-        <div className="absolute top-4 right-4 z-10">
+          {/* Info Button */}
           <Button
             onClick={() => setIsModalOpen(true)}
-            variant="ghost"
-            size="icon"
-            className="rounded-full bg-black/50 backdrop-blur-sm border border-gray-500 hover:bg-black/70 hover:border-gray-400 transition-all"
+            size="sm"
+            className="bg-black/55 backdrop-blur-sm border border-[#2a2a2a] hover:bg-black/70 rounded-[10px] px-2.5 py-1.5 h-auto text-xs text-white"
             aria-label="Informações"
           >
-            <Info className="h-5 w-5 text-white" />
+            ℹ️ Informação
           </Button>
         </div>
 
         {/* Content Container */}
-        <div className="relative z-10 h-full flex flex-col items-center justify-center px-4 text-center">
+        <div className="relative z-10 grid place-items-center text-center px-4 py-8 pb-6 max-w-[720px] mx-auto">
           {/* Logo */}
-          <div className="mb-6">
-            <img 
-              src={logoImage} 
-              alt={settings?.brand_name || "Carpe Diem Motel"} 
-              className="w-[120px] h-[120px] rounded-lg border-2 border-white shadow-2xl object-cover"
-            />
-          </div>
+          <img 
+            src={logoImage} 
+            alt={settings?.brand_name || "Carpe Diem Motel"} 
+            className="w-[120px] h-[120px] rounded-xl object-cover border-2 border-white shadow-[0_8px_20px_rgba(0,0,0,0.35)] mb-3 block"
+          />
 
-          {/* Tagline */}
-          <h1 className="text-2xl font-extrabold text-white mb-2" style={{ fontWeight: 800 }}>
+          {/* Title */}
+          <h1 className="text-[24px] leading-[1.1] text-white mb-0.5" style={{ fontWeight: 800 }}>
             {settings?.tagline || "Aproveite o Momento!"}
           </h1>
 
-          {/* Brand Name & Address */}
-          <p className="text-sm text-[#b3b3b3] max-w-md leading-relaxed">
+          {/* Subtitle */}
+          <p className="text-[14px] text-[#b3b3b3]">
             {settings?.brand_name || "Carpe Diem Motel"} – {settings?.address || "BR-104, Km 118, Lagoa Seca – PB"}
           </p>
         </div>

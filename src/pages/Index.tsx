@@ -53,9 +53,11 @@ const Index = () => {
     setActiveCategory(category);
     const element = sectionRefs.current[category];
     if (element) {
-      const headerOffset = 120;
+      const navHeight = 56; // Approximate height of category bar
+      const extraOffset = 4; // Small buffer
+      const targetOffset = 56; // Additional offset for proper positioning
       const elementPosition = element.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+      const offsetPosition = elementPosition + window.pageYOffset - navHeight - extraOffset - targetOffset;
 
       window.scrollTo({
         top: offsetPosition,
@@ -120,7 +122,8 @@ const Index = () => {
               key={category.name}
               ref={(el) => (sectionRefs.current[category.name] = el)}
               data-category={category.name}
-              className="mb-10 scroll-mt-20"
+              className="mb-10"
+              style={{ scrollMarginTop: "80px" }}
             >
               <h2 className="text-xl font-extrabold text-white mb-5 uppercase tracking-wide flex items-center gap-2" style={{ fontWeight: 800 }}>
                 <span className="text-2xl">{category.emoji}</span>
