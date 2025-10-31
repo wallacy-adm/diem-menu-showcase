@@ -53,11 +53,11 @@ const Index = () => {
     setActiveCategory(category);
     const element = sectionRefs.current[category];
     if (element) {
-      const navHeight = 56; // Approximate height of category bar
-      const extraOffset = 4; // Small buffer
-      const targetOffset = 56; // Additional offset for proper positioning
+      const headerHeight = 240; // Hero header height
+      const navHeight = 56; // Category bar height
+      const buffer = 16; // Extra spacing
       const elementPosition = element.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - navHeight - extraOffset - targetOffset;
+      const offsetPosition = elementPosition + window.pageYOffset - navHeight - buffer;
 
       window.scrollTo({
         top: offsetPosition,
@@ -69,15 +69,22 @@ const Index = () => {
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveCategory(entry.target.getAttribute("data-category") || "");
+        // Find the entry with the highest intersection ratio
+        const visibleEntries = entries.filter(entry => entry.isIntersecting);
+        if (visibleEntries.length > 0) {
+          // Sort by intersectionRatio and take the most visible one
+          const mostVisible = visibleEntries.sort((a, b) => 
+            b.intersectionRatio - a.intersectionRatio
+          )[0];
+          const category = mostVisible.target.getAttribute("data-category");
+          if (category) {
+            setActiveCategory(category);
           }
-        });
+        }
       },
       {
-        rootMargin: "-120px 0px -60% 0px",
-        threshold: 0.1,
+        rootMargin: "-140px 0px -50% 0px",
+        threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5],
       }
     );
 
@@ -123,7 +130,7 @@ const Index = () => {
               ref={(el) => (sectionRefs.current[category.name] = el)}
               data-category={category.name}
               className="mb-10"
-              style={{ scrollMarginTop: "80px" }}
+              style={{ scrollMarginTop: "72px" }}
             >
               <h2 className="text-xl font-extrabold text-white mb-5 uppercase tracking-wide flex items-center gap-2" style={{ fontWeight: 800 }}>
                 <span className="text-2xl">{category.emoji}</span>
