@@ -5,10 +5,13 @@ import { MenuHeader } from "@/components/MenuHeader";
 import { CategoryChips } from "@/components/CategoryChips";
 import { ProductCard } from "@/components/ProductCard";
 import { MenuFooter } from "@/components/MenuFooter";
+import { SearchBar } from "@/components/SearchBar";
+import { CartButton } from "@/components/CartButton";
 import { Loader2 } from "lucide-react";
 
 const Index = () => {
   const [activeCategory, setActiveCategory] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const sectionRefs = useRef<{ [key: string]: HTMLElement | null }>({});
 
   const { data: categories, isLoading: categoriesLoading } = useQuery({
@@ -41,7 +44,12 @@ const Index = () => {
 
   const isLoading = categoriesLoading || itemsLoading;
 
-  const groupedItems = menuItems?.reduce((acc, item) => {
+  const filteredItems = menuItems?.filter((item) =>
+    item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    item.description.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const groupedItems = filteredItems?.reduce((acc, item) => {
     if (!acc[item.category]) {
       acc[item.category] = [];
     }
@@ -119,9 +127,15 @@ const Index = () => {
         activeCategory={activeCategory}
         onCategoryClick={handleCategoryClick}
       />
+      <SearchBar onSearch={setSearchQuery} />
 
       <main className="container mx-auto px-4 py-6">
-        {categories.map((category) => {
+        {searchQuery && filteredItems?.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">Nenhum produto encontrado</p>
+          </div>
+        ) : (
+          categories.map((category) => {
           const items = groupedItems?.[category.name] || [];
           
           return (
@@ -160,10 +174,12 @@ const Index = () => {
               )}
             </section>
           );
-        })}
+        })
+        )}
       </main>
 
       <MenuFooter />
+      <CartButton />
     </div>
   );
 };
