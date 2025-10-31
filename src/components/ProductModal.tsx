@@ -1,15 +1,10 @@
-import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Minus, Plus, ShoppingCart } from "lucide-react";
-import { useCart } from "@/contexts/CartContext";
 
 interface ProductModalProps {
   isOpen: boolean;
@@ -26,92 +21,61 @@ interface ProductModalProps {
 }
 
 export const ProductModal = ({ isOpen, onClose, product }: ProductModalProps) => {
-  const [quantity, setQuantity] = useState(1);
-  const { addItem } = useCart();
   const hasPromo = product.oldPrice && product.oldPrice > product.price;
-  const discountPercentage = hasPromo
+  const discountPercentage = hasPromo 
     ? Math.round(((product.oldPrice! - product.price) / product.oldPrice!) * 100)
     : 0;
 
-  const handleAddToCart = () => {
-    addItem({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      image: product.image,
-    }, quantity);
-    onClose();
-    setQuantity(1);
-  };
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div className="space-y-4">
-          <div className="relative w-full aspect-video rounded-lg overflow-hidden">
+      <DialogContent className="sm:max-w-2xl bg-card border-border rounded-2xl">
+        <DialogHeader>
+          <DialogTitle className="text-3xl font-bold text-white pr-8 leading-tight" style={{ fontWeight: 800 }}>
+            {product.name}
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-6">
+          <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-secondary">
             <img
               src={product.image}
               alt={product.name}
+              loading="lazy"
               className="w-full h-full object-cover"
             />
-            {hasPromo && (
-              <Badge className="absolute top-3 right-3 bg-promo text-promo-foreground text-sm font-bold px-3 py-1">
-                -{discountPercentage}%
-              </Badge>
-            )}
           </div>
 
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold">{product.name}</DialogTitle>
-            <DialogDescription className="text-sm text-muted-foreground/80 uppercase tracking-wide">
+          <div>
+            <Badge variant="secondary" className="mb-4 px-4 py-1.5 text-sm">
               {product.category}
-            </DialogDescription>
-          </DialogHeader>
+            </Badge>
+            <p className="text-[#b3b3b3] leading-relaxed text-base">
+              {product.description}
+            </p>
+          </div>
 
-          <p className="text-foreground/90 leading-relaxed">{product.description}</p>
-
-          <div className="flex items-center gap-3 pt-2">
-            <span className="text-3xl font-extrabold text-primary">
-              R$ {product.price.toFixed(2)}
-            </span>
+          <div className="pt-6 border-t border-border space-y-2">
             {hasPromo && (
-              <span className="text-lg text-muted-foreground line-through">
-                R$ {product.oldPrice!.toFixed(2)}
-              </span>
+              <div className="flex items-center gap-3">
+                <Badge className="bg-[#ff8c00] text-white hover:bg-[#ff8c00]/90 px-3 py-1 text-sm font-bold">
+                  -{discountPercentage}%
+                </Badge>
+                <span className="text-lg text-[#8a8a8a] line-through">
+                  R$ {product.oldPrice!.toFixed(2)}
+                </span>
+              </div>
             )}
-          </div>
-
-          <div className="flex items-center gap-4 pt-4">
-            <div className="flex items-center gap-3 bg-secondary rounded-lg p-2">
-              <Button
-                size="icon"
-                variant="outline"
-                onClick={() => setQuantity(Math.max(1, quantity - 1))}
-              >
-                <Minus className="h-4 w-4" />
-              </Button>
-              <span className="w-12 text-center font-bold text-lg">{quantity}</span>
-              <Button
-                size="icon"
-                variant="outline"
-                onClick={() => setQuantity(quantity + 1)}
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
+            <div className="text-4xl font-extrabold text-[#00D084]" style={{ fontWeight: 800 }}>
+              R$ {product.price.toFixed(2)}
             </div>
-            <Button
-              className="flex-1"
-              size="lg"
-              onClick={handleAddToCart}
-            >
-              <ShoppingCart className="h-5 w-5 mr-2" />
-              Adicionar ao Carrinho
-            </Button>
           </div>
 
-          <p className="text-xs text-muted-foreground/70 text-center mt-6 border-t border-border/50 pt-4">
-            * Imagens meramente ilustrativas. Consulte a disponibilidade dos produtos no momento do pedido.
-          </p>
+          {/* Aviso */}
+          <div className="mt-4 p-3 bg-muted/30 rounded-lg border border-border/30">
+            <p className="text-sm text-[#b3b3b3] text-center">
+              Apenas visualização — pedidos não são feitos por aqui.
+            </p>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
