@@ -42,62 +42,62 @@ export default function Admin() {
   ];
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-[#F2F2F7] pb-20">
       {/* Header Banner */}
-      <div className="bg-card border-b border-border">
-        <div className="max-w-md mx-auto">
-          <div className="aspect-[4/1] bg-muted flex items-center justify-center">
+      <div className="bg-card mb-3">
+        <div className="max-w-md mx-auto p-4">
+          <div className="flex items-center gap-3 mb-4">
             <img 
               src="/src/assets/carpe-diem-logo.png" 
               alt="Carpe Diem Motel" 
-              className="h-12 object-contain"
+              className="w-16 h-16 object-cover rounded-lg"
             />
-          </div>
-          
-          {/* Business Field */}
-          <div className="p-4 space-y-2">
-            <div className="flex items-center gap-2">
-              <Camera className="w-4 h-4 text-muted-foreground" />
-              <label className="text-sm text-muted-foreground">Negócio</label>
-            </div>
-            <div className="relative">
-              <Input 
-                value="Aproveite o Momento!"
-                className="bg-secondary border-border"
-                readOnly
-              />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
-                20/45
-              </span>
+            <div className="flex-1 space-y-1">
+              <div className="flex items-center gap-2">
+                <Camera className="w-4 h-4 text-primary" />
+                <label className="text-xs text-muted-foreground">Negócio</label>
+              </div>
+              <div className="relative">
+                <Input 
+                  value="Aproveite o Momento!"
+                  className="bg-background border-input text-sm font-medium pr-12"
+                  readOnly
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+                  20/45
+                </span>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Toolbar */}
-      <div className="sticky top-0 z-10 bg-card border-b border-border">
-        <div className="max-w-md mx-auto p-3 flex items-center gap-2">
-          <Button className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2">
-            <Menu className="w-4 h-4" />
+      <div className="bg-card mb-3">
+        <div className="max-w-md mx-auto p-3 space-y-3">
+          <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 gap-2 h-11 font-semibold rounded-lg">
+            <Menu className="w-5 h-5" />
             Categorias
           </Button>
           
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input 
-              placeholder="Buscar..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 bg-secondary border-border"
-            />
-          </div>
-          
           <div className="flex items-center gap-2">
-            <Star className="w-5 h-5 text-muted-foreground" />
-            <Switch 
-              checked={showFeatured}
-              onCheckedChange={setShowFeatured}
-            />
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input 
+                placeholder="Buscar..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 bg-background border-input rounded-lg"
+              />
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <Star className="w-5 h-5 text-muted-foreground" />
+              <Switch 
+                checked={showFeatured}
+                onCheckedChange={setShowFeatured}
+              />
+            </div>
           </div>
         </div>
       </div>

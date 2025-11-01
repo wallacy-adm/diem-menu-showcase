@@ -21,18 +21,18 @@ export function CategoryCard({ category, onEditProduct }: CategoryCardProps) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <Card className="bg-card border-border overflow-hidden">
+    <Card className="bg-card border-border/50 shadow-sm overflow-hidden">
       {/* Category Header */}
       <div className="p-4 flex items-center justify-between">
         <div className="flex-1">
           <div className="text-xs text-muted-foreground mb-1">Nome da categoria</div>
-          <div className="font-semibold text-foreground">
+          <div className="font-bold text-foreground uppercase text-sm">
             {category.name}
           </div>
         </div>
         
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-sm text-muted-foreground">
+          <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-sm font-medium">
             {category.productCount}
           </div>
           
@@ -41,7 +41,7 @@ export function CategoryCard({ category, onEditProduct }: CategoryCardProps) {
               variant="ghost"
               size="icon"
               onClick={() => setMenuOpen(!menuOpen)}
-              className="hover:bg-secondary"
+              className="hover:bg-muted w-8 h-8"
             >
               <MoreVertical className="w-4 h-4" />
             </Button>
@@ -57,7 +57,7 @@ export function CategoryCard({ category, onEditProduct }: CategoryCardProps) {
             variant="ghost"
             size="icon"
             onClick={() => setExpanded(!expanded)}
-            className="hover:bg-secondary"
+            className="hover:bg-muted w-8 h-8 rounded-full"
           >
             {expanded ? (
               <ChevronUp className="w-5 h-5" />
@@ -70,10 +70,10 @@ export function CategoryCard({ category, onEditProduct }: CategoryCardProps) {
 
       {/* Expanded Content */}
       {expanded && (
-        <div className="px-4 pb-4 space-y-3">
-          <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
+        <div className="bg-muted/30 px-4 py-3 space-y-3 border-t border-border/50">
+          <button className="text-primary text-sm font-medium hover:underline">
             + Produto
-          </Button>
+          </button>
           
           <div className="space-y-2">
             {category.products.map((product) => (

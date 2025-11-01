@@ -99,39 +99,41 @@ export function EditProductModal({ product, onClose }: EditProductModalProps) {
 
             {/* Price Input */}
             {activeTab === "simple" && (
-              <div className="space-y-2">
-                <label className="text-sm text-muted-foreground">Preço</label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                    R$
-                  </span>
-                  <Input 
-                    type="number"
-                    defaultValue={product.price}
-                    className="bg-secondary border-border pl-10"
-                  />
+              <div className="space-y-3">
+                <div className="space-y-2">
+                  <label className="text-sm text-muted-foreground">Preço</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
+                      R$
+                    </span>
+                    <Input 
+                      type="number"
+                      defaultValue={product.price}
+                      className="bg-secondary border-border pl-10"
+                    />
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex flex-wrap gap-2">
+                  <Button variant="outline" size="sm" className="border-border bg-green-50 text-green-700 hover:bg-green-100">
+                    Disponível
+                  </Button>
+                  <Button variant="outline" size="sm" className="border-border text-xs">
+                    + Desconto
+                  </Button>
+                  <Button variant="outline" size="sm" className="border-border text-xs">
+                    + Custo
+                  </Button>
+                  <Button variant="outline" size="sm" className="border-border text-xs">
+                    + Embalagem
+                  </Button>
+                  <Button variant="outline" size="sm" className="border-border text-xs">
+                    + SKU
+                  </Button>
                 </div>
               </div>
             )}
-
-            {/* Action Buttons */}
-            <div className="flex flex-wrap gap-2">
-              <Button variant="outline" size="sm" className="border-border">
-                Disponível
-              </Button>
-              <Button variant="outline" size="sm" className="border-border">
-                + Desconto
-              </Button>
-              <Button variant="outline" size="sm" className="border-border">
-                + Custo
-              </Button>
-              <Button variant="outline" size="sm" className="border-border">
-                + Embalagem
-              </Button>
-              <Button variant="outline" size="sm" className="border-border">
-                + SKU
-              </Button>
-            </div>
           </div>
 
           {/* Stock Control */}

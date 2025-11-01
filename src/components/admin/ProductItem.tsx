@@ -20,28 +20,28 @@ export function ProductItem({ product, onEdit }: ProductItemProps) {
 
   return (
     <div 
-      className="flex items-center gap-3 p-3 rounded-lg bg-secondary hover:bg-secondary/80 transition-colors cursor-pointer"
+      className="flex items-center gap-3 p-2 bg-card rounded-lg border border-border/30 hover:border-border transition-colors cursor-pointer"
       onClick={() => onEdit(product)}
     >
       {/* Product Image */}
       <img 
         src={product.image}
         alt={product.name}
-        className="w-16 h-16 rounded-lg object-cover"
+        className="w-14 h-14 rounded-lg object-cover"
       />
       
       {/* Product Info */}
-      <div className="flex-1">
-        <div className="font-medium text-foreground mb-1">{product.name}</div>
+      <div className="flex-1 min-w-0">
+        <div className="font-semibold text-foreground text-sm mb-1">{product.name}</div>
         <div className="flex items-center gap-2">
+          <span className="text-sm font-bold text-foreground">
+            R$ {product.price.toFixed(2)}
+          </span>
           {product.oldPrice && (
-            <span className="text-sm text-muted-foreground line-through">
+            <span className="text-xs text-muted-foreground line-through">
               R$ {product.oldPrice.toFixed(2)}
             </span>
           )}
-          <span className="text-sm font-semibold text-primary">
-            R$ {product.price.toFixed(2)}
-          </span>
         </div>
       </div>
       
@@ -54,7 +54,7 @@ export function ProductItem({ product, onEdit }: ProductItemProps) {
             e.stopPropagation();
             setMenuOpen(!menuOpen);
           }}
-          className="hover:bg-muted"
+          className="hover:bg-muted w-8 h-8"
         >
           <MoreVertical className="w-4 h-4" />
         </Button>
