@@ -21,18 +21,31 @@ export function CategoryCard({ category, onEditProduct }: CategoryCardProps) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <Card className="bg-card border-border/50 shadow-sm overflow-hidden">
+    <Card 
+      className="bg-white overflow-hidden"
+      style={{ 
+        borderRadius: '12px',
+        border: '1px solid #E5E5EA',
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)'
+      }}
+    >
       {/* Category Header */}
       <div className="p-4 flex items-center justify-between">
         <div className="flex-1">
-          <div className="text-xs text-muted-foreground mb-1">Nome da categoria</div>
-          <div className="font-bold text-foreground uppercase text-sm">
+          <div className="text-xs mb-1" style={{ color: '#8A8A8E' }}>Nome da categoria</div>
+          <div className="font-bold uppercase text-sm" style={{ color: '#1C1C1E' }}>
             {category.name}
           </div>
         </div>
         
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-sm font-medium">
+          <div 
+            className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium"
+            style={{ 
+              backgroundColor: '#E5E5EA',
+              color: '#1C1C1E'
+            }}
+          >
             {category.productCount}
           </div>
           
@@ -41,9 +54,9 @@ export function CategoryCard({ category, onEditProduct }: CategoryCardProps) {
               variant="ghost"
               size="icon"
               onClick={() => setMenuOpen(!menuOpen)}
-              className="hover:bg-muted w-8 h-8"
+              className="hover:bg-secondary w-8 h-8"
             >
-              <MoreVertical className="w-4 h-4" />
+              <MoreVertical className="w-4 h-4" style={{ color: '#8A8A8E' }} />
             </Button>
             
             {menuOpen && (
@@ -57,12 +70,13 @@ export function CategoryCard({ category, onEditProduct }: CategoryCardProps) {
             variant="ghost"
             size="icon"
             onClick={() => setExpanded(!expanded)}
-            className="hover:bg-muted w-8 h-8 rounded-full"
+            className="w-8 h-8 rounded-full"
+            style={{ backgroundColor: '#E5E5EA' }}
           >
             {expanded ? (
-              <ChevronUp className="w-5 h-5" />
+              <ChevronUp className="w-5 h-5" style={{ color: '#8A8A8E' }} />
             ) : (
-              <ChevronDown className="w-5 h-5" />
+              <ChevronDown className="w-5 h-5" style={{ color: '#8A8A8E' }} />
             )}
           </Button>
         </div>
@@ -70,8 +84,8 @@ export function CategoryCard({ category, onEditProduct }: CategoryCardProps) {
 
       {/* Expanded Content */}
       {expanded && (
-        <div className="bg-muted/30 px-4 py-3 space-y-3 border-t border-border/50">
-          <button className="text-primary text-sm font-medium hover:underline">
+        <div className="bg-white px-4 py-3 space-y-3 border-t" style={{ borderColor: '#E5E5EA' }}>
+          <button className="text-sm font-medium" style={{ color: '#007AFF' }}>
             + Produto
           </button>
           

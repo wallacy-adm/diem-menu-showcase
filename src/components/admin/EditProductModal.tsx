@@ -67,33 +67,29 @@ export function EditProductModal({ product, onClose }: EditProductModalProps) {
 
           {/* Price Section */}
           <div className="space-y-4">
-            {/* Tabs */}
-            <div className="flex gap-4 border-b border-border">
+            {/* Segmented Control */}
+            <div className="flex rounded-lg overflow-hidden" style={{ backgroundColor: '#E5E5EA' }}>
               <button
                 onClick={() => setActiveTab("simple")}
-                className={`pb-2 text-sm font-medium transition-colors relative ${
+                className="flex-1 py-2 text-sm font-medium transition-colors"
+                style={
                   activeTab === "simple" 
-                    ? "text-primary" 
-                    : "text-muted-foreground"
-                }`}
+                    ? { backgroundColor: '#007AFF', color: 'white' }
+                    : { backgroundColor: 'transparent', color: '#1C1C1E' }
+                }
               >
                 Simples
-                {activeTab === "simple" && (
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
-                )}
               </button>
               <button
                 onClick={() => setActiveTab("variants")}
-                className={`pb-2 text-sm font-medium transition-colors relative ${
+                className="flex-1 py-2 text-sm font-medium transition-colors"
+                style={
                   activeTab === "variants" 
-                    ? "text-primary" 
-                    : "text-muted-foreground"
-                }`}
+                    ? { backgroundColor: '#007AFF', color: 'white' }
+                    : { backgroundColor: 'transparent', color: '#1C1C1E' }
+                }
               >
                 Variantes
-                {activeTab === "variants" && (
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
-                )}
               </button>
             </div>
 
@@ -116,19 +112,69 @@ export function EditProductModal({ product, onClose }: EditProductModalProps) {
 
                 {/* Action Buttons */}
                 <div className="flex flex-wrap gap-2">
-                  <Button variant="outline" size="sm" className="border-border bg-green-50 text-green-700 hover:bg-green-100">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="text-xs"
+                    style={{ 
+                      backgroundColor: '#E8F5E9',
+                      color: '#2E7D32',
+                      borderColor: '#E5E5EA',
+                      borderRadius: '16px'
+                    }}
+                  >
                     Disponível
                   </Button>
-                  <Button variant="outline" size="sm" className="border-border text-xs">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="text-xs"
+                    style={{ 
+                      backgroundColor: '#E5E5EA',
+                      color: '#1C1C1E',
+                      borderColor: '#E5E5EA',
+                      borderRadius: '16px'
+                    }}
+                  >
                     + Desconto
                   </Button>
-                  <Button variant="outline" size="sm" className="border-border text-xs">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="text-xs"
+                    style={{ 
+                      backgroundColor: '#E5E5EA',
+                      color: '#1C1C1E',
+                      borderColor: '#E5E5EA',
+                      borderRadius: '16px'
+                    }}
+                  >
                     + Custo
                   </Button>
-                  <Button variant="outline" size="sm" className="border-border text-xs">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="text-xs"
+                    style={{ 
+                      backgroundColor: '#E5E5EA',
+                      color: '#1C1C1E',
+                      borderColor: '#E5E5EA',
+                      borderRadius: '16px'
+                    }}
+                  >
                     + Embalagem
                   </Button>
-                  <Button variant="outline" size="sm" className="border-border text-xs">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="text-xs"
+                    style={{ 
+                      backgroundColor: '#E5E5EA',
+                      color: '#1C1C1E',
+                      borderColor: '#E5E5EA',
+                      borderRadius: '16px'
+                    }}
+                  >
                     + SKU
                   </Button>
                 </div>
