@@ -54,9 +54,6 @@ export const ProductCard = ({
             <div className="flex flex-col gap-1">
               {hasPromotion && (
                 <div className="flex items-center gap-2">
-                  <span className="inline-block bg-[#ff8c00] text-white text-xs font-bold px-2 py-0.5 rounded">
-                    -{discountPercentage}%
-                  </span>
                   <span className="text-sm text-[#8a8a8a] line-through">
                     R$ {oldPrice?.toFixed(2)}
                   </span>
@@ -69,7 +66,12 @@ export const ProductCard = ({
           </div>
 
           {/* Image Right */}
-          <div className="w-[120px] h-[120px] flex-shrink-0">
+          <div className="w-[120px] h-[120px] flex-shrink-0 relative">
+            {hasPromotion && (
+              <div className="absolute top-1 right-1 z-10 bg-[#ff8c00] text-white text-xs font-bold px-2 py-0.5 rounded shadow-md">
+                -{discountPercentage}%
+              </div>
+            )}
             <div className="relative w-full h-full rounded-[14px] overflow-hidden bg-muted">
               {!imageLoaded && (
                 <div className="absolute inset-0 flex items-center justify-center">
