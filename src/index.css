@@ -8,36 +8,36 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Dark theme - Olaclick Style */
-    --background: 0 0% 4.7%;
+    /* Dark theme - Admin Dashboard Style */
+    --background: 210 11% 5%;
     --foreground: 0 0% 100%;
 
-    --card: 0 0% 10%;
-    --card-foreground: 0 0% 98%;
+    --card: 210 11% 10%;
+    --card-foreground: 0 0% 100%;
 
-    --popover: 0 0% 5%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 210 11% 8%;
+    --popover-foreground: 0 0% 100%;
 
     --primary: 160 100% 41%;
     --primary-foreground: 0 0% 0%;
 
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 210 11% 10%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 0 0% 20%;
-    --muted-foreground: 0 0% 65%;
+    --muted: 210 11% 15%;
+    --muted-foreground: 0 0% 70%;
 
-    --accent: 160 100% 42%;
+    --accent: 160 100% 41%;
     --accent-foreground: 0 0% 0%;
 
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 20%;
-    --input: 0 0% 20%;
-    --ring: 160 100% 42%;
+    --border: 210 11% 15%;
+    --input: 210 11% 15%;
+    --ring: 160 100% 41%;
 
-    --radius: 0.875rem;
+    --radius: 0.5rem;
 
     /* Promo badge */
     --promo: 25 95% 53%;
