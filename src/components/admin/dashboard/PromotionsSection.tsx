@@ -1,7 +1,4 @@
-import { useState } from "react";
-import { Percent } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useMemo } from "react";
 import { Switch } from "@/components/ui/switch";
 import {
   Table,
@@ -12,34 +9,30 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
+import { useProducts } from "@/hooks/useProducts";
 
 export function PromotionsSection() {
   const { toast } = useToast();
+  const { products, toggleVisible } = useProducts();
 
-  // Mock data
-  const promotions = [
-    {
-      id: "1",
-      productName: "Picanha Premium",
-      originalPrice: 119.90,
-      currentPrice: 89.90,
-      discount: 25,
-      active: true,
-    },
-    {
-      id: "2",
-      productName: "Salmão Grelhado",
-      originalPrice: 99.90,
-      currentPrice: 79.90,
-      discount: 20,
-      active: true,
-    },
-  ];
+  const promotionalProducts = useMemo(() => {
+    return products
+      .filter(product => product.oldPrice && product.oldPrice > product.price)
+      .map(product => ({
+        id: product.id,
+        productName: product.name,
+        originalPrice: product.oldPrice!,
+        promoPrice: product.price,
+        discount: Math.round(((product.oldPrice! - product.price) / product.oldPrice!) * 100),
+        active: product.visible,
+      }));
+  }, [products]);
 
   const handleTogglePromotion = (id: string) => {
+    toggleVisible(id);
     toast({
-      title: "Atualizado!",
-      description: "Promoção atualizada com sucesso.",
+      title: "✅ Atualizado!",
+      description: "Status da promoção atualizado.",
     });
   };
 
@@ -49,7 +42,7 @@ export function PromotionsSection() {
         <div>
           <h2 className="text-2xl font-bold text-foreground">Promoções</h2>
           <p className="text-sm text-muted-foreground mt-1">
-            Gerencie os produtos com preços promocionais
+            Produtos em promoção (com preço antigo maior que o atual)
           </p>
         </div>
       </div>
@@ -67,34 +60,41 @@ export function PromotionsSection() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {promotions.map((promo) => (
-              <TableRow key={promo.id}>
-                <TableCell className="font-medium">{promo.productName}</TableCell>
-                <TableCell className="text-right text-muted-foreground line-through">
-                  R$ {promo.originalPrice.toFixed(2)}
-                </TableCell>
-                <TableCell className="text-right text-primary font-semibold">
-                  R$ {promo.currentPrice.toFixed(2)}
-                </TableCell>
-                <TableCell className="text-center">
-                  <span className="inline-flex items-center gap-1 bg-orange-500/10 text-orange-500 px-2 py-1 rounded-full text-xs font-semibold">
-                    <Percent className="w-3 h-3" />
-                    {promo.discount}%
-                  </span>
-                </TableCell>
-                <TableCell className="text-center">
-                  <div className="flex items-center justify-center gap-2">
-                    <Switch
-                      checked={promo.active}
-                      onCheckedChange={() => handleTogglePromotion(promo.id)}
-                    />
-                    <span className="text-xs text-muted-foreground">
-                      {promo.active ? "Ativo" : "Inativo"}
-                    </span>
-                  </div>
+            {promotionalProducts.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                  Nenhuma promoção cadastrada. Adicione produtos com preço antigo maior que o preço atual.
                 </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              promotionalProducts.map((promo) => (
+                <TableRow key={promo.id}>
+                  <TableCell className="font-medium">{promo.productName}</TableCell>
+                  <TableCell className="text-right text-muted-foreground line-through">
+                    R$ {promo.originalPrice.toFixed(2)}
+                  </TableCell>
+                  <TableCell className="text-right text-primary font-bold">
+                    R$ {promo.promoPrice.toFixed(2)}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-destructive text-destructive-foreground">
+                      -{promo.discount}%
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <div className="flex items-center justify-center gap-2">
+                      <Switch
+                        checked={promo.active}
+                        onCheckedChange={() => handleTogglePromotion(promo.id)}
+                      />
+                      <span className="text-xs text-muted-foreground">
+                        {promo.active ? "Ativa" : "Inativa"}
+                      </span>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </div>

@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Plus, Pencil, Trash2, Search } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Plus, Search, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -11,59 +11,82 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ProductModal } from "./ProductModal";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
+import { ProductModal } from "./ProductModal";
+import { useProducts, Product } from "@/hooks/useProducts";
+import { useCategories } from "@/hooks/useCategories";
 
 export function ProductsSection() {
   const { toast } = useToast();
+  const { products, addProduct, updateProduct, deleteProduct, toggleVisible } = useProducts();
+  const { categories } = useCategories();
   const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<any>(null);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  // Mock data
-  const products = [
-    {
-      id: "1",
-      name: "Picanha Premium",
-      category: "🥩 Carnes",
-      price: 89.90,
-      oldPrice: 119.90,
-      image: "/placeholder.svg",
-      visible: true,
-    },
-    {
-      id: "2",
-      name: "Salmão Grelhado",
-      category: "🐟 Peixes",
-      price: 79.90,
-      oldPrice: null,
-      image: "/placeholder.svg",
-      visible: true,
-    },
-  ];
+  const filteredProducts = useMemo(() => {
+    return products.filter(product => {
+      const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          product.category.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesSearch;
+    });
+  }, [products, searchQuery]);
 
   const handleAddProduct = () => {
     setEditingProduct(null);
     setIsModalOpen(true);
   };
 
-  const handleEditProduct = (product: any) => {
+  const handleEdit = (product: Product) => {
     setEditingProduct(product);
     setIsModalOpen(true);
   };
 
-  const handleDeleteProduct = (id: string) => {
-    toast({
-      title: "Removido!",
-      description: "Produto removido com sucesso.",
-    });
+  const handleSaveProduct = (productData: Omit<Product, 'id'>) => {
+    if (editingProduct) {
+      updateProduct(editingProduct.id, productData);
+    } else {
+      addProduct(productData);
+    }
+  };
+
+  const handleDeleteClick = (id: string) => {
+    setDeleteId(id);
+  };
+
+  const handleConfirmDelete = () => {
+    if (deleteId) {
+      deleteProduct(deleteId);
+      toast({
+        title: "✅ Removido!",
+        description: "Produto removido com sucesso.",
+      });
+      setDeleteId(null);
+    }
   };
 
   const handleToggleVisible = (id: string) => {
+    toggleVisible(id);
     toast({
-      title: "Atualizado!",
+      title: "✅ Atualizado!",
       description: "Status do produto atualizado.",
     });
+  };
+
+  const calculateDiscount = (price: number, oldPrice?: number) => {
+    if (!oldPrice || oldPrice <= price) return null;
+    return Math.round(((oldPrice - price) / oldPrice) * 100);
   };
 
   return (
@@ -108,71 +131,107 @@ export function ProductsSection() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {products.map((product) => (
-              <TableRow key={product.id}>
-                <TableCell>
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    className="w-12 h-12 object-cover rounded-lg"
-                  />
-                </TableCell>
-                <TableCell className="font-medium">{product.name}</TableCell>
-                <TableCell className="text-muted-foreground">{product.category}</TableCell>
-                <TableCell className="text-right">
-                  <div className="space-y-1">
-                    {product.oldPrice && (
-                      <div className="text-xs text-muted-foreground line-through">
-                        R$ {product.oldPrice.toFixed(2)}
-                      </div>
-                    )}
-                    <div className="text-primary font-semibold">
-                      R$ {product.price.toFixed(2)}
-                    </div>
-                  </div>
-                </TableCell>
-                <TableCell className="text-center">
-                  <div className="flex items-center justify-center gap-2">
-                    <Switch
-                      checked={product.visible}
-                      onCheckedChange={() => handleToggleVisible(product.id)}
-                    />
-                    <span className="text-xs text-muted-foreground">
-                      {product.visible ? "Ativo" : "Inativo"}
-                    </span>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center justify-center gap-2">
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={() => handleEditProduct(product)}
-                    >
-                      <Pencil className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDeleteProduct(product.id)}
-                      className="text-destructive hover:text-destructive"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
+            {filteredProducts.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                  {searchQuery ? "Nenhum produto encontrado" : "Nenhum produto cadastrado"}
                 </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              filteredProducts.map((product) => {
+                const discount = calculateDiscount(product.price, product.oldPrice);
+                return (
+                  <TableRow key={product.id}>
+                    <TableCell>
+                      <div className="relative w-16 h-16">
+                        <img
+                          src={product.imageUrl}
+                          alt={product.name}
+                          className="w-full h-full object-cover rounded-lg"
+                        />
+                        {discount && (
+                          <div className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs font-bold px-1.5 py-0.5 rounded">
+                            -{discount}%
+                          </div>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="font-medium">{product.name}</TableCell>
+                    <TableCell>{product.category}</TableCell>
+                    <TableCell>
+                      <div className="flex flex-col items-end">
+                        <span className="text-primary font-bold">
+                          R$ {product.price.toFixed(2)}
+                        </span>
+                        {product.oldPrice && (
+                          <span className="text-xs text-muted-foreground line-through">
+                            R$ {product.oldPrice.toFixed(2)}
+                          </span>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <div className="flex items-center justify-center gap-2">
+                        <Switch
+                          checked={product.visible}
+                          onCheckedChange={() => handleToggleVisible(product.id)}
+                        />
+                        <span className="text-xs text-muted-foreground">
+                          {product.visible ? "Ativo" : "Inativo"}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center justify-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEdit(product)}
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteClick(product.id)}
+                          className="text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
+            )}
           </TableBody>
         </Table>
       </div>
 
-      {/* Product Modal */}
       <ProductModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        product={editingProduct}
+        onSave={handleSaveProduct}
+        product={editingProduct || undefined}
+        categories={categories}
       />
+
+      <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir este produto? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

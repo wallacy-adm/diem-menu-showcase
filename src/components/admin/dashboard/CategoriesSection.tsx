@@ -11,18 +11,26 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
+import { useCategories } from "@/hooks/useCategories";
 
 export function CategoriesSection() {
   const { toast } = useToast();
+  const { categories, addCategory, updateCategory, deleteCategory, toggleVisible } = useCategories();
   const [newCategoryName, setNewCategoryName] = useState("");
-
-  // Mock data - será substituído por dados do Supabase
-  const categories = [
-    { id: "1", name: "😍 Promoção em Dobro", visible: true, sortOrder: 0 },
-    { id: "2", name: "⭐ Promoção do Dia", visible: true, sortOrder: 1 },
-    { id: "3", name: "🏆 Campeões de Vendas", visible: true, sortOrder: 2 },
-  ];
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingName, setEditingName] = useState("");
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const handleAddCategory = () => {
     if (!newCategoryName.trim()) {
@@ -34,28 +42,66 @@ export function CategoriesSection() {
       return;
     }
 
-    // TODO: Implementar com Supabase
+    addCategory(newCategoryName.trim());
     toast({
-      title: "Sucesso!",
+      title: "✅ Sucesso!",
       description: "Categoria adicionada com sucesso!",
     });
     setNewCategoryName("");
   };
 
   const handleToggleVisible = (id: string) => {
-    // TODO: Implementar com Supabase
+    toggleVisible(id);
     toast({
-      title: "Atualizado!",
+      title: "✅ Atualizado!",
       description: "Status da categoria atualizado.",
     });
   };
 
-  const handleDelete = (id: string) => {
-    // TODO: Implementar com Supabase
-    toast({
-      title: "Removido!",
-      description: "Categoria removida com sucesso.",
-    });
+  const handleStartEdit = (id: string, name: string) => {
+    setEditingId(id);
+    setEditingName(name);
+  };
+
+  const handleSaveEdit = () => {
+    if (!editingName.trim()) {
+      toast({
+        title: "Erro",
+        description: "Digite um nome para a categoria",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (editingId) {
+      updateCategory(editingId, { name: editingName.trim() });
+      toast({
+        title: "✅ Sucesso!",
+        description: "Categoria atualizada com sucesso!",
+      });
+      setEditingId(null);
+      setEditingName("");
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditingName("");
+  };
+
+  const handleDeleteClick = (id: string) => {
+    setDeleteId(id);
+  };
+
+  const handleConfirmDelete = () => {
+    if (deleteId) {
+      deleteCategory(deleteId);
+      toast({
+        title: "✅ Removido!",
+        description: "Categoria removida com sucesso.",
+      });
+      setDeleteId(null);
+    }
   };
 
   return (
@@ -99,7 +145,27 @@ export function CategoriesSection() {
           <TableBody>
             {categories.map((category) => (
               <TableRow key={category.id}>
-                <TableCell className="font-medium">{category.name}</TableCell>
+                <TableCell className="font-medium">
+                  {editingId === category.id ? (
+                    <div className="flex gap-2">
+                      <Input
+                        value={editingName}
+                        onChange={(e) => setEditingName(e.target.value)}
+                        onKeyPress={(e) => e.key === "Enter" && handleSaveEdit()}
+                        className="flex-1"
+                        autoFocus
+                      />
+                      <Button onClick={handleSaveEdit} size="sm">
+                        Salvar
+                      </Button>
+                      <Button onClick={handleCancelEdit} variant="ghost" size="sm">
+                        Cancelar
+                      </Button>
+                    </div>
+                  ) : (
+                    category.name
+                  )}
+                </TableCell>
                 <TableCell className="text-center">
                   <div className="flex items-center justify-center gap-2">
                     <Switch
@@ -113,17 +179,25 @@ export function CategoriesSection() {
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center justify-center gap-2">
-                    <Button variant="ghost" size="sm">
-                      <Pencil className="w-4 h-4" />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={() => handleDelete(category.id)}
-                      className="text-destructive hover:text-destructive"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                    {editingId !== category.id && (
+                      <>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleStartEdit(category.id, category.name)}
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleDeleteClick(category.id)}
+                          className="text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </TableCell>
               </TableRow>
@@ -131,6 +205,23 @@ export function CategoriesSection() {
           </TableBody>
         </Table>
       </div>
+
+      <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir esta categoria? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
