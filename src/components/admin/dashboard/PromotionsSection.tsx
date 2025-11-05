@@ -9,32 +9,48 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
-import { useProducts } from "@/hooks/useProducts";
+import { useAdminProducts } from "@/hooks/useAdminProducts";
 
 export function PromotionsSection() {
   const { toast } = useToast();
-  const { products, toggleVisible } = useProducts();
+  const { products, toggleVisible, isLoading } = useAdminProducts();
 
   const promotionalProducts = useMemo(() => {
     return products
-      .filter(product => product.oldPrice && product.oldPrice > product.price)
+      .filter(product => product.old_price && product.old_price > product.price)
       .map(product => ({
         id: product.id,
         productName: product.name,
-        originalPrice: product.oldPrice!,
+        originalPrice: product.old_price!,
         promoPrice: product.price,
-        discount: Math.round(((product.oldPrice! - product.price) / product.oldPrice!) * 100),
+        discount: Math.round(((product.old_price! - product.price) / product.old_price!) * 100),
         active: product.visible,
       }));
   }, [products]);
 
-  const handleTogglePromotion = (id: string) => {
-    toggleVisible(id);
-    toast({
-      title: "✅ Atualizado!",
-      description: "Status da promoção atualizado.",
-    });
+  const handleTogglePromotion = async (id: string) => {
+    try {
+      await toggleVisible(id);
+      toast({
+        title: "✅ Atualizado!",
+        description: "Status da promoção atualizado.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Erro",
+        description: error.message || "Não foi possível atualizar o status.",
+        variant: "destructive",
+      });
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

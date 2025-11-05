@@ -23,13 +23,13 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { ProductModal } from "./ProductModal";
-import { useProducts, Product } from "@/hooks/useProducts";
-import { useCategories } from "@/hooks/useCategories";
+import { useAdminProducts, Product } from "@/hooks/useAdminProducts";
+import { useAdminCategories } from "@/hooks/useAdminCategories";
 
 export function ProductsSection() {
   const { toast } = useToast();
-  const { products, addProduct, updateProduct, deleteProduct, toggleVisible } = useProducts();
-  const { categories } = useCategories();
+  const { products, addProduct, updateProduct, deleteProduct, toggleVisible, isLoading } = useAdminProducts();
+  const { categories } = useAdminCategories();
   const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -53,11 +53,29 @@ export function ProductsSection() {
     setIsModalOpen(true);
   };
 
-  const handleSaveProduct = (productData: Omit<Product, 'id'>) => {
-    if (editingProduct) {
-      updateProduct(editingProduct.id, productData);
-    } else {
-      addProduct(productData);
+  const handleSaveProduct = async (productData: Omit<Product, 'id' | 'sort_order'>) => {
+    try {
+      if (editingProduct) {
+        await updateProduct({ id: editingProduct.id, updates: productData });
+        toast({
+          title: "✅ Sucesso!",
+          description: "Produto atualizado com sucesso!",
+        });
+      } else {
+        await addProduct(productData);
+        toast({
+          title: "✅ Sucesso!",
+          description: "Produto adicionado com sucesso!",
+        });
+      }
+      setIsModalOpen(false);
+      setEditingProduct(null);
+    } catch (error: any) {
+      toast({
+        title: "Erro",
+        description: error.message || "Não foi possível salvar o produto.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -65,29 +83,53 @@ export function ProductsSection() {
     setDeleteId(id);
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (deleteId) {
-      deleteProduct(deleteId);
-      toast({
-        title: "✅ Removido!",
-        description: "Produto removido com sucesso.",
-      });
-      setDeleteId(null);
+      try {
+        await deleteProduct(deleteId);
+        toast({
+          title: "✅ Removido!",
+          description: "Produto removido com sucesso.",
+        });
+        setDeleteId(null);
+      } catch (error: any) {
+        toast({
+          title: "Erro",
+          description: error.message || "Não foi possível remover o produto.",
+          variant: "destructive",
+        });
+      }
     }
   };
 
-  const handleToggleVisible = (id: string) => {
-    toggleVisible(id);
-    toast({
-      title: "✅ Atualizado!",
-      description: "Status do produto atualizado.",
-    });
+  const handleToggleVisible = async (id: string) => {
+    try {
+      await toggleVisible(id);
+      toast({
+        title: "✅ Atualizado!",
+        description: "Status do produto atualizado.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Erro",
+        description: error.message || "Não foi possível atualizar o status.",
+        variant: "destructive",
+      });
+    }
   };
 
   const calculateDiscount = (price: number, oldPrice?: number) => {
     if (!oldPrice || oldPrice <= price) return null;
     return Math.round(((oldPrice - price) / oldPrice) * 100);
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -139,13 +181,13 @@ export function ProductsSection() {
               </TableRow>
             ) : (
               filteredProducts.map((product) => {
-                const discount = calculateDiscount(product.price, product.oldPrice);
+                const discount = calculateDiscount(product.price, product.old_price);
                 return (
                   <TableRow key={product.id}>
                     <TableCell>
                       <div className="relative w-16 h-16">
                         <img
-                          src={product.imageUrl}
+                          src={product.image}
                           alt={product.name}
                           className="w-full h-full object-cover rounded-lg"
                         />
@@ -163,9 +205,9 @@ export function ProductsSection() {
                         <span className="text-primary font-bold">
                           R$ {product.price.toFixed(2)}
                         </span>
-                        {product.oldPrice && (
+                        {product.old_price && (
                           <span className="text-xs text-muted-foreground line-through">
-                            R$ {product.oldPrice.toFixed(2)}
+                            R$ {product.old_price.toFixed(2)}
                           </span>
                         )}
                       </div>
@@ -210,7 +252,10 @@ export function ProductsSection() {
 
       <ProductModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => {
+          setIsModalOpen(false);
+          setEditingProduct(null);
+        }}
         onSave={handleSaveProduct}
         product={editingProduct || undefined}
         categories={categories}

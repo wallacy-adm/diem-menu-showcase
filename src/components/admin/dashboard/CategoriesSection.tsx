@@ -22,17 +22,17 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { useCategories } from "@/hooks/useCategories";
+import { useAdminCategories } from "@/hooks/useAdminCategories";
 
 export function CategoriesSection() {
   const { toast } = useToast();
-  const { categories, addCategory, updateCategory, deleteCategory, toggleVisible } = useCategories();
+  const { categories, addCategory, updateCategory, deleteCategory, toggleVisible, isLoading } = useAdminCategories();
   const [newCategoryName, setNewCategoryName] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  const handleAddCategory = () => {
+  const handleAddCategory = async () => {
     if (!newCategoryName.trim()) {
       toast({
         title: "Erro",
@@ -42,20 +42,36 @@ export function CategoriesSection() {
       return;
     }
 
-    addCategory(newCategoryName.trim());
-    toast({
-      title: "✅ Sucesso!",
-      description: "Categoria adicionada com sucesso!",
-    });
-    setNewCategoryName("");
+    try {
+      await addCategory(newCategoryName.trim());
+      toast({
+        title: "✅ Sucesso!",
+        description: "Categoria adicionada com sucesso!",
+      });
+      setNewCategoryName("");
+    } catch (error: any) {
+      toast({
+        title: "Erro",
+        description: error.message || "Não foi possível adicionar a categoria.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleToggleVisible = (id: string) => {
-    toggleVisible(id);
-    toast({
-      title: "✅ Atualizado!",
-      description: "Status da categoria atualizado.",
-    });
+  const handleToggleVisible = async (id: string) => {
+    try {
+      await toggleVisible(id);
+      toast({
+        title: "✅ Atualizado!",
+        description: "Status da categoria atualizado.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Erro",
+        description: error.message || "Não foi possível atualizar o status.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleStartEdit = (id: string, name: string) => {
@@ -63,7 +79,7 @@ export function CategoriesSection() {
     setEditingName(name);
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (!editingName.trim()) {
       toast({
         title: "Erro",
@@ -74,13 +90,21 @@ export function CategoriesSection() {
     }
 
     if (editingId) {
-      updateCategory(editingId, { name: editingName.trim() });
-      toast({
-        title: "✅ Sucesso!",
-        description: "Categoria atualizada com sucesso!",
-      });
-      setEditingId(null);
-      setEditingName("");
+      try {
+        await updateCategory({ id: editingId, updates: { name: editingName.trim() } });
+        toast({
+          title: "✅ Sucesso!",
+          description: "Categoria atualizada com sucesso!",
+        });
+        setEditingId(null);
+        setEditingName("");
+      } catch (error: any) {
+        toast({
+          title: "Erro",
+          description: error.message || "Não foi possível atualizar a categoria.",
+          variant: "destructive",
+        });
+      }
     }
   };
 
@@ -93,16 +117,32 @@ export function CategoriesSection() {
     setDeleteId(id);
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (deleteId) {
-      deleteCategory(deleteId);
-      toast({
-        title: "✅ Removido!",
-        description: "Categoria removida com sucesso.",
-      });
-      setDeleteId(null);
+      try {
+        await deleteCategory(deleteId);
+        toast({
+          title: "✅ Removido!",
+          description: "Categoria removida com sucesso.",
+        });
+        setDeleteId(null);
+      } catch (error: any) {
+        toast({
+          title: "Erro",
+          description: error.message || "Não foi possível remover a categoria.",
+          variant: "destructive",
+        });
+      }
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

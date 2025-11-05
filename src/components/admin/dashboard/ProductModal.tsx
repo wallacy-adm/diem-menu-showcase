@@ -20,13 +20,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Product } from "@/hooks/useProducts";
-import { Category } from "@/hooks/useCategories";
+import { Product } from "@/hooks/useAdminProducts";
+import { Category } from "@/hooks/useAdminCategories";
 
 interface ProductModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (product: Omit<Product, 'id'>) => void;
+  onSave: (product: Omit<Product, 'id' | 'sort_order'>) => void;
   product?: Product;
   categories: Category[];
 }
@@ -41,6 +41,7 @@ export function ProductModal({ isOpen, onClose, onSave, product, categories }: P
   const [oldPrice, setOldPrice] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [visible, setVisible] = useState(true);
+  const [featured, setFeatured] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   useEffect(() => {
@@ -49,10 +50,11 @@ export function ProductModal({ isOpen, onClose, onSave, product, categories }: P
       setDescription(product.description || "");
       setCategory(product.category || "");
       setPrice(product.price?.toString() || "");
-      setOldPrice(product.oldPrice?.toString() || "");
-      setImageUrl(product.imageUrl || "");
+      setOldPrice(product.old_price?.toString() || "");
+      setImageUrl(product.image || "");
       setVisible(product.visible ?? true);
-      setImagePreview(product.imageUrl || null);
+      setFeatured(product.featured ?? false);
+      setImagePreview(product.image || null);
     } else {
       setName("");
       setDescription("");
@@ -61,6 +63,7 @@ export function ProductModal({ isOpen, onClose, onSave, product, categories }: P
       setOldPrice("");
       setImageUrl("");
       setVisible(true);
+      setFeatured(false);
       setImagePreview(null);
     }
   }, [product, isOpen]);
@@ -123,15 +126,12 @@ export function ProductModal({ isOpen, onClose, onSave, product, categories }: P
       description: description.trim(),
       category,
       price: priceNum,
-      oldPrice: oldPriceNum,
-      imageUrl,
+      old_price: oldPriceNum,
+      image: imageUrl,
       visible,
+      featured,
     });
 
-    toast({
-      title: "✅ Sucesso!",
-      description: product ? "Produto atualizado com sucesso!" : "Produto adicionado com sucesso!",
-    });
     onClose();
   };
 
