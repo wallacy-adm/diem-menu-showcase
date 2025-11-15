@@ -10,6 +10,8 @@ export interface Settings {
   whatsapp_url: string;
   theme_accent: string;
   footer_note: string;
+  logo_url?: string;
+  bg_url?: string;
   created_at: string;
   updated_at: string;
 }

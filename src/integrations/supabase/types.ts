@@ -238,11 +238,13 @@ export type Database = {
       settings: {
         Row: {
           address: string
+          bg_url: string | null
           brand_name: string
           created_at: string
           footer_note: string
           id: string
           instagram_url: string
+          logo_url: string | null
           tagline: string
           theme_accent: string
           updated_at: string
@@ -250,11 +252,13 @@ export type Database = {
         }
         Insert: {
           address?: string
+          bg_url?: string | null
           brand_name?: string
           created_at?: string
           footer_note?: string
           id?: string
           instagram_url?: string
+          logo_url?: string | null
           tagline?: string
           theme_accent?: string
           updated_at?: string
@@ -262,11 +266,13 @@ export type Database = {
         }
         Update: {
           address?: string
+          bg_url?: string | null
           brand_name?: string
           created_at?: string
           footer_note?: string
           id?: string
           instagram_url?: string
+          logo_url?: string | null
           tagline?: string
           theme_accent?: string
           updated_at?: string
