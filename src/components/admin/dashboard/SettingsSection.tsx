@@ -31,6 +31,15 @@ export function SettingsSection() {
         whatsapp_url: settings.whatsapp_url,
         footer_note: settings.footer_note,
       });
+      
+      // Load previews from saved settings if they exist
+      const settingsWithImages = settings as any;
+      if (settingsWithImages.logo_url) {
+        setLogoPreview(settingsWithImages.logo_url);
+      }
+      if (settingsWithImages.bg_url) {
+        setBgPreview(settingsWithImages.bg_url);
+      }
     }
   }, [settings]);
 
@@ -96,7 +105,12 @@ export function SettingsSection() {
 
   const handleSave = async () => {
     try {
-      await updateSettings(formData);
+      const dataToSave = {
+        ...formData,
+        ...(logoPreview && { logo_url: logoPreview }),
+        ...(bgPreview && { bg_url: bgPreview }),
+      };
+      await updateSettings(dataToSave);
       toast({
         title: "✅ Salvo!",
         description: "Configurações atualizadas com sucesso. As mudanças serão refletidas no cardápio.",
