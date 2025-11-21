@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 import { AdminSidebar } from "@/components/admin/dashboard/AdminSidebar";
 import { DashboardHeader } from "@/components/admin/dashboard/DashboardHeader";
 import { CategoriesSection } from "@/components/admin/dashboard/CategoriesSection";
@@ -10,10 +12,30 @@ type ActiveSection = "categories" | "products" | "promotions" | "settings";
 
 export default function AdminDashboard() {
   const [activeSection, setActiveSection] = useState<ActiveSection>("products");
+  const navigate = useNavigate();
+  const { session, isLoading } = useAuth();
+
+  useEffect(() => {
+    if (!isLoading && !session) {
+      navigate('/admin/login');
+    }
+  }, [session, isLoading, navigate]);
 
   const handleLogout = () => {
     // Logout removed - dashboard is now public
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground">Carregando...</p>
+      </div>
+    );
+  }
+
+  if (!session) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-background flex">
