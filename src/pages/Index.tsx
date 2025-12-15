@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { MenuHeader } from "@/components/MenuHeader";
@@ -9,7 +9,10 @@ import { Loader2 } from "lucide-react";
 
 const Index = () => {
   const [activeCategory, setActiveCategory] = useState("");
-  const sectionRefs = useRef<{ [key: string]: HTMLElement | null }>({});
+  const [isUserScrolling, setIsUserScrolling] = useState(false);
+  const sectionRefs = useRef<Map<string, HTMLElement>>(new Map());
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const { data: categories, isLoading: categoriesLoading } = useQuery({
     queryKey: ["categories"],
@@ -49,51 +52,98 @@ const Index = () => {
     return acc;
   }, {} as Record<string, typeof menuItems>);
 
-  const handleCategoryClick = (category: string) => {
+  // Click handler - scroll to section
+  const handleCategoryClick = useCallback((category: string) => {
+    const element = sectionRefs.current.get(category);
+    if (!element) return;
+
+    // Disable scroll spy temporarily during programmatic scroll
+    setIsUserScrolling(true);
     setActiveCategory(category);
-    const element = sectionRefs.current[category];
-    if (element) {
-      const headerHeight = 240; // Hero header height
-      const navHeight = 56; // Category bar height
-      const buffer = 16; // Extra spacing
-      const elementPosition = element.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - navHeight - buffer;
 
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: "smooth",
-      });
-    }
-  };
+    const navHeight = 56;
+    const buffer = 16;
+    const elementPosition = element.getBoundingClientRect().top + window.scrollY;
+    const offsetPosition = elementPosition - navHeight - buffer;
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        // Find the entry with the highest intersection ratio
-        const visibleEntries = entries.filter(entry => entry.isIntersecting);
-        if (visibleEntries.length > 0) {
-          // Sort by intersectionRatio and take the most visible one
-          const mostVisible = visibleEntries.sort((a, b) => 
-            b.intersectionRatio - a.intersectionRatio
-          )[0];
-          const category = mostVisible.target.getAttribute("data-category");
-          if (category) {
-            setActiveCategory(category);
-          }
-        }
-      },
-      {
-        rootMargin: "-140px 0px -50% 0px",
-        threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5],
-      }
-    );
-
-    Object.values(sectionRefs.current).forEach((ref) => {
-      if (ref) observer.observe(ref);
+    window.scrollTo({
+      top: offsetPosition,
+      behavior: "smooth",
     });
 
-    return () => observer.disconnect();
-  }, [categories]);
+    // Re-enable scroll spy after scroll animation completes
+    if (scrollTimeoutRef.current) {
+      clearTimeout(scrollTimeoutRef.current);
+    }
+    scrollTimeoutRef.current = setTimeout(() => {
+      setIsUserScrolling(false);
+    }, 800);
+  }, []);
+
+  // Set up IntersectionObserver for scroll spy
+  useEffect(() => {
+    if (!categories || categories.length === 0) return;
+
+    // Set initial active category
+    if (!activeCategory && categories.length > 0) {
+      setActiveCategory(categories[0].name);
+    }
+
+    // Clean up previous observer
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+    }
+
+    const handleIntersection = (entries: IntersectionObserverEntry[]) => {
+      // Don't update during programmatic scrolling
+      if (isUserScrolling) return;
+
+      // Find the section that is most visible in the viewport
+      const visibleEntries = entries
+        .filter((entry) => entry.isIntersecting)
+        .sort((a, b) => {
+          // Prioritize entries that are higher in the viewport
+          const aTop = a.boundingClientRect.top;
+          const bTop = b.boundingClientRect.top;
+          return aTop - bTop;
+        });
+
+      if (visibleEntries.length > 0) {
+        const mostVisibleEntry = visibleEntries[0];
+        const category = mostVisibleEntry.target.getAttribute("data-category");
+        if (category && category !== activeCategory) {
+          setActiveCategory(category);
+        }
+      }
+    };
+
+    observerRef.current = new IntersectionObserver(handleIntersection, {
+      root: null,
+      rootMargin: "-72px 0px -60% 0px",
+      threshold: [0, 0.1, 0.25, 0.5],
+    });
+
+    // Observe all sections
+    sectionRefs.current.forEach((element) => {
+      if (element) {
+        observerRef.current?.observe(element);
+      }
+    });
+
+    return () => {
+      observerRef.current?.disconnect();
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+    };
+  }, [categories, isUserScrolling, activeCategory]);
+
+  // Register section ref
+  const setSectionRef = useCallback((name: string, el: HTMLElement | null) => {
+    if (el) {
+      sectionRefs.current.set(name, el);
+    }
+  }, []);
 
   if (isLoading) {
     return (
@@ -115,7 +165,7 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <MenuHeader />
       <CategoryChips
-        categories={categories.map(cat => ({ name: cat.name, emoji: cat.emoji }))}
+        categories={categories.map((cat) => ({ name: cat.name, emoji: cat.emoji }))}
         activeCategory={activeCategory}
         onCategoryClick={handleCategoryClick}
       />
@@ -123,16 +173,19 @@ const Index = () => {
       <main className="container mx-auto px-4 py-6">
         {categories.map((category) => {
           const items = groupedItems?.[category.name] || [];
-          
+
           return (
             <section
               key={category.name}
-              ref={(el) => (sectionRefs.current[category.name] = el)}
+              ref={(el) => setSectionRef(category.name, el)}
               data-category={category.name}
               className="mb-10"
               style={{ scrollMarginTop: "72px" }}
             >
-              <h2 className="text-xl font-extrabold text-white mb-5 uppercase tracking-wide flex items-center gap-2" style={{ fontWeight: 800 }}>
+              <h2
+                className="text-xl font-extrabold text-white mb-5 uppercase tracking-wide flex items-center gap-2"
+                style={{ fontWeight: 800 }}
+              >
                 <span className="text-2xl">{category.emoji}</span>
                 {category.name}
                 <span className="text-2xl">{category.emoji}</span>

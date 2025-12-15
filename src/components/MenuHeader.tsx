@@ -2,10 +2,9 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { InfoModal } from "./InfoModal";
-import heroImage from "@/assets/carpe-diem-hero.jpg";
-import logoImage from "@/assets/carpe-diem-logo.png";
 import { Button } from "./ui/button";
-import { Info } from "lucide-react";
+import fallbackHeroImage from "@/assets/carpe-diem-hero.jpg";
+import fallbackLogoImage from "@/assets/carpe-diem-logo.png";
 
 export const MenuHeader = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -23,6 +22,10 @@ export const MenuHeader = () => {
     },
   });
 
+  // Use dynamic images from settings, fallback to local assets
+  const backgroundImage = settings?.bg_url || fallbackHeroImage;
+  const logoImage = settings?.logo_url || fallbackLogoImage;
+
   return (
     <>
       <header className="relative min-h-[240px] overflow-hidden bg-black">
@@ -30,7 +33,7 @@ export const MenuHeader = () => {
         <div 
           className="absolute inset-0 bg-cover bg-center"
           style={{ 
-            backgroundImage: `linear-gradient(180deg, rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url(${heroImage})`
+            backgroundImage: `linear-gradient(180deg, rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url(${backgroundImage})`
           }}
         />
 
@@ -55,7 +58,7 @@ export const MenuHeader = () => {
 
         {/* Content Container */}
         <div className="relative z-10 grid place-items-center text-center px-4 py-8 pb-6 max-w-[720px] mx-auto">
-          {/* Logo */}
+          {/* Logo - Dynamic from settings */}
           <img 
             src={logoImage} 
             alt={settings?.brand_name || "Carpe Diem Motel"} 
