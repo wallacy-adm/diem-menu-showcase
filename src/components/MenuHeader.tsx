@@ -48,8 +48,12 @@ export const MenuHeader = () => {
           {/* Info Button */}
           <Button
             onClick={() => setIsModalOpen(true)}
+            onTouchEnd={(e) => {
+              e.preventDefault();
+              setIsModalOpen(true);
+            }}
             size="sm"
-            className="bg-black/55 backdrop-blur-sm border border-[#2a2a2a] hover:bg-black/70 rounded-[10px] px-2.5 py-1.5 h-auto text-xs text-white"
+            className="bg-black/55 backdrop-blur-sm border border-[#2a2a2a] hover:bg-black/70 active:bg-black/80 rounded-[10px] px-2.5 py-1.5 h-auto text-xs text-white touch-manipulation pointer-events-auto relative z-20"
             aria-label="Informações"
           >
             ℹ️ Informação
