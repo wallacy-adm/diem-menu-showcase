@@ -38,9 +38,9 @@ export const MenuHeader = () => {
         />
 
         {/* Top Bar with Status and Info */}
-        <div className="absolute top-3 left-3 right-3 z-10 flex justify-between items-center gap-2">
+        <div className="absolute top-3 left-3 right-3 z-20 flex justify-between items-center gap-2 pointer-events-none">
           {/* Status Badge */}
-          <div className="flex items-center gap-2 bg-black/55 backdrop-blur-sm px-2.5 py-1.5 rounded-full border border-[#2a2a2a]">
+          <div className="flex items-center gap-2 bg-black/55 backdrop-blur-sm px-2.5 py-1.5 rounded-full border border-[#2a2a2a] pointer-events-auto">
             <div className="w-2 h-2 bg-[#d6f5e6] rounded-full animate-pulse" />
             <span className="text-[#d6f5e6] text-xs">Aberto</span>
           </div>
@@ -48,12 +48,17 @@ export const MenuHeader = () => {
           {/* Info Button */}
           <Button
             onClick={() => setIsModalOpen(true)}
+            onTouchStart={(e) => {
+              e.stopPropagation();
+            }}
             onTouchEnd={(e) => {
               e.preventDefault();
+              e.stopPropagation();
               setIsModalOpen(true);
             }}
             size="sm"
-            className="bg-black/55 backdrop-blur-sm border border-[#2a2a2a] hover:bg-black/70 active:bg-black/80 rounded-[10px] px-2.5 py-1.5 h-auto text-xs text-white touch-manipulation pointer-events-auto relative z-20"
+            className="bg-black/55 backdrop-blur-sm border border-[#2a2a2a] hover:bg-black/70 active:bg-black/80 rounded-[10px] px-2.5 py-1.5 h-auto text-xs text-white touch-manipulation pointer-events-auto cursor-pointer select-none"
+            style={{ WebkitTapHighlightColor: 'transparent' }}
             aria-label="Informações"
           >
             ℹ️ Informação
