@@ -37,7 +37,7 @@ export const CategoryChips = ({
   }, [activeCategory]);
 
   return (
-    <nav className="sticky top-0 z-[9999] bg-[#0C0C0C] border-b border-[#1f1f1f]">
+    <nav className="sticky top-0 z-40 bg-[#0C0C0C] border-b border-[#1f1f1f]">
       <div
         ref={scrollContainerRef}
         className="flex gap-2 px-3 py-2.5 overflow-x-auto scrollbar-hide"

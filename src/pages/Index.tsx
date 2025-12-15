@@ -80,63 +80,69 @@ const Index = () => {
     }, 800);
   }, []);
 
-  // Set up IntersectionObserver for scroll spy
-  useEffect(() => {
-    if (!categories || categories.length === 0) return;
-
-    // Set initial active category
-    if (!activeCategory && categories.length > 0) {
-      setActiveCategory(categories[0].name);
-    }
-
-    // Clean up previous observer
+  // Create observer function
+  const createObserver = useCallback(() => {
     if (observerRef.current) {
       observerRef.current.disconnect();
     }
 
     const handleIntersection = (entries: IntersectionObserverEntry[]) => {
-      // Don't update during programmatic scrolling
       if (isUserScrolling) return;
 
-      // Find the section that is most visible in the viewport
       const visibleEntries = entries
         .filter((entry) => entry.isIntersecting)
-        .sort((a, b) => {
-          // Prioritize entries that are higher in the viewport
-          const aTop = a.boundingClientRect.top;
-          const bTop = b.boundingClientRect.top;
-          return aTop - bTop;
-        });
+        .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
 
       if (visibleEntries.length > 0) {
-        const mostVisibleEntry = visibleEntries[0];
-        const category = mostVisibleEntry.target.getAttribute("data-category");
-        if (category && category !== activeCategory) {
+        const category = visibleEntries[0].target.getAttribute("data-category");
+        if (category) {
           setActiveCategory(category);
         }
       }
     };
 
+    // Dynamic rootMargin based on viewport
+    const navHeight = 56;
     observerRef.current = new IntersectionObserver(handleIntersection, {
       root: null,
-      rootMargin: "-72px 0px -60% 0px",
+      rootMargin: `-${navHeight}px 0px -50% 0px`,
       threshold: [0, 0.1, 0.25, 0.5],
     });
 
-    // Observe all sections
     sectionRefs.current.forEach((element) => {
       if (element) {
         observerRef.current?.observe(element);
       }
     });
+  }, [isUserScrolling]);
+
+  // Set up IntersectionObserver for scroll spy
+  useEffect(() => {
+    if (!categories || categories.length === 0) return;
+
+    if (!activeCategory && categories.length > 0) {
+      setActiveCategory(categories[0].name);
+    }
+
+    createObserver();
+
+    // Recalculate on resize/orientation change
+    const handleResize = () => {
+      createObserver();
+    };
+
+    window.addEventListener("resize", handleResize);
+    window.addEventListener("orientationchange", handleResize);
 
     return () => {
       observerRef.current?.disconnect();
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("orientationchange", handleResize);
       if (scrollTimeoutRef.current) {
         clearTimeout(scrollTimeoutRef.current);
       }
     };
-  }, [categories, isUserScrolling, activeCategory]);
+  }, [categories, createObserver, activeCategory]);
 
   // Register section ref
   const setSectionRef = useCallback((name: string, el: HTMLElement | null) => {
