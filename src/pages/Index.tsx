@@ -9,9 +9,8 @@ import { Loader2 } from "lucide-react";
 
 const Index = () => {
   const [activeCategory, setActiveCategory] = useState("");
-  const [isUserScrolling, setIsUserScrolling] = useState(false);
   const sectionRefs = useRef<Map<string, HTMLElement>>(new Map());
-  const observerRef = useRef<IntersectionObserver | null>(null);
+  const isManualScrollRef = useRef(false);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const { data: categories, isLoading: categoriesLoading } = useQuery({
@@ -52,13 +51,37 @@ const Index = () => {
     return acc;
   }, {} as Record<string, typeof menuItems>);
 
+  // Calculate active category based on scroll position
+  const calculateActiveCategory = useCallback(() => {
+    if (!categories || categories.length === 0) return;
+
+    const navHeight = 72; // header + category bar height
+    const scrollPosition = window.scrollY + navHeight + 20;
+
+    let currentCategory = categories[0].name;
+
+    for (const category of categories) {
+      const element = sectionRefs.current.get(category.name);
+      if (element) {
+        const rect = element.getBoundingClientRect();
+        const elementTop = rect.top + window.scrollY;
+        
+        if (elementTop <= scrollPosition) {
+          currentCategory = category.name;
+        }
+      }
+    }
+
+    setActiveCategory(currentCategory);
+  }, [categories]);
+
   // Click handler - scroll to section
   const handleCategoryClick = useCallback((category: string) => {
     const element = sectionRefs.current.get(category);
     if (!element) return;
 
-    // Disable scroll spy temporarily during programmatic scroll
-    setIsUserScrolling(true);
+    // Set manual scroll flag
+    isManualScrollRef.current = true;
     setActiveCategory(category);
 
     const navHeight = 56;
@@ -71,78 +94,50 @@ const Index = () => {
       behavior: "smooth",
     });
 
-    // Re-enable scroll spy after scroll animation completes
+    // Clear manual scroll flag after animation completes
     if (scrollTimeoutRef.current) {
       clearTimeout(scrollTimeoutRef.current);
     }
     scrollTimeoutRef.current = setTimeout(() => {
-      setIsUserScrolling(false);
-    }, 800);
-  }, []);
+      isManualScrollRef.current = false;
+      // Recalculate to sync with actual position
+      calculateActiveCategory();
+    }, 600);
+  }, [calculateActiveCategory]);
 
-  // Create observer function
-  const createObserver = useCallback(() => {
-    if (observerRef.current) {
-      observerRef.current.disconnect();
-    }
-
-    const handleIntersection = (entries: IntersectionObserverEntry[]) => {
-      if (isUserScrolling) return;
-
-      const visibleEntries = entries
-        .filter((entry) => entry.isIntersecting)
-        .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
-
-      if (visibleEntries.length > 0) {
-        const category = visibleEntries[0].target.getAttribute("data-category");
-        if (category) {
-          setActiveCategory(category);
-        }
-      }
-    };
-
-    // Dynamic rootMargin based on viewport
-    const navHeight = 56;
-    observerRef.current = new IntersectionObserver(handleIntersection, {
-      root: null,
-      rootMargin: `-${navHeight}px 0px -50% 0px`,
-      threshold: [0, 0.1, 0.25, 0.5],
-    });
-
-    sectionRefs.current.forEach((element) => {
-      if (element) {
-        observerRef.current?.observe(element);
-      }
-    });
-  }, [isUserScrolling]);
-
-  // Set up IntersectionObserver for scroll spy
+  // Scroll event handler with throttle
   useEffect(() => {
     if (!categories || categories.length === 0) return;
 
+    let ticking = false;
+
+    const handleScroll = () => {
+      // If manual scroll just happened, skip
+      if (isManualScrollRef.current) return;
+
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          calculateActiveCategory();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    // Set initial category
     if (!activeCategory && categories.length > 0) {
       setActiveCategory(categories[0].name);
     }
 
-    createObserver();
-
-    // Recalculate on resize/orientation change
-    const handleResize = () => {
-      createObserver();
-    };
-
-    window.addEventListener("resize", handleResize);
-    window.addEventListener("orientationchange", handleResize);
+    window.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {
-      observerRef.current?.disconnect();
-      window.removeEventListener("resize", handleResize);
-      window.removeEventListener("orientationchange", handleResize);
+      window.removeEventListener("scroll", handleScroll);
       if (scrollTimeoutRef.current) {
         clearTimeout(scrollTimeoutRef.current);
       }
     };
-  }, [categories, createObserver, activeCategory]);
+  }, [categories, calculateActiveCategory, activeCategory]);
 
   // Register section ref
   const setSectionRef = useCallback((name: string, el: HTMLElement | null) => {
