@@ -1,14 +1,16 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { MenuHeader } from "@/components/MenuHeader";
 import { CategoryChips } from "@/components/CategoryChips";
 import { ProductCard } from "@/components/ProductCard";
 import { MenuFooter } from "@/components/MenuFooter";
-import { Loader2 } from "lucide-react";
+import { Loader2, Search, X } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 const Index = () => {
   const [activeCategory, setActiveCategory] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const sectionRefs = useRef<Map<string, HTMLElement>>(new Map());
   const isManualScrollRef = useRef(false);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -43,13 +45,23 @@ const Index = () => {
 
   const isLoading = categoriesLoading || itemsLoading;
 
-  const groupedItems = menuItems?.reduce((acc, item) => {
+  // Filter items by search query
+  const filteredItems = useMemo(() => {
+    if (!menuItems) return [];
+    if (!searchQuery.trim()) return menuItems;
+    const query = searchQuery.toLowerCase().trim();
+    return menuItems.filter(item => 
+      item.name.toLowerCase().includes(query)
+    );
+  }, [menuItems, searchQuery]);
+
+  const groupedItems = filteredItems?.reduce((acc, item) => {
     if (!acc[item.category]) {
       acc[item.category] = [];
     }
     acc[item.category].push(item);
     return acc;
-  }, {} as Record<string, typeof menuItems>);
+  }, {} as Record<string, typeof filteredItems>);
 
   // Calculate active category based on scroll position
   const calculateActiveCategory = useCallback(() => {
@@ -170,6 +182,28 @@ const Index = () => {
         activeCategory={activeCategory}
         onCategoryClick={handleCategoryClick}
       />
+
+      {/* Search Field */}
+      <div className="container mx-auto px-4 pt-4">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="text"
+            placeholder="Buscar produtos..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10 pr-10 bg-black/50 border-border/50 text-foreground placeholder:text-muted-foreground rounded-xl"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+      </div>
 
       <main className="container mx-auto px-4 py-6">
         {categories.map((category) => {

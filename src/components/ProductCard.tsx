@@ -57,7 +57,7 @@ export const ProductCard = ({
                   <span className="text-sm text-[#8a8a8a] line-through">
                     R$ {oldPrice?.toFixed(2)}
                   </span>
-                  <span className="text-xs font-bold text-[#ff8c00]">
+                  <span className="bg-white text-[#ff8c00] text-xs font-bold px-2 py-0.5 rounded">
                     -{discountPercentage}%
                   </span>
                 </div>
