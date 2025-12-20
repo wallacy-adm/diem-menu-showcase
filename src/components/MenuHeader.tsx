@@ -31,9 +31,9 @@ export const MenuHeader = () => {
       <header className="relative min-h-[240px] overflow-hidden bg-black">
         {/* Hero Background Image with Gradient Overlay */}
         <div 
-          className="absolute inset-0 bg-cover bg-center"
+          className="absolute inset-0 bg-cover bg-center brightness-110"
           style={{ 
-            backgroundImage: `linear-gradient(180deg, rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url(${backgroundImage})`
+            backgroundImage: `linear-gradient(180deg, rgba(0,0,0,0.45), rgba(0,0,0,0.45)), url(${backgroundImage})`
           }}
         />
 

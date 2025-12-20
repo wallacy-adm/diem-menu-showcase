@@ -42,7 +42,7 @@ export const InfoModal = ({ isOpen, onClose, settings }: InfoModalProps) => {
               <h3 className="font-bold text-base text-foreground mb-1.5">
                 Endereço
               </h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
+              <p className="text-sm text-muted-foreground leading-relaxed select-text">
                 {settings?.address || "BR-104, Km 118, Lagoa Seca – PB"}
               </p>
             </div>

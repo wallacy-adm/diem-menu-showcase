@@ -34,7 +34,7 @@ export const ProductCard = ({
   return (
     <>
       <div 
-        className="bg-[#1a1a1a] rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 border border-border/30 cursor-pointer"
+        className="bg-black rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 border border-border/30 cursor-pointer"
         onClick={() => setIsModalOpen(true)}
       >
         <div className="flex gap-4 p-4">
@@ -57,6 +57,9 @@ export const ProductCard = ({
                   <span className="text-sm text-[#8a8a8a] line-through">
                     R$ {oldPrice?.toFixed(2)}
                   </span>
+                  <span className="text-xs font-bold text-[#ff8c00]">
+                    -{discountPercentage}%
+                  </span>
                 </div>
               )}
               <div className="text-2xl font-extrabold text-[#00D084]" style={{ fontWeight: 800 }}>
@@ -67,11 +70,6 @@ export const ProductCard = ({
 
           {/* Image Right */}
           <div className="w-[120px] h-[120px] flex-shrink-0 relative">
-            {hasPromotion && (
-              <div className="absolute top-1 right-1 z-10 bg-[#ff8c00] text-white text-xs font-bold px-2 py-0.5 rounded shadow-md">
-                -{discountPercentage}%
-              </div>
-            )}
             <div className="relative w-full h-full rounded-[14px] overflow-hidden bg-muted">
               {!imageLoaded && (
                 <div className="absolute inset-0 flex items-center justify-center">
