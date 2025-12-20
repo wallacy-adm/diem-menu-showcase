@@ -36,15 +36,15 @@ export const InfoModal = ({ isOpen, onClose, settings }: InfoModalProps) => {
         </DialogHeader>
 
         <div className="space-y-4 py-4">
-          <div className="flex items-start gap-4 p-5 rounded-xl bg-secondary/50 border border-border">
+          <div className="flex items-start gap-4 p-5 rounded-xl bg-secondary/50 border border-border pointer-events-none select-text">
             <MapPin className="h-6 w-6 text-primary flex-shrink-0 mt-0.5" />
             <div>
               <h3 className="font-bold text-base text-foreground mb-1.5">
                 Endereço
               </h3>
-              <p className="text-sm text-muted-foreground leading-relaxed select-text">
+              <span className="text-sm text-muted-foreground leading-relaxed block">
                 {settings?.address || "BR-104, Km 118, Lagoa Seca – PB"}
-              </p>
+              </span>
             </div>
           </div>
 
