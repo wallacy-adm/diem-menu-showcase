@@ -208,6 +208,11 @@ const Index = () => {
       <main className="container mx-auto px-4 py-6">
         {categories.map((category) => {
           const items = groupedItems?.[category.name] || [];
+          
+          // Hide category completely if no items match during search
+          if (searchQuery.trim() && items.length === 0) {
+            return null;
+          }
 
           return (
             <section

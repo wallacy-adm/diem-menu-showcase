@@ -36,13 +36,19 @@ export const InfoModal = ({ isOpen, onClose, settings }: InfoModalProps) => {
         </DialogHeader>
 
         <div className="space-y-4 py-4">
-          <div className="flex items-start gap-4 p-5 rounded-xl bg-secondary/50 border border-border pointer-events-none select-text">
-            <MapPin className="h-6 w-6 text-primary flex-shrink-0 mt-0.5" />
-            <div>
-              <h3 className="font-bold text-base text-foreground mb-1.5">
+          <div 
+            className="flex items-start gap-4 p-5 rounded-xl bg-secondary/50 border border-border select-text cursor-default"
+            style={{ pointerEvents: 'none', touchAction: 'none', userSelect: 'text' }}
+            onClick={undefined}
+            onTouchStart={undefined}
+            onPointerDown={undefined}
+          >
+            <MapPin className="h-6 w-6 text-primary flex-shrink-0 mt-0.5 pointer-events-none" />
+            <div className="pointer-events-none">
+              <h3 className="font-bold text-base text-foreground mb-1.5 pointer-events-none">
                 Endereço
               </h3>
-              <span className="text-sm text-muted-foreground leading-relaxed block">
+              <span className="text-sm text-muted-foreground leading-relaxed block pointer-events-none">
                 {settings?.address || "BR-104, Km 118, Lagoa Seca – PB"}
               </span>
             </div>
