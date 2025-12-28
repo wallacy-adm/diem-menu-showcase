@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Plus, Search, Pencil, Trash2, ChevronDown, ChevronRight } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, ChevronDown, ChevronRight, ArrowUp, ArrowDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -25,7 +25,7 @@ import { useAdminCategories } from "@/hooks/useAdminCategories";
 
 export function ProductsSection() {
   const { toast } = useToast();
-  const { products, addProduct, updateProduct, deleteProduct, toggleVisible, isLoading } = useAdminProducts();
+  const { products, addProduct, updateProduct, deleteProduct, toggleVisible, reorderProducts, isLoading } = useAdminProducts();
   const { categories } = useAdminCategories();
   const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -33,7 +33,7 @@ export function ProductsSection() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(categories.map(c => c.name)));
 
-  // Group products by category
+  // Group products by category and sort by sort_order
   const groupedProducts = useMemo(() => {
     const filtered = products.filter(product => {
       const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -51,6 +51,11 @@ export function ProductsSection() {
         grouped[product.category] = [];
       }
       grouped[product.category].push(product);
+    });
+
+    // Sort products within each category by sort_order
+    Object.keys(grouped).forEach(category => {
+      grouped[category].sort((a, b) => a.sort_order - b.sort_order);
     });
 
     return grouped;
@@ -153,6 +158,52 @@ export function ProductsSection() {
   const calculateDiscount = (price: number, oldPrice?: number) => {
     if (!oldPrice || oldPrice <= price) return null;
     return Math.round(((oldPrice - price) / oldPrice) * 100);
+  };
+
+  const handleMoveUp = async (product: Product, categoryProducts: Product[], index: number) => {
+    if (index === 0) return; // Already at top
+    const previousProduct = categoryProducts[index - 1];
+    try {
+      await reorderProducts({
+        productId1: product.id,
+        sortOrder1: product.sort_order,
+        productId2: previousProduct.id,
+        sortOrder2: previousProduct.sort_order,
+      });
+      toast({
+        title: "✅ Reordenado!",
+        description: "Produto movido para cima.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Erro",
+        description: error.message || "Não foi possível reordenar.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleMoveDown = async (product: Product, categoryProducts: Product[], index: number) => {
+    if (index === categoryProducts.length - 1) return; // Already at bottom
+    const nextProduct = categoryProducts[index + 1];
+    try {
+      await reorderProducts({
+        productId1: product.id,
+        sortOrder1: product.sort_order,
+        productId2: nextProduct.id,
+        sortOrder2: nextProduct.sort_order,
+      });
+      toast({
+        title: "✅ Reordenado!",
+        description: "Produto movido para baixo.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Erro",
+        description: error.message || "Não foi possível reordenar.",
+        variant: "destructive",
+      });
+    }
   };
 
   if (isLoading) {
@@ -298,6 +349,30 @@ export function ProductsSection() {
                                 <span className="text-xs text-muted-foreground w-12">
                                   {product.visible ? "Ativo" : "Inativo"}
                                 </span>
+                              </div>
+
+                              {/* Reorder Buttons */}
+                              <div className="flex flex-col gap-0.5 flex-shrink-0">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-6 w-6 p-0"
+                                  onClick={() => handleMoveUp(product, categoryProducts, index)}
+                                  disabled={index === 0}
+                                  title="Mover para cima"
+                                >
+                                  <ArrowUp className="w-3 h-3" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-6 w-6 p-0"
+                                  onClick={() => handleMoveDown(product, categoryProducts, index)}
+                                  disabled={index === categoryProducts.length - 1}
+                                  title="Mover para baixo"
+                                >
+                                  <ArrowDown className="w-3 h-3" />
+                                </Button>
                               </div>
 
                               {/* Actions */}
