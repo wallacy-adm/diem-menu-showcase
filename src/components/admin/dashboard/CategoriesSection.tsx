@@ -1,16 +1,8 @@
 import { useState } from "react";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, ArrowUp, ArrowDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,7 +18,7 @@ import { useAdminCategories } from "@/hooks/useAdminCategories";
 
 export function CategoriesSection() {
   const { toast } = useToast();
-  const { categories, addCategory, updateCategory, deleteCategory, toggleVisible, isLoading } = useAdminCategories();
+  const { categories, addCategory, updateCategory, deleteCategory, toggleVisible, reorderCategories, isLoading } = useAdminCategories();
   const [newCategoryName, setNewCategoryName] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");
@@ -136,6 +128,46 @@ export function CategoriesSection() {
     }
   };
 
+  const handleMoveUp = async (index: number) => {
+    if (index === 0) return;
+    const currentCategory = categories[index];
+    const targetCategory = categories[index - 1];
+    
+    try {
+      await reorderCategories({ categoryId: currentCategory.id, targetCategoryId: targetCategory.id });
+      toast({
+        title: "✅ Atualizado!",
+        description: "Ordem da categoria atualizada.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Erro",
+        description: error.message || "Não foi possível reordenar.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleMoveDown = async (index: number) => {
+    if (index === categories.length - 1) return;
+    const currentCategory = categories[index];
+    const targetCategory = categories[index + 1];
+    
+    try {
+      await reorderCategories({ categoryId: currentCategory.id, targetCategoryId: targetCategory.id });
+      toast({
+        title: "✅ Atualizado!",
+        description: "Ordem da categoria atualizada.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Erro",
+        description: error.message || "Não foi possível reordenar.",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -229,6 +261,28 @@ export function CategoriesSection() {
                       <span className={`text-xs ${category.visible ? 'text-primary' : 'text-muted-foreground'}`}>
                         {category.visible ? "Ativo" : "Inativo"}
                       </span>
+                    </div>
+
+                    {/* Reorder Buttons */}
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleMoveUp(index)}
+                        disabled={index === 0}
+                        className="text-muted-foreground hover:text-foreground disabled:opacity-30"
+                      >
+                        <ArrowUp className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleMoveDown(index)}
+                        disabled={index === categories.length - 1}
+                        className="text-muted-foreground hover:text-foreground disabled:opacity-30"
+                      >
+                        <ArrowDown className="w-4 h-4" />
+                      </Button>
                     </div>
 
                     {/* Actions */}
