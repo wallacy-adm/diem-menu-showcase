@@ -95,6 +95,34 @@ export function useAdminCategories() {
     },
   });
 
+  const reorderCategoriesMutation = useMutation({
+    mutationFn: async ({ categoryId, targetCategoryId }: { categoryId: string; targetCategoryId: string }) => {
+      const category = categories.find(c => c.id === categoryId);
+      const targetCategory = categories.find(c => c.id === targetCategoryId);
+      
+      if (!category || !targetCategory) throw new Error('Category not found');
+
+      // Swap sort_order values
+      const { error: error1 } = await supabase
+        .from('categories')
+        .update({ sort_order: targetCategory.sort_order })
+        .eq('id', categoryId);
+      
+      if (error1) throw error1;
+
+      const { error: error2 } = await supabase
+        .from('categories')
+        .update({ sort_order: category.sort_order })
+        .eq('id', targetCategoryId);
+      
+      if (error2) throw error2;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+    },
+  });
+
   return {
     categories,
     isLoading,
@@ -102,5 +130,6 @@ export function useAdminCategories() {
     updateCategory: updateCategoryMutation.mutateAsync,
     deleteCategory: deleteCategoryMutation.mutateAsync,
     toggleVisible: toggleVisibleMutation.mutateAsync,
+    reorderCategories: reorderCategoriesMutation.mutateAsync,
   };
 }
