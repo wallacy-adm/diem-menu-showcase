@@ -95,6 +95,33 @@ export function useAdminProducts() {
     },
   });
 
+  const reorderProductsMutation = useMutation({
+    mutationFn: async ({ productId1, sortOrder1, productId2, sortOrder2 }: { 
+      productId1: string; 
+      sortOrder1: number; 
+      productId2: string; 
+      sortOrder2: number; 
+    }) => {
+      // Swap sort_order values between two products
+      const { error: error1 } = await supabase
+        .from('menu_items')
+        .update({ sort_order: sortOrder2 })
+        .eq('id', productId1);
+      
+      if (error1) throw error1;
+
+      const { error: error2 } = await supabase
+        .from('menu_items')
+        .update({ sort_order: sortOrder1 })
+        .eq('id', productId2);
+      
+      if (error2) throw error2;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+    },
+  });
+
   return {
     products,
     isLoading,
@@ -102,5 +129,6 @@ export function useAdminProducts() {
     updateProduct: updateProductMutation.mutateAsync,
     deleteProduct: deleteProductMutation.mutateAsync,
     toggleVisible: toggleVisibleMutation.mutateAsync,
+    reorderProducts: reorderProductsMutation.mutateAsync,
   };
 }
