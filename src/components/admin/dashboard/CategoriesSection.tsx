@@ -150,7 +150,7 @@ export function CategoriesSection() {
         <div>
           <h2 className="text-2xl font-bold text-foreground">Categorias</h2>
           <p className="text-sm text-muted-foreground mt-1">
-            Gerencie as categorias do seu cardápio
+            {categories.length} {categories.length === 1 ? 'categoria cadastrada' : 'categorias cadastradas'}
           </p>
         </div>
       </div>
@@ -172,22 +172,27 @@ export function CategoriesSection() {
         </div>
       </div>
 
-      {/* Categories Table */}
-      <div className="bg-card rounded-lg border border-border overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Nome</TableHead>
-              <TableHead className="w-32 text-center">Status</TableHead>
-              <TableHead className="w-32 text-center">Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {categories.map((category) => (
-              <TableRow key={category.id}>
-                <TableCell className="font-medium">
+      {/* Categories List */}
+      <div className="space-y-3">
+        {categories.length === 0 ? (
+          <div className="bg-card rounded-lg border border-border p-8 text-center text-muted-foreground">
+            Nenhuma categoria cadastrada
+          </div>
+        ) : (
+          categories.map((category, index) => (
+            <div
+              key={category.id}
+              className="bg-card rounded-lg border border-border p-4 hover:border-primary/30 transition-colors"
+            >
+              <div className="flex items-center justify-between">
+                {/* Category Info */}
+                <div className="flex items-center gap-4 flex-1 min-w-0">
+                  <div className="flex items-center justify-center w-10 h-10 bg-muted rounded-lg text-lg">
+                    {category.emoji}
+                  </div>
+                  
                   {editingId === category.id ? (
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-1">
                       <Input
                         value={editingName}
                         onChange={(e) => setEditingName(e.target.value)}
@@ -203,47 +208,53 @@ export function CategoriesSection() {
                       </Button>
                     </div>
                   ) : (
-                    category.name
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium text-foreground truncate">{category.name}</h3>
+                      <p className="text-xs text-muted-foreground">
+                        Ordem: {index + 1}
+                      </p>
+                    </div>
                   )}
-                </TableCell>
-                <TableCell className="text-center">
-                  <div className="flex items-center justify-center gap-2">
-                    <Switch
-                      checked={category.visible}
-                      onCheckedChange={() => handleToggleVisible(category.id)}
-                    />
-                    <span className="text-xs text-muted-foreground">
-                      {category.visible ? "Ativo" : "Inativo"}
-                    </span>
+                </div>
+
+                {/* Status & Actions */}
+                {editingId !== category.id && (
+                  <div className="flex items-center gap-4">
+                    {/* Status */}
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={category.visible}
+                        onCheckedChange={() => handleToggleVisible(category.id)}
+                      />
+                      <span className={`text-xs ${category.visible ? 'text-primary' : 'text-muted-foreground'}`}>
+                        {category.visible ? "Ativo" : "Inativo"}
+                      </span>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex items-center gap-1">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => handleStartEdit(category.id, category.name)}
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => handleDeleteClick(category.id)}
+                        className="text-destructive hover:text-destructive"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center justify-center gap-2">
-                    {editingId !== category.id && (
-                      <>
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => handleStartEdit(category.id, category.name)}
-                        >
-                          <Pencil className="w-4 h-4" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => handleDeleteClick(category.id)}
-                          className="text-destructive hover:text-destructive"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+                )}
+              </div>
+            </div>
+          ))
+        )}
       </div>
 
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>

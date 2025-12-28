@@ -1,16 +1,8 @@
 import { useState, useMemo } from "react";
-import { Plus, Search, Pencil, Trash2 } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, ChevronDown, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,6 +13,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { useToast } from "@/hooks/use-toast";
 import { ProductModal } from "./ProductModal";
 import { useAdminProducts, Product } from "@/hooks/useAdminProducts";
@@ -34,14 +31,49 @@ export function ProductsSection() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(categories.map(c => c.name)));
 
-  const filteredProducts = useMemo(() => {
-    return products.filter(product => {
+  // Group products by category
+  const groupedProducts = useMemo(() => {
+    const filtered = products.filter(product => {
       const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           product.category.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesSearch;
     });
-  }, [products, searchQuery]);
+
+    const grouped: Record<string, Product[]> = {};
+    categories.forEach(cat => {
+      grouped[cat.name] = [];
+    });
+    
+    filtered.forEach(product => {
+      if (!grouped[product.category]) {
+        grouped[product.category] = [];
+      }
+      grouped[product.category].push(product);
+    });
+
+    return grouped;
+  }, [products, categories, searchQuery]);
+
+  // Expand all categories when data loads
+  useMemo(() => {
+    if (categories.length > 0 && expandedCategories.size === 0) {
+      setExpandedCategories(new Set(categories.map(c => c.name)));
+    }
+  }, [categories]);
+
+  const toggleCategory = (categoryName: string) => {
+    setExpandedCategories(prev => {
+      const next = new Set(prev);
+      if (next.has(categoryName)) {
+        next.delete(categoryName);
+      } else {
+        next.add(categoryName);
+      }
+      return next;
+    });
+  };
 
   const handleAddProduct = () => {
     setEditingProduct(null);
@@ -131,13 +163,16 @@ export function ProductsSection() {
     );
   }
 
+  const totalProducts = products.length;
+  const visibleCategories = categories.filter(cat => groupedProducts[cat.name]?.length > 0 || !searchQuery);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-foreground">Produtos</h2>
           <p className="text-sm text-muted-foreground mt-1">
-            Gerencie os produtos do seu cardápio
+            {totalProducts} produtos em {categories.length} categorias
           </p>
         </div>
         <Button onClick={handleAddProduct} className="gap-2">
@@ -159,95 +194,141 @@ export function ProductsSection() {
         </div>
       </div>
 
-      {/* Products Table */}
-      <div className="bg-card rounded-lg border border-border overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-20">Imagem</TableHead>
-              <TableHead>Nome</TableHead>
-              <TableHead>Categoria</TableHead>
-              <TableHead className="text-right">Preço</TableHead>
-              <TableHead className="w-32 text-center">Status</TableHead>
-              <TableHead className="w-32 text-center">Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredProducts.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
-                  {searchQuery ? "Nenhum produto encontrado" : "Nenhum produto cadastrado"}
-                </TableCell>
-              </TableRow>
-            ) : (
-              filteredProducts.map((product) => {
-                const discount = calculateDiscount(product.price, product.old_price);
-                return (
-                  <TableRow key={product.id}>
-                    <TableCell>
-                      <div className="relative w-16 h-16">
-                        <img
-                          src={product.image}
-                          alt={product.name}
-                          className="w-full h-full object-cover rounded-lg"
-                        />
-                        {discount && (
-                          <div className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs font-bold px-1.5 py-0.5 rounded">
-                            -{discount}%
-                          </div>
+      {/* Products grouped by category */}
+      <div className="space-y-4">
+        {visibleCategories.length === 0 ? (
+          <div className="bg-card rounded-lg border border-border p-8 text-center text-muted-foreground">
+            {searchQuery ? "Nenhum produto encontrado" : "Nenhuma categoria cadastrada"}
+          </div>
+        ) : (
+          visibleCategories.map((category) => {
+            const categoryProducts = groupedProducts[category.name] || [];
+            const isExpanded = expandedCategories.has(category.name);
+            
+            // Hide empty categories during search
+            if (searchQuery && categoryProducts.length === 0) {
+              return null;
+            }
+
+            return (
+              <Collapsible
+                key={category.id}
+                open={isExpanded}
+                onOpenChange={() => toggleCategory(category.name)}
+              >
+                <div className="bg-card rounded-lg border border-border overflow-hidden">
+                  {/* Category Header */}
+                  <CollapsibleTrigger asChild>
+                    <div className="flex items-center justify-between p-4 cursor-pointer hover:bg-muted/50 transition-colors">
+                      <div className="flex items-center gap-3">
+                        {isExpanded ? (
+                          <ChevronDown className="w-5 h-5 text-muted-foreground" />
+                        ) : (
+                          <ChevronRight className="w-5 h-5 text-muted-foreground" />
                         )}
-                      </div>
-                    </TableCell>
-                    <TableCell className="font-medium">{product.name}</TableCell>
-                    <TableCell>{product.category}</TableCell>
-                    <TableCell>
-                      <div className="flex flex-col items-end">
-                        <span className="text-primary font-bold">
-                          R$ {product.price.toFixed(2)}
-                        </span>
-                        {product.old_price && (
-                          <span className="text-xs text-muted-foreground line-through">
-                            R$ {product.old_price.toFixed(2)}
-                          </span>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <div className="flex items-center justify-center gap-2">
-                        <Switch
-                          checked={product.visible}
-                          onCheckedChange={() => handleToggleVisible(product.id)}
-                        />
-                        <span className="text-xs text-muted-foreground">
-                          {product.visible ? "Ativo" : "Inativo"}
+                        <span className="text-lg">{category.emoji}</span>
+                        <h3 className="font-semibold text-foreground">{category.name}</h3>
+                        <span className="text-sm text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                          {categoryProducts.length} {categoryProducts.length === 1 ? 'produto' : 'produtos'}
                         </span>
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center justify-center gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleEdit(product)}
-                        >
-                          <Pencil className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDeleteClick(product.id)}
-                          className="text-destructive hover:text-destructive"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
+                      {!category.visible && (
+                        <span className="text-xs bg-muted text-muted-foreground px-2 py-1 rounded">
+                          Categoria oculta
+                        </span>
+                      )}
+                    </div>
+                  </CollapsibleTrigger>
+
+                  {/* Products List */}
+                  <CollapsibleContent>
+                    {categoryProducts.length === 0 ? (
+                      <div className="px-4 pb-4 pt-2 text-sm text-muted-foreground border-t border-border">
+                        Nenhum produto nesta categoria
                       </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })
-            )}
-          </TableBody>
-        </Table>
+                    ) : (
+                      <div className="border-t border-border">
+                        {categoryProducts.map((product, index) => {
+                          const discount = calculateDiscount(product.price, product.old_price);
+                          return (
+                            <div
+                              key={product.id}
+                              className={`flex items-center gap-4 p-4 hover:bg-muted/30 transition-colors ${
+                                index !== categoryProducts.length - 1 ? 'border-b border-border/50' : ''
+                              }`}
+                            >
+                              {/* Product Image */}
+                              <div className="relative w-14 h-14 flex-shrink-0">
+                                <img
+                                  src={product.image}
+                                  alt={product.name}
+                                  className="w-full h-full object-cover rounded-lg"
+                                />
+                                {discount && (
+                                  <div className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs font-bold px-1.5 py-0.5 rounded">
+                                    -{discount}%
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Product Info */}
+                              <div className="flex-1 min-w-0">
+                                <h4 className="font-medium text-foreground truncate">{product.name}</h4>
+                                <p className="text-sm text-muted-foreground truncate">{product.description}</p>
+                              </div>
+
+                              {/* Price */}
+                              <div className="flex flex-col items-end flex-shrink-0">
+                                <span className="text-primary font-bold">
+                                  R$ {product.price.toFixed(2)}
+                                </span>
+                                {product.old_price && (
+                                  <span className="text-xs text-muted-foreground line-through">
+                                    R$ {product.old_price.toFixed(2)}
+                                  </span>
+                                )}
+                              </div>
+
+                              {/* Status */}
+                              <div className="flex items-center gap-2 flex-shrink-0">
+                                <Switch
+                                  checked={product.visible}
+                                  onCheckedChange={() => handleToggleVisible(product.id)}
+                                />
+                                <span className="text-xs text-muted-foreground w-12">
+                                  {product.visible ? "Ativo" : "Inativo"}
+                                </span>
+                              </div>
+
+                              {/* Actions */}
+                              <div className="flex items-center gap-1 flex-shrink-0">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleEdit(product)}
+                                >
+                                  <Pencil className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDeleteClick(product.id)}
+                                  className="text-destructive hover:text-destructive"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </CollapsibleContent>
+                </div>
+              </Collapsible>
+            );
+          })
+        )}
       </div>
 
       <ProductModal
