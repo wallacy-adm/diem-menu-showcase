@@ -1,4 +1,4 @@
-import { MapPin, Instagram, MessageCircle } from "lucide-react";
+import { MapPin, Clock, MessageCircle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -15,12 +15,12 @@ interface InfoModalProps {
 }
 
 export const InfoModal = ({ isOpen, onClose, settings }: InfoModalProps) => {
-  const handleInstagramClick = () => {
-    window.open(settings?.instagram_url || "https://instagram.com", "_blank");
-  };
+  // Centralized WhatsApp URL - uses settings or fallback
+  const whatsappUrl = settings?.whatsapp_url || "https://wa.me/5583999999999";
 
-  const handleWhatsAppClick = () => {
-    window.open(settings?.whatsapp_url || "https://wa.me/", "_blank");
+  const handleComplaintsClick = () => {
+    const message = encodeURIComponent("Olá, gostaria de registrar uma reclamação ou sugestão.");
+    window.open(`${whatsappUrl}?text=${message}`, "_blank");
   };
 
   return (
@@ -31,17 +31,15 @@ export const InfoModal = ({ isOpen, onClose, settings }: InfoModalProps) => {
             {settings?.brand_name || "Carpe Diem Motel"}
           </DialogTitle>
           <DialogDescription className="text-muted-foreground text-base mt-2">
-            Entre em contato conosco
+            Informações do estabelecimento
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
+          {/* Address - Non-interactive text */}
           <div 
             className="flex items-start gap-4 p-5 rounded-xl bg-secondary/50 border border-border select-text cursor-default"
             style={{ pointerEvents: 'none', touchAction: 'none', userSelect: 'text' }}
-            onClick={undefined}
-            onTouchStart={undefined}
-            onPointerDown={undefined}
           >
             <MapPin className="h-6 w-6 text-primary flex-shrink-0 mt-0.5 pointer-events-none" />
             <div className="pointer-events-none">
@@ -54,25 +52,30 @@ export const InfoModal = ({ isOpen, onClose, settings }: InfoModalProps) => {
             </div>
           </div>
 
-          <Button
-            onClick={handleInstagramClick}
-            className="w-full justify-start gap-4 h-auto p-5 bg-secondary hover:bg-secondary/80 text-foreground border border-border rounded-xl"
-            variant="outline"
+          {/* Operating Hours - Non-interactive */}
+          <div 
+            className="flex items-start gap-4 p-5 rounded-xl bg-secondary/50 border border-border select-text cursor-default"
+            style={{ pointerEvents: 'none', touchAction: 'none', userSelect: 'text' }}
           >
-            <Instagram className="h-6 w-6 text-primary" />
-            <div className="text-left">
-              <h3 className="font-bold text-base">Instagram</h3>
-              <p className="text-sm text-muted-foreground">Siga-nos no Instagram</p>
+            <Clock className="h-6 w-6 text-primary flex-shrink-0 mt-0.5 pointer-events-none" />
+            <div className="pointer-events-none">
+              <h3 className="font-bold text-base text-foreground mb-1.5 pointer-events-none">
+                Funcionamento
+              </h3>
+              <span className="text-sm text-muted-foreground leading-relaxed block pointer-events-none">
+                24 horas, todos os dias
+              </span>
             </div>
-          </Button>
+          </div>
 
+          {/* Complaints/Suggestions - Clickable WhatsApp link */}
           <Button
-            onClick={handleWhatsAppClick}
+            onClick={handleComplaintsClick}
             className="w-full justify-start gap-4 h-auto p-5 bg-primary hover:bg-primary/90 text-black rounded-xl font-semibold"
           >
             <MessageCircle className="h-6 w-6" />
             <div className="text-left">
-              <h3 className="font-bold text-base">WhatsApp</h3>
+              <h3 className="font-bold text-base">Reclamações ou Sugestões</h3>
               <p className="text-sm opacity-80">Fale conosco pelo WhatsApp</p>
             </div>
           </Button>

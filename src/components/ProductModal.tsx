@@ -5,6 +5,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { MessageCircle } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ProductModalProps {
   isOpen: boolean;
@@ -21,6 +24,26 @@ interface ProductModalProps {
 }
 
 export const ProductModal = ({ isOpen, onClose, product }: ProductModalProps) => {
+  const { data: settings } = useQuery({
+    queryKey: ["settings"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("settings")
+        .select("whatsapp_url")
+        .single();
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Centralized WhatsApp URL
+  const whatsappUrl = settings?.whatsapp_url || "https://wa.me/5583999999999";
+
+  const handleComplaintsClick = () => {
+    const message = encodeURIComponent("Olá, gostaria de registrar uma reclamação ou sugestão.");
+    window.open(`${whatsappUrl}?text=${message}`, "_blank");
+  };
+
   const hasPromo = product.oldPrice && product.oldPrice > product.price;
   const discountPercentage = hasPromo 
     ? Math.round(((product.oldPrice! - product.price) / product.oldPrice!) * 100)
@@ -70,11 +93,15 @@ export const ProductModal = ({ isOpen, onClose, product }: ProductModalProps) =>
             </div>
           </div>
 
-          {/* Aviso */}
-          <div className="mt-4 p-3 bg-muted/30 rounded-lg border border-border/30">
-            <p className="text-sm text-[#b3b3b3] text-center">
-              Apenas visualização — pedidos não são feitos por aqui.
-            </p>
+          {/* Complaints/Suggestions Link */}
+          <div className="mt-4 flex justify-center">
+            <button
+              onClick={handleComplaintsClick}
+              className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors text-sm font-medium"
+            >
+              <MessageCircle className="h-4 w-4" />
+              Reclamações ou Sugestões
+            </button>
           </div>
         </div>
       </DialogContent>
