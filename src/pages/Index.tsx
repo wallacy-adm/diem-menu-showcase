@@ -117,6 +117,28 @@ const Index = () => {
     }, 600);
   }, [calculateActiveCategory]);
 
+  // Touch/wheel event - immediately release manual scroll lock
+  useEffect(() => {
+    const releaseManualScroll = () => {
+      if (isManualScrollRef.current) {
+        isManualScrollRef.current = false;
+        if (scrollTimeoutRef.current) {
+          clearTimeout(scrollTimeoutRef.current);
+          scrollTimeoutRef.current = null;
+        }
+      }
+    };
+
+    // Listen for user-initiated scroll gestures
+    window.addEventListener("touchmove", releaseManualScroll, { passive: true });
+    window.addEventListener("wheel", releaseManualScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("touchmove", releaseManualScroll);
+      window.removeEventListener("wheel", releaseManualScroll);
+    };
+  }, []);
+
   // Scroll event handler with throttle
   useEffect(() => {
     if (!categories || categories.length === 0) return;
@@ -124,7 +146,7 @@ const Index = () => {
     let ticking = false;
 
     const handleScroll = () => {
-      // If manual scroll just happened, skip
+      // Skip only if manual scroll is active
       if (isManualScrollRef.current) return;
 
       if (!ticking) {
