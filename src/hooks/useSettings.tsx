@@ -12,6 +12,9 @@ export interface Settings {
   footer_note: string;
   logo_url?: string;
   bg_url?: string;
+  show_logo: boolean;
+  show_bg: boolean;
+  admin_logo_url?: string;
   created_at: string;
   updated_at: string;
 }

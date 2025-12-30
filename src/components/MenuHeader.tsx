@@ -23,19 +23,26 @@ export const MenuHeader = () => {
   });
 
   // Use dynamic images from settings, fallback to local assets
-  const backgroundImage = settings?.bg_url || fallbackHeroImage;
-  const logoImage = settings?.logo_url || fallbackLogoImage;
+  // Respect show_logo and show_bg toggles
+  const showBackground = settings?.show_bg !== false;
+  const showLogo = settings?.show_logo !== false;
+  const backgroundImage = showBackground ? (settings?.bg_url || fallbackHeroImage) : null;
+  const logoImage = showLogo ? (settings?.logo_url || fallbackLogoImage) : null;
 
   return (
     <>
       <header className="relative min-h-[240px] overflow-hidden bg-black">
         {/* Hero Background Image with Gradient Overlay */}
-        <div 
-          className="absolute inset-0 bg-cover bg-center brightness-110"
-          style={{ 
-            backgroundImage: `linear-gradient(180deg, rgba(0,0,0,0.45), rgba(0,0,0,0.45)), url(${backgroundImage})`
-          }}
-        />
+        {backgroundImage ? (
+          <div 
+            className="absolute inset-0 bg-cover bg-center brightness-110"
+            style={{ 
+              backgroundImage: `linear-gradient(180deg, rgba(0,0,0,0.45), rgba(0,0,0,0.45)), url(${backgroundImage})`
+            }}
+          />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-b from-[#1a1a1a] to-black" />
+        )}
 
         {/* Top Bar with Status and Info */}
         <div className="absolute top-3 left-3 right-3 z-20 flex justify-between items-center gap-2 pointer-events-none">
@@ -68,11 +75,13 @@ export const MenuHeader = () => {
         {/* Content Container */}
         <div className="relative z-10 grid place-items-center text-center px-4 py-8 pb-6 max-w-[720px] mx-auto">
           {/* Logo - Dynamic from settings */}
-          <img 
-            src={logoImage} 
-            alt={settings?.brand_name || "Carpe Diem Motel"} 
-            className="w-[120px] h-[120px] rounded-xl object-cover border-2 border-white shadow-[0_8px_20px_rgba(0,0,0,0.35)] mb-3 block"
-          />
+          {logoImage && (
+            <img 
+              src={logoImage} 
+              alt={settings?.brand_name || "Carpe Diem Motel"} 
+              className="w-[120px] h-[120px] rounded-xl object-cover border-2 border-white shadow-[0_8px_20px_rgba(0,0,0,0.35)] mb-3 block"
+            />
+          )}
 
           {/* Title */}
           <h1 className="text-[24px] leading-[1.1] text-white mb-0.5" style={{ fontWeight: 800 }}>
