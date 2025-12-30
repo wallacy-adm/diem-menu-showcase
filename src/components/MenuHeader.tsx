@@ -81,7 +81,7 @@ export const MenuHeader = () => {
 
           {/* Subtitle */}
           <p className="text-[14px] text-[#b3b3b3]">
-            {settings?.brand_name || "Carpe Diem Motel"} – {settings?.address || "BR-104, Km 118, Lagoa Seca – PB"}
+            {settings?.brand_name || "Carpe Diem Motel"}
           </p>
         </div>
       </header>
