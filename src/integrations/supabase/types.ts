@@ -238,6 +238,7 @@ export type Database = {
       settings: {
         Row: {
           address: string
+          admin_logo_url: string | null
           bg_url: string | null
           brand_name: string
           created_at: string
@@ -245,6 +246,8 @@ export type Database = {
           id: string
           instagram_url: string
           logo_url: string | null
+          show_bg: boolean
+          show_logo: boolean
           tagline: string
           theme_accent: string
           updated_at: string
@@ -252,6 +255,7 @@ export type Database = {
         }
         Insert: {
           address?: string
+          admin_logo_url?: string | null
           bg_url?: string | null
           brand_name?: string
           created_at?: string
@@ -259,6 +263,8 @@ export type Database = {
           id?: string
           instagram_url?: string
           logo_url?: string | null
+          show_bg?: boolean
+          show_logo?: boolean
           tagline?: string
           theme_accent?: string
           updated_at?: string
@@ -266,6 +272,7 @@ export type Database = {
         }
         Update: {
           address?: string
+          admin_logo_url?: string | null
           bg_url?: string | null
           brand_name?: string
           created_at?: string
@@ -273,6 +280,8 @@ export type Database = {
           id?: string
           instagram_url?: string
           logo_url?: string | null
+          show_bg?: boolean
+          show_logo?: boolean
           tagline?: string
           theme_accent?: string
           updated_at?: string
