@@ -93,11 +93,11 @@ export const ProductModal = ({ isOpen, onClose, product }: ProductModalProps) =>
             </div>
           </div>
 
-          {/* Complaints/Suggestions Link */}
+          {/* Complaints/Suggestions Link - Red and prominent */}
           <div className="mt-4 flex justify-center">
             <button
               onClick={handleComplaintsClick}
-              className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors text-sm font-medium"
+              className="flex items-center gap-2 text-destructive hover:text-destructive/80 transition-colors text-sm font-semibold"
             >
               <MessageCircle className="h-4 w-4" />
               Reclamações ou Sugestões

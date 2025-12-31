@@ -32,17 +32,16 @@ export const MenuHeader = () => {
   return (
     <>
       <header className="relative min-h-[240px] overflow-hidden bg-black">
-        {/* Hero Background Image with Gradient Overlay */}
-        {backgroundImage ? (
-          <div 
-            className="absolute inset-0 bg-cover bg-center brightness-110"
-            style={{ 
-              backgroundImage: `linear-gradient(180deg, rgba(0,0,0,0.45), rgba(0,0,0,0.45)), url(${backgroundImage})`
-            }}
-          />
-        ) : (
-          <div className="absolute inset-0 bg-gradient-to-b from-[#1a1a1a] to-black" />
-        )}
+        {/* Hero Background Image with Gradient Overlay - Always maintain structure */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ 
+            backgroundImage: backgroundImage 
+              ? `linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0.3)), url(${backgroundImage})`
+              : undefined,
+            backgroundColor: backgroundImage ? undefined : '#0a0a0a'
+          }}
+        />
 
         {/* Top Bar with Status and Info */}
         <div className="absolute top-3 left-3 right-3 z-20 flex justify-between items-center gap-2 pointer-events-none">
