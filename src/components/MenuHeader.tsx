@@ -71,26 +71,31 @@ export const MenuHeader = () => {
           </Button>
         </div>
 
-        {/* Content Container */}
-        <div className="relative z-10 grid place-items-center text-center px-4 py-8 pb-6 max-w-[720px] mx-auto">
-          {/* Logo - Dynamic from settings */}
-          {logoImage && (
-            <img 
-              src={logoImage} 
-              alt={settings?.brand_name || "Carpe Diem Motel"} 
-              className="w-[120px] h-[120px] rounded-xl object-cover border-2 border-white shadow-[0_8px_20px_rgba(0,0,0,0.35)] mb-3 block"
-            />
-          )}
+        {/* Content Container - Flex column with fixed structure */}
+        <div className="relative z-10 flex flex-col items-center justify-center text-center px-4 py-8 pb-6 max-w-[720px] mx-auto min-h-[180px]">
+          {/* Logo Block - Independent container with fixed height when logo is hidden */}
+          <div className={`flex items-center justify-center ${logoImage ? 'mb-3' : 'h-0'}`}>
+            {logoImage && (
+              <img 
+                src={logoImage} 
+                alt={settings?.brand_name || "Carpe Diem Motel"} 
+                className="w-[120px] h-[120px] rounded-xl object-cover border-2 border-white shadow-[0_8px_20px_rgba(0,0,0,0.35)] block"
+              />
+            )}
+          </div>
 
-          {/* Title */}
-          <h1 className="text-[24px] leading-[1.1] text-white mb-0.5" style={{ fontWeight: 800 }}>
-            {settings?.tagline || "Aproveite o Momento!"}
-          </h1>
+          {/* Slogan Block - Independent container, always centered */}
+          <div className="flex flex-col items-center justify-center">
+            {/* Title */}
+            <h1 className="text-[24px] leading-[1.1] text-white mb-0.5" style={{ fontWeight: 800 }}>
+              {settings?.tagline || "Aproveite o Momento!"}
+            </h1>
 
-          {/* Subtitle */}
-          <p className="text-[14px] text-[#b3b3b3]">
-            {settings?.brand_name || "Carpe Diem Motel"}
-          </p>
+            {/* Subtitle */}
+            <p className="text-[14px] text-[#b3b3b3]">
+              {settings?.brand_name || "Carpe Diem Motel"}
+            </p>
+          </div>
         </div>
       </header>
 
