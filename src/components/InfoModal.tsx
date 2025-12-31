@@ -1,4 +1,4 @@
-import { MapPin, Clock, MessageCircle } from "lucide-react";
+import { MapPin, MessageCircle, Instagram } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -52,21 +52,23 @@ export const InfoModal = ({ isOpen, onClose, settings }: InfoModalProps) => {
             </div>
           </div>
 
-          {/* Operating Hours - Non-interactive */}
-          <div 
-            className="flex items-start gap-4 p-5 rounded-xl bg-secondary/50 border border-border select-text cursor-default"
-            style={{ pointerEvents: 'none', touchAction: 'none', userSelect: 'text' }}
+          {/* Instagram - Clickable link */}
+          <a
+            href={settings?.instagram_url || "https://instagram.com/carpediemmotel"}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-start gap-4 p-5 rounded-xl bg-secondary/50 border border-border hover:bg-secondary/70 transition-colors cursor-pointer"
           >
-            <Clock className="h-6 w-6 text-primary flex-shrink-0 mt-0.5 pointer-events-none" />
-            <div className="pointer-events-none">
-              <h3 className="font-bold text-base text-foreground mb-1.5 pointer-events-none">
-                Funcionamento
+            <Instagram className="h-6 w-6 text-primary flex-shrink-0 mt-0.5" />
+            <div>
+              <h3 className="font-bold text-base text-foreground mb-1.5">
+                Instagram
               </h3>
-              <span className="text-sm text-muted-foreground leading-relaxed block pointer-events-none">
-                24 horas, todos os dias
+              <span className="text-sm text-primary underline">
+                Siga-nos no Instagram
               </span>
             </div>
-          </div>
+          </a>
 
           {/* Complaints/Suggestions - Clickable WhatsApp link */}
           <Button
