@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Plus, Search, Pencil, Trash2, ChevronDown, ChevronRight, ArrowUp, ArrowDown } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, ChevronDown, ChevronRight, ArrowUp, ArrowDown, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/collapsible";
 import { useToast } from "@/hooks/use-toast";
 import { ProductModal } from "./ProductModal";
+import { DuplicateProductModal } from "./DuplicateProductModal";
 import { useAdminProducts, Product } from "@/hooks/useAdminProducts";
 import { useAdminCategories } from "@/hooks/useAdminCategories";
 
@@ -32,6 +33,8 @@ export function ProductsSection() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(categories.map(c => c.name)));
+  const [duplicatingProduct, setDuplicatingProduct] = useState<Product | null>(null);
+  const [isDuplicating, setIsDuplicating] = useState(false);
 
   // Group products by category and sort by sort_order
   const groupedProducts = useMemo(() => {
@@ -203,6 +206,42 @@ export function ProductsSection() {
         description: error.message || "Não foi possível reordenar.",
         variant: "destructive",
       });
+    }
+  };
+
+  const handleDuplicateClick = (product: Product) => {
+    setDuplicatingProduct(product);
+  };
+
+  const handleDuplicateProduct = async (targetCategory: string) => {
+    if (!duplicatingProduct) return;
+    
+    setIsDuplicating(true);
+    try {
+      await addProduct({
+        name: duplicatingProduct.name,
+        description: duplicatingProduct.description,
+        category: targetCategory,
+        price: duplicatingProduct.price,
+        old_price: duplicatingProduct.old_price,
+        image: duplicatingProduct.image,
+        visible: duplicatingProduct.visible,
+        featured: duplicatingProduct.featured,
+      });
+      
+      toast({
+        title: "✅ Duplicado!",
+        description: `Produto copiado para "${targetCategory}" com sucesso.`,
+      });
+      setDuplicatingProduct(null);
+    } catch (error: any) {
+      toast({
+        title: "Erro",
+        description: error.message || "Não foi possível duplicar o produto.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDuplicating(false);
     }
   };
 
@@ -380,6 +419,14 @@ export function ProductsSection() {
                                 <Button
                                   variant="ghost"
                                   size="sm"
+                                  onClick={() => handleDuplicateClick(product)}
+                                  title="Duplicar para outra categoria"
+                                >
+                                  <Copy className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
                                   onClick={() => handleEdit(product)}
                                 >
                                   <Pencil className="w-4 h-4" />
@@ -415,6 +462,15 @@ export function ProductsSection() {
         onSave={handleSaveProduct}
         product={editingProduct || undefined}
         categories={categories}
+      />
+
+      <DuplicateProductModal
+        isOpen={!!duplicatingProduct}
+        onClose={() => setDuplicatingProduct(null)}
+        onDuplicate={handleDuplicateProduct}
+        product={duplicatingProduct}
+        categories={categories}
+        isLoading={isDuplicating}
       />
 
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
