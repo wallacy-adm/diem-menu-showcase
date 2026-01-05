@@ -71,27 +71,24 @@ export const MenuHeader = () => {
           </Button>
         </div>
 
-        {/* Content Container - Flex column with fixed structure */}
-        <div className="relative z-10 flex flex-col items-center justify-center text-center px-4 py-8 pb-6 max-w-[720px] mx-auto min-h-[180px]">
-          {/* Logo Block - Independent container with fixed height when logo is hidden */}
-          <div className={`flex items-center justify-center ${logoImage ? 'mb-3' : 'h-0'}`}>
+        {/* Content Container - Fixed structure layout */}
+        <div className="relative z-10 flex flex-col items-center text-center px-4 py-8 pb-6 max-w-[720px] mx-auto">
+          {/* Logo Space Holder - Always reserves 120px + 12px margin, never collapses */}
+          <div className="flex items-center justify-center w-[120px] h-[120px] mb-3">
             {logoImage && (
               <img 
                 src={logoImage} 
                 alt={settings?.brand_name || "Carpe Diem Motel"} 
-                className="w-[120px] h-[120px] rounded-xl object-cover border-2 border-white shadow-[0_8px_20px_rgba(0,0,0,0.35)] block"
+                className="w-[120px] h-[120px] rounded-xl object-cover border-2 border-white shadow-[0_8px_20px_rgba(0,0,0,0.35)]"
               />
             )}
           </div>
 
-          {/* Slogan Block - Independent container, always centered */}
+          {/* Slogan Block - Fixed position, never moves */}
           <div className="flex flex-col items-center justify-center">
-            {/* Title */}
             <h1 className="text-[24px] leading-[1.1] text-white mb-0.5" style={{ fontWeight: 800 }}>
               {settings?.tagline || "Aproveite o Momento!"}
             </h1>
-
-            {/* Subtitle */}
             <p className="text-[14px] text-[#b3b3b3]">
               {settings?.brand_name || "Carpe Diem Motel"}
             </p>
