@@ -337,107 +337,111 @@ export function ProductsSection() {
                         Nenhum produto nesta categoria
                       </div>
                     ) : (
-                      <div className="border-t border-border">
+                      <div className="border-t border-border divide-y divide-border/50">
                         {categoryProducts.map((product, index) => {
                           const discount = calculateDiscount(product.price, product.old_price);
                           return (
                             <div
                               key={product.id}
-                              className={`flex items-center gap-4 p-4 hover:bg-muted/30 transition-colors ${
-                                index !== categoryProducts.length - 1 ? 'border-b border-border/50' : ''
-                              }`}
+                              className="p-3 hover:bg-muted/30 transition-colors"
                             >
-                              {/* Product Image */}
-                              <div className="relative w-14 h-14 flex-shrink-0">
-                                <img
-                                  src={product.image}
-                                  alt={product.name}
-                                  className="w-full h-full object-cover rounded-lg"
-                                />
-                                {discount && (
-                                  <div className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs font-bold px-1.5 py-0.5 rounded">
-                                    -{discount}%
+                              {/* Mobile-first: stack vertically */}
+                              <div className="flex items-start gap-3">
+                                {/* Product Image */}
+                                <div className="relative w-12 h-12 flex-shrink-0">
+                                  <img
+                                    src={product.image}
+                                    alt={product.name}
+                                    className="w-full h-full object-cover rounded-lg"
+                                  />
+                                  {discount && (
+                                    <div className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[10px] font-bold px-1 py-0.5 rounded">
+                                      -{discount}%
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Product Info & Price */}
+                                <div className="flex-1 min-w-0">
+                                  <h4 className="font-medium text-foreground text-sm truncate">{product.name}</h4>
+                                  <p className="text-xs text-muted-foreground truncate">{product.description}</p>
+                                  <div className="flex items-center gap-2 mt-1">
+                                    <span className="text-primary font-bold text-sm">
+                                      R$ {product.price.toFixed(2)}
+                                    </span>
+                                    {product.old_price && (
+                                      <span className="text-[10px] text-muted-foreground line-through">
+                                        R$ {product.old_price.toFixed(2)}
+                                      </span>
+                                    )}
                                   </div>
-                                )}
-                              </div>
+                                </div>
 
-                              {/* Product Info */}
-                              <div className="flex-1 min-w-0">
-                                <h4 className="font-medium text-foreground truncate">{product.name}</h4>
-                                <p className="text-sm text-muted-foreground truncate">{product.description}</p>
-                              </div>
-
-                              {/* Price */}
-                              <div className="flex flex-col items-end flex-shrink-0">
-                                <span className="text-primary font-bold">
-                                  R$ {product.price.toFixed(2)}
-                                </span>
-                                {product.old_price && (
-                                  <span className="text-xs text-muted-foreground line-through">
-                                    R$ {product.old_price.toFixed(2)}
+                                {/* Status Switch */}
+                                <div className="flex items-center gap-1.5 flex-shrink-0">
+                                  <Switch
+                                    checked={product.visible}
+                                    onCheckedChange={() => handleToggleVisible(product.id)}
+                                  />
+                                  <span className="text-[10px] text-muted-foreground w-10">
+                                    {product.visible ? "Ativo" : "Inativo"}
                                   </span>
-                                )}
+                                </div>
                               </div>
 
-                              {/* Status */}
-                              <div className="flex items-center gap-2 flex-shrink-0">
-                                <Switch
-                                  checked={product.visible}
-                                  onCheckedChange={() => handleToggleVisible(product.id)}
-                                />
-                                <span className="text-xs text-muted-foreground w-12">
-                                  {product.visible ? "Ativo" : "Inativo"}
-                                </span>
-                              </div>
-
-                              {/* Reorder Buttons */}
-                              <div className="flex flex-col gap-0.5 flex-shrink-0">
+                              {/* Actions Row */}
+                              <div className="flex items-center justify-end gap-1 mt-2">
+                                {/* Reorder Buttons */}
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  className="h-6 w-6 p-0"
+                                  className="h-7 w-7 p-0"
                                   onClick={() => handleMoveUp(product, categoryProducts, index)}
                                   disabled={index === 0}
                                   title="Mover para cima"
                                 >
-                                  <ArrowUp className="w-3 h-3" />
+                                  <ArrowUp className="w-3.5 h-3.5" />
                                 </Button>
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  className="h-6 w-6 p-0"
+                                  className="h-7 w-7 p-0"
                                   onClick={() => handleMoveDown(product, categoryProducts, index)}
                                   disabled={index === categoryProducts.length - 1}
                                   title="Mover para baixo"
                                 >
-                                  <ArrowDown className="w-3 h-3" />
+                                  <ArrowDown className="w-3.5 h-3.5" />
                                 </Button>
-                              </div>
 
-                              {/* Actions */}
-                              <div className="flex items-center gap-1 flex-shrink-0">
+                                <div className="w-px h-4 bg-border mx-1" />
+
+                                {/* Action Buttons */}
                                 <Button
                                   variant="ghost"
                                   size="sm"
+                                  className="h-7 w-7 p-0"
                                   onClick={() => handleDuplicateClick(product)}
                                   title="Duplicar para outra categoria"
                                 >
-                                  <Copy className="w-4 h-4" />
+                                  <Copy className="w-3.5 h-3.5" />
                                 </Button>
                                 <Button
                                   variant="ghost"
                                   size="sm"
+                                  className="h-7 w-7 p-0"
                                   onClick={() => handleEdit(product)}
+                                  title="Editar produto"
                                 >
-                                  <Pencil className="w-4 h-4" />
+                                  <Pencil className="w-3.5 h-3.5" />
                                 </Button>
                                 <Button
                                   variant="ghost"
                                   size="sm"
+                                  className="h-7 w-7 p-0 text-destructive hover:text-destructive"
                                   onClick={() => handleDeleteClick(product.id)}
-                                  className="text-destructive hover:text-destructive"
+                                  title="Excluir produto"
                                 >
-                                  <Trash2 className="w-4 h-4" />
+                                  <Trash2 className="w-3.5 h-3.5" />
                                 </Button>
                               </div>
                             </div>

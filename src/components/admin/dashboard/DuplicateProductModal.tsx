@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Copy } from "lucide-react";
+import { Copy, Check, ChevronsUpDown } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -9,13 +9,20 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 
 interface Category {
   id: string;
@@ -52,6 +59,7 @@ export function DuplicateProductModal({
   isLoading = false,
 }: DuplicateProductModalProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [comboboxOpen, setComboboxOpen] = useState(false);
 
   const handleDuplicate = async () => {
     if (!selectedCategory) return;
@@ -62,6 +70,7 @@ export function DuplicateProductModal({
 
   const handleClose = () => {
     setSelectedCategory("");
+    setComboboxOpen(false);
     onClose();
   };
 
@@ -69,6 +78,8 @@ export function DuplicateProductModal({
   const availableCategories = categories.filter(
     (cat) => cat.name !== product?.category
   );
+
+  const selectedCategoryData = categories.find(cat => cat.name === selectedCategory);
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -100,24 +111,54 @@ export function DuplicateProductModal({
             </div>
           )}
 
-          {/* Category selector */}
+          {/* Category selector with search */}
           <div className="space-y-2">
-            <Label htmlFor="target-category">Copiar para categoria:</Label>
-            <Select
-              value={selectedCategory}
-              onValueChange={setSelectedCategory}
-            >
-              <SelectTrigger id="target-category">
-                <SelectValue placeholder="Selecione a categoria de destino" />
-              </SelectTrigger>
-              <SelectContent>
-                {availableCategories.map((category) => (
-                  <SelectItem key={category.id} value={category.name}>
-                    {category.emoji} {category.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label>Copiar para categoria:</Label>
+            <Popover open={comboboxOpen} onOpenChange={setComboboxOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={comboboxOpen}
+                  className="w-full justify-between"
+                >
+                  {selectedCategoryData ? (
+                    <span>{selectedCategoryData.emoji} {selectedCategoryData.name}</span>
+                  ) : (
+                    <span className="text-muted-foreground">Selecione a categoria de destino</span>
+                  )}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                <Command>
+                  <CommandInput placeholder="Buscar categoria..." />
+                  <CommandList>
+                    <CommandEmpty>Nenhuma categoria encontrada.</CommandEmpty>
+                    <CommandGroup>
+                      {availableCategories.map((category) => (
+                        <CommandItem
+                          key={category.id}
+                          value={category.name}
+                          onSelect={() => {
+                            setSelectedCategory(category.name);
+                            setComboboxOpen(false);
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              selectedCategory === category.name ? "opacity-100" : "opacity-0"
+                            )}
+                          />
+                          {category.emoji} {category.name}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
 
           <p className="text-sm text-muted-foreground">
