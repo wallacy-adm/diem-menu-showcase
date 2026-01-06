@@ -307,24 +307,24 @@ export function ProductsSection() {
                 onOpenChange={() => toggleCategory(category.name)}
               >
                 <div className="bg-card rounded-lg border border-border overflow-hidden">
-                  {/* Category Header */}
+                  {/* Category Header - Visual distinction */}
                   <CollapsibleTrigger asChild>
-                    <div className="flex items-center justify-between p-4 cursor-pointer hover:bg-muted/50 transition-colors">
+                    <div className="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-muted/60 transition-colors bg-muted/40 border-b border-border">
                       <div className="flex items-center gap-3">
                         {isExpanded ? (
-                          <ChevronDown className="w-5 h-5 text-muted-foreground" />
+                          <ChevronDown className="w-5 h-5 text-primary" />
                         ) : (
                           <ChevronRight className="w-5 h-5 text-muted-foreground" />
                         )}
-                        <span className="text-lg">{category.emoji}</span>
-                        <h3 className="font-semibold text-foreground">{category.name}</h3>
-                        <span className="text-sm text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                        <span className="text-xl">{category.emoji}</span>
+                        <h3 className="font-bold text-foreground text-base">{category.name}</h3>
+                        <span className="text-xs text-muted-foreground bg-background px-2 py-0.5 rounded-full border border-border">
                           {categoryProducts.length} {categoryProducts.length === 1 ? 'produto' : 'produtos'}
                         </span>
                       </div>
                       {!category.visible && (
-                        <span className="text-xs bg-muted text-muted-foreground px-2 py-1 rounded">
-                          Categoria oculta
+                        <span className="text-xs bg-destructive/10 text-destructive px-2 py-1 rounded font-medium">
+                          Oculta
                         </span>
                       )}
                     </div>
