@@ -38,7 +38,7 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen bg-background flex w-full max-w-full overflow-x-hidden">
       {/* Sidebar */}
       <AdminSidebar 
         activeSection={activeSection}
@@ -46,13 +46,13 @@ export default function AdminDashboard() {
       />
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-w-0 overflow-x-hidden">
         {/* Header */}
         <DashboardHeader onLogout={handleLogout} />
 
         {/* Content Area */}
-        <main className="flex-1 p-6 overflow-auto">
-          <div className="max-w-7xl mx-auto">
+        <main className="flex-1 p-4 sm:p-6 overflow-y-auto overflow-x-hidden">
+          <div className="max-w-full sm:max-w-7xl mx-auto w-full">
             {activeSection === "categories" && <CategoriesSection />}
             {activeSection === "products" && <ProductsSection />}
             {activeSection === "promotions" && <PromotionsSection />}
@@ -61,7 +61,7 @@ export default function AdminDashboard() {
         </main>
 
         {/* Footer */}
-        <footer className="border-t border-border p-4 text-center">
+        <footer className="border-t border-border p-4 text-center flex-shrink-0">
           <p className="text-xs text-muted-foreground">
             Painel administrativo do cardápio Carpe Diem Motel — Uso interno exclusivo.
           </p>

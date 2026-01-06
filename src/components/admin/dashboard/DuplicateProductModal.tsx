@@ -82,8 +82,8 @@ export function DuplicateProductModal({
   const selectedCategoryData = categories.find(cat => cat.name === selectedCategory);
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[425px]">
+    <Dialog open={isOpen} onOpenChange={handleClose} modal>
+      <DialogContent className="sm:max-w-[425px] overflow-visible">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Copy className="w-5 h-5" />
@@ -114,7 +114,7 @@ export function DuplicateProductModal({
           {/* Category selector with search */}
           <div className="space-y-2">
             <Label>Copiar para categoria:</Label>
-            <Popover open={comboboxOpen} onOpenChange={setComboboxOpen}>
+            <Popover open={comboboxOpen} onOpenChange={setComboboxOpen} modal>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
@@ -130,10 +130,14 @@ export function DuplicateProductModal({
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+              <PopoverContent 
+                className="w-[--radix-popover-trigger-width] p-0 z-[200] pointer-events-auto" 
+                align="start"
+                sideOffset={4}
+              >
                 <Command>
-                  <CommandInput placeholder="Buscar categoria..." />
-                  <CommandList>
+                  <CommandInput placeholder="Buscar categoria..." className="pointer-events-auto" />
+                  <CommandList className="max-h-[200px] overflow-auto pointer-events-auto">
                     <CommandEmpty>Nenhuma categoria encontrada.</CommandEmpty>
                     <CommandGroup>
                       {availableCategories.map((category) => (
@@ -144,6 +148,7 @@ export function DuplicateProductModal({
                             setSelectedCategory(category.name);
                             setComboboxOpen(false);
                           }}
+                          className="pointer-events-auto cursor-pointer"
                         >
                           <Check
                             className={cn(
