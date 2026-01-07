@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Pencil, Trash2, ArrowUp, ArrowDown } from "lucide-react";
+import { Plus, Pencil, Trash2, ArrowUp, ArrowDown, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -15,10 +15,11 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useAdminCategories } from "@/hooks/useAdminCategories";
+import { cn } from "@/lib/utils";
 
 export function CategoriesSection() {
   const { toast } = useToast();
-  const { categories, addCategory, updateCategory, deleteCategory, toggleVisible, reorderCategories, isLoading } = useAdminCategories();
+  const { categories, addCategory, updateCategory, deleteCategory, toggleVisible, reorderCategories, toggleHighlight, isLoading } = useAdminCategories();
   const [newCategoryName, setNewCategoryName] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");
@@ -168,6 +169,22 @@ export function CategoriesSection() {
     }
   };
 
+  const handleToggleHighlight = async (id: string) => {
+    try {
+      await toggleHighlight(id);
+      toast({
+        title: "✅ Atualizado!",
+        description: "Destaque da categoria atualizado.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Erro",
+        description: error.message || "Não foi possível atualizar o destaque.",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -252,6 +269,23 @@ export function CategoriesSection() {
                 {/* Status & Actions */}
                 {editingId !== category.id && (
                   <div className="flex items-center gap-4">
+                    {/* Highlight Toggle */}
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleToggleHighlight(category.id)}
+                        className={cn(
+                          "flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium transition-colors",
+                          category.highlight 
+                            ? "bg-amber-500/20 text-amber-400 hover:bg-amber-500/30" 
+                            : "bg-muted text-muted-foreground hover:bg-muted/80"
+                        )}
+                        title={category.highlight ? "Desativar destaque" : "Ativar destaque"}
+                      >
+                        <Sparkles className="w-3.5 h-3.5" />
+                        {category.highlight ? "Destaque" : "Normal"}
+                      </button>
+                    </div>
+
                     {/* Status */}
                     <div className="flex items-center gap-2">
                       <Switch

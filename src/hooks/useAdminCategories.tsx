@@ -7,6 +7,7 @@ export interface Category {
   visible: boolean;
   sort_order: number;
   emoji: string;
+  highlight: boolean;
 }
 
 export function useAdminCategories() {
@@ -123,6 +124,24 @@ export function useAdminCategories() {
     },
   });
 
+  const toggleHighlightMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const category = categories.find(c => c.id === id);
+      if (!category) throw new Error('Category not found');
+      
+      const { error } = await supabase
+        .from('categories')
+        .update({ highlight: !category.highlight })
+        .eq('id', id);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+    },
+  });
+
   return {
     categories,
     isLoading,
@@ -131,5 +150,6 @@ export function useAdminCategories() {
     deleteCategory: deleteCategoryMutation.mutateAsync,
     toggleVisible: toggleVisibleMutation.mutateAsync,
     reorderCategories: reorderCategoriesMutation.mutateAsync,
+    toggleHighlight: toggleHighlightMutation.mutateAsync,
   };
 }
