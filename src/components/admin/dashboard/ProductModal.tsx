@@ -110,7 +110,8 @@ export function ProductModal({ isOpen, onClose, onSave, product, categories }: P
     }
 
     const priceNum = parseFloat(price);
-    const oldPriceNum = oldPrice ? parseFloat(oldPrice) : undefined;
+    const oldPriceValue = oldPrice ? parseFloat(oldPrice) : null;
+    const oldPriceNum = oldPriceValue && oldPriceValue > 0 ? oldPriceValue : undefined;
 
     if (isNaN(priceNum) || priceNum <= 0) {
       toast({
@@ -236,10 +237,10 @@ export function ProductModal({ isOpen, onClose, onSave, product, categories }: P
               <SelectTrigger className="bg-background border-border">
                 <SelectValue placeholder="Selecione uma categoria" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="z-[200] bg-popover">
                 {categories.filter(cat => cat.visible).map((cat) => (
                   <SelectItem key={cat.id} value={cat.name}>
-                    {cat.name}
+                    {cat.emoji} {cat.name}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -270,8 +271,14 @@ export function ProductModal({ isOpen, onClose, onSave, product, categories }: P
                 id="oldPrice"
                 type="number"
                 step="0.01"
+                min="0"
                 value={oldPrice}
-                onChange={(e) => setOldPrice(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === '' || parseFloat(value) >= 0) {
+                    setOldPrice(value);
+                  }
+                }}
                 placeholder="0.00"
                 className="bg-background border-border"
               />
