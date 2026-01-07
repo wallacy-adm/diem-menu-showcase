@@ -200,7 +200,11 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <MenuHeader />
       <CategoryChips
-        categories={categories.map((cat) => ({ name: cat.name, emoji: cat.emoji }))}
+        categories={categories.map((cat) => ({ 
+          name: cat.name, 
+          emoji: cat.emoji,
+          highlight: cat.highlight 
+        }))}
         activeCategory={activeCategory}
         onCategoryClick={handleCategoryClick}
       />

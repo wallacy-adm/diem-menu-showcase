@@ -2,7 +2,7 @@ import { useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
 interface CategoryChipsProps {
-  categories: Array<{ name: string; emoji: string }>;
+  categories: Array<{ name: string; emoji: string; highlight?: boolean }>;
   activeCategory: string;
   onCategoryClick: (category: string) => void;
 }
@@ -48,29 +48,36 @@ export const CategoryChips = ({
         role="tablist"
         aria-label="Categorias"
       >
-        {categories.map((category) => (
-          <button
-            key={category.name}
-            ref={(el) => {
-              if (el) chipRefs.current.set(category.name, el);
-            }}
-            onClick={() => onCategoryClick(category.name)}
-            className={cn(
-              "whitespace-nowrap px-3.5 py-2.5 rounded-full text-[14px] transition-all flex-shrink-0",
-              activeCategory === category.name
-                ? "bg-[#00D084] text-black border border-[#00D084] shadow-[0_2px_0_0_#00D084]"
-                : "bg-[#14161a] text-white border border-[#2a2f36]"
-            )}
-            style={{
-              fontWeight: activeCategory === category.name ? 800 : 400,
-            }}
-            role="tab"
-            aria-selected={activeCategory === category.name}
-            aria-label={`Ver categoria ${category.name}`}
-          >
-            {category.emoji} {category.name}
-          </button>
-        ))}
+        {categories.map((category) => {
+          const isActive = activeCategory === category.name;
+          const isHighlighted = category.highlight && !isActive;
+          
+          return (
+            <button
+              key={category.name}
+              ref={(el) => {
+                if (el) chipRefs.current.set(category.name, el);
+              }}
+              onClick={() => onCategoryClick(category.name)}
+              className={cn(
+                "whitespace-nowrap px-3.5 py-2.5 rounded-full text-[14px] transition-all flex-shrink-0",
+                isActive
+                  ? "bg-[#00D084] text-black border border-[#00D084] shadow-[0_2px_0_0_#00D084]"
+                  : isHighlighted
+                    ? "bg-[#14161a] text-white border border-[#00D084]/50 animate-highlight-glow"
+                    : "bg-[#14161a] text-white border border-[#2a2f36]"
+              )}
+              style={{
+                fontWeight: isActive ? 800 : isHighlighted ? 600 : 400,
+              }}
+              role="tab"
+              aria-selected={isActive}
+              aria-label={`Ver categoria ${category.name}`}
+            >
+              {category.emoji} {category.name}
+            </button>
+          );
+        })}
       </div>
     </nav>
   );
