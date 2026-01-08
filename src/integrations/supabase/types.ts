@@ -203,9 +203,11 @@ export type Database = {
           created_at: string
           description: string | null
           discount_percentage: number
+          end_date: string
           id: string
           name: string
           product_id: string
+          start_date: string
           updated_at: string
         }
         Insert: {
@@ -213,9 +215,11 @@ export type Database = {
           created_at?: string
           description?: string | null
           discount_percentage: number
+          end_date?: string
           id?: string
           name: string
           product_id: string
+          start_date?: string
           updated_at?: string
         }
         Update: {
@@ -223,9 +227,11 @@ export type Database = {
           created_at?: string
           description?: string | null
           discount_percentage?: number
+          end_date?: string
           id?: string
           name?: string
           product_id?: string
+          start_date?: string
           updated_at?: string
         }
         Relationships: [

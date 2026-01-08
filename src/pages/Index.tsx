@@ -7,6 +7,7 @@ import { ProductCard } from "@/components/ProductCard";
 import { MenuFooter } from "@/components/MenuFooter";
 import { Loader2, Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { useActivePromotions } from "@/hooks/useActivePromotions";
 
 const Index = () => {
   const [activeCategory, setActiveCategory] = useState("");
@@ -42,6 +43,8 @@ const Index = () => {
       return data;
     },
   });
+
+  const { data: activePromotions } = useActivePromotions();
 
   const isLoading = categoriesLoading || itemsLoading;
 
@@ -259,18 +262,27 @@ const Index = () => {
 
               {items.length > 0 ? (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
-                  {items.map((item) => (
-                    <ProductCard
-                      key={item.id}
-                      id={item.id}
-                      name={item.name}
-                      description={item.description}
-                      price={Number(item.price)}
-                      oldPrice={item.old_price ? Number(item.old_price) : undefined}
-                      image={item.image}
-                      category={item.category}
-                    />
-                  ))}
+                  {items.map((item) => {
+                    // Check if this product has an active promotion
+                    const promotion = activePromotions?.get(item.id);
+                    const displayPrice = promotion ? promotion.discounted_price : Number(item.price);
+                    const displayOldPrice = promotion ? promotion.original_price : (item.old_price ? Number(item.old_price) : undefined);
+                    const promotionName = promotion ? promotion.name : undefined;
+                    
+                    return (
+                      <ProductCard
+                        key={item.id}
+                        id={item.id}
+                        name={item.name}
+                        description={item.description}
+                        price={displayPrice}
+                        oldPrice={displayOldPrice}
+                        image={item.image}
+                        category={item.category}
+                        promotionName={promotionName}
+                      />
+                    );
+                  })}
                 </div>
               ) : (
                 <p className="text-[#b3b3b3] text-sm text-center py-8">
