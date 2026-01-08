@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Calendar, Clock, CheckCircle, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -23,6 +24,8 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useAdminPromotions, type PromotionWithProduct } from "@/hooks/useAdminPromotions";
 import { PromotionModal } from "./PromotionModal";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 export function PromotionsSection() {
   const { toast } = useToast();
@@ -102,6 +105,36 @@ export function PromotionsSection() {
     }
   };
 
+  const getStatusBadge = (status: 'active' | 'scheduled' | 'ended') => {
+    switch (status) {
+      case 'active':
+        return (
+          <Badge className="bg-green-600 text-white gap-1">
+            <CheckCircle className="w-3 h-3" />
+            Ativa
+          </Badge>
+        );
+      case 'scheduled':
+        return (
+          <Badge className="bg-blue-600 text-white gap-1">
+            <Clock className="w-3 h-3" />
+            Agendada
+          </Badge>
+        );
+      case 'ended':
+        return (
+          <Badge variant="secondary" className="gap-1">
+            <XCircle className="w-3 h-3" />
+            Encerrada
+          </Badge>
+        );
+    }
+  };
+
+  const formatDate = (dateStr: string) => {
+    return format(new Date(dateStr), "dd/MM/yyyy HH:mm", { locale: ptBR });
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -116,7 +149,7 @@ export function PromotionsSection() {
         <div>
           <h2 className="text-2xl font-bold text-foreground">Promoções</h2>
           <p className="text-sm text-muted-foreground mt-1">
-            Gerencie as promoções dos produtos do cardápio
+            Gerencie as promoções com período automático
           </p>
         </div>
         <Button onClick={handleCreate} className="gap-2">
@@ -127,76 +160,94 @@ export function PromotionsSection() {
 
       {/* Promotions Table */}
       <div className="bg-card rounded-lg border border-border overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Nome</TableHead>
-              <TableHead>Produto</TableHead>
-              <TableHead className="text-right">Preço Original</TableHead>
-              <TableHead className="text-right">Preço Promocional</TableHead>
-              <TableHead className="text-center">Desconto</TableHead>
-              <TableHead className="text-center">Status</TableHead>
-              <TableHead className="w-32 text-center">Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {promotions.length === 0 ? (
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
-                  Nenhuma promoção cadastrada. Clique em "Nova Promoção" para começar.
-                </TableCell>
+                <TableHead>Nome</TableHead>
+                <TableHead>Produto</TableHead>
+                <TableHead className="text-right">Preço</TableHead>
+                <TableHead className="text-center">Desconto</TableHead>
+                <TableHead className="text-center">Período</TableHead>
+                <TableHead className="text-center">Status</TableHead>
+                <TableHead className="text-center">Habilitada</TableHead>
+                <TableHead className="w-24 text-center">Ações</TableHead>
               </TableRow>
-            ) : (
-              promotions.map((promo) => (
-                <TableRow key={promo.id}>
-                  <TableCell className="font-medium">{promo.name}</TableCell>
-                  <TableCell>{promo.product_name}</TableCell>
-                  <TableCell className="text-right text-muted-foreground line-through">
-                    R$ {promo.product_price.toFixed(2)}
+            </TableHeader>
+            <TableBody>
+              {promotions.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
+                    Nenhuma promoção cadastrada. Clique em "Nova Promoção" para começar.
                   </TableCell>
-                  <TableCell className="text-right text-primary font-bold">
-                    R$ {promo.discounted_price.toFixed(2)}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-destructive text-destructive-foreground">
-                      -{promo.discount_percentage}%
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <div className="flex items-center justify-center gap-2">
+                </TableRow>
+              ) : (
+                promotions.map((promo) => (
+                  <TableRow key={promo.id}>
+                    <TableCell className="font-medium">{promo.name}</TableCell>
+                    <TableCell className="max-w-[150px] truncate">{promo.product_name}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex flex-col items-end">
+                        <span className="text-muted-foreground line-through text-xs">
+                          R$ {promo.product_price.toFixed(2)}
+                        </span>
+                        <span className="text-primary font-bold">
+                          R$ {promo.discounted_price.toFixed(2)}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Badge variant="destructive">
+                        -{promo.discount_percentage}%
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <div className="flex flex-col items-center gap-0.5 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="w-3 h-3" />
+                          {formatDate(promo.start_date)}
+                        </span>
+                        <span>até</span>
+                        <span className="flex items-center gap-1">
+                          <Calendar className="w-3 h-3" />
+                          {formatDate(promo.end_date)}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {getStatusBadge(promo.status)}
+                    </TableCell>
+                    <TableCell className="text-center">
                       <Switch
                         checked={promo.active}
                         onCheckedChange={() => handleToggleActive(promo)}
                       />
-                      <span className="text-xs text-muted-foreground">
-                        {promo.active ? "Ativa" : "Inativa"}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center justify-center gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEdit(promo)}
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setDeletingId(promo.id)}
-                        className="text-destructive hover:text-destructive"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center justify-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEdit(promo)}
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setDeletingId(promo.id)}
+                          className="text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
 
       {/* Modals */}

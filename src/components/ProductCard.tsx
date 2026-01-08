@@ -12,6 +12,7 @@ interface ProductCardProps {
   oldPrice?: number;
   image: string;
   category: string;
+  promotionName?: string;
 }
 
 export const ProductCard = ({
@@ -22,6 +23,7 @@ export const ProductCard = ({
   oldPrice,
   image,
   category,
+  promotionName,
 }: ProductCardProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -53,13 +55,18 @@ export const ProductCard = ({
             {/* Price Section */}
             <div className="flex flex-col gap-1">
               {hasPromotion && (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-sm text-[#8a8a8a] line-through">
                     R$ {oldPrice?.toFixed(2)}
                   </span>
                   <span className="bg-white text-[#ff8c00] text-xs font-bold px-2 py-0.5 rounded">
                     -{discountPercentage}%
                   </span>
+                  {promotionName && (
+                    <span className="bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded">
+                      {promotionName}
+                    </span>
+                  )}
                 </div>
               )}
               <div className="text-2xl font-extrabold text-[#00D084]" style={{ fontWeight: 800 }}>
@@ -96,7 +103,7 @@ export const ProductCard = ({
       <ProductModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        product={{ id, name, description, price, oldPrice, image, category }}
+        product={{ id, name, description, price, oldPrice, image, category, promotionName }}
       />
     </>
   );

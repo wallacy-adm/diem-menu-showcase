@@ -20,6 +20,7 @@ interface ProductModalProps {
     oldPrice?: number;
     image: string;
     category: string;
+    promotionName?: string;
   };
 }
 
@@ -79,13 +80,18 @@ export const ProductModal = ({ isOpen, onClose, product }: ProductModalProps) =>
 
           <div className="pt-6 border-t border-border space-y-2">
             {hasPromo && (
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 flex-wrap">
                 <Badge className="bg-[#ff8c00] text-white hover:bg-[#ff8c00]/90 px-3 py-1 text-sm font-bold">
                   -{discountPercentage}%
                 </Badge>
                 <span className="text-lg text-[#8a8a8a] line-through">
                   R$ {product.oldPrice!.toFixed(2)}
                 </span>
+                {product.promotionName && (
+                  <Badge className="bg-primary text-primary-foreground px-3 py-1 text-sm font-bold">
+                    {product.promotionName}
+                  </Badge>
+                )}
               </div>
             )}
             <div className="text-4xl font-extrabold text-[#00D084]" style={{ fontWeight: 800 }}>
