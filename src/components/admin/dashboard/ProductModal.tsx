@@ -137,8 +137,8 @@ export function ProductModal({ isOpen, onClose, onSave, product, categories }: P
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+    <Dialog open={isOpen} onOpenChange={onClose} modal>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto overflow-x-visible">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-foreground">
             {product ? "Editar Produto" : "Adicionar Novo Produto"}
@@ -237,7 +237,11 @@ export function ProductModal({ isOpen, onClose, onSave, product, categories }: P
               <SelectTrigger className="bg-background border-border">
                 <SelectValue placeholder="Selecione uma categoria" />
               </SelectTrigger>
-              <SelectContent className="z-[200] bg-popover">
+              <SelectContent 
+                className="z-[200] bg-popover" 
+                position="popper"
+                sideOffset={4}
+              >
                 {categories.filter(cat => cat.visible).map((cat) => (
                   <SelectItem key={cat.id} value={cat.name}>
                     {cat.emoji} {cat.name}

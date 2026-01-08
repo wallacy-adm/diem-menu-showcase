@@ -16,8 +16,8 @@ export function EditProductModal({ product, onClose }: EditProductModalProps) {
   const [activeTab, setActiveTab] = useState<"simple" | "variants">("simple");
 
   return (
-    <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="max-w-md w-full max-h-[90vh] overflow-y-auto p-0 gap-0">
+    <Dialog open={true} onOpenChange={onClose} modal>
+      <DialogContent className="max-w-md w-full max-h-[90vh] overflow-y-auto overflow-x-visible p-0 gap-0">
         {/* Header */}
         <div className="sticky top-0 bg-card border-b border-border p-4 flex items-center justify-between z-10">
           <h2 className="text-lg font-semibold">Editar produto</h2>
@@ -206,7 +206,11 @@ export function EditProductModal({ product, onClose }: EditProductModalProps) {
               <SelectTrigger className="bg-secondary border-border">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent 
+                className="z-[200] bg-popover" 
+                position="popper"
+                sideOffset={4}
+              >
                 <SelectItem value="main">Cozinha principal</SelectItem>
                 <SelectItem value="bar">Bar</SelectItem>
                 <SelectItem value="desserts">Sobremesas</SelectItem>
