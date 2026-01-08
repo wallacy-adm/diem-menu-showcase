@@ -44,7 +44,7 @@ export const ProductModal = ({ isOpen, onClose, product }: ProductModalProps) =>
     window.open(`${whatsappUrl}?text=${message}`, "_blank");
   };
 
-  const hasPromo = product.oldPrice && product.oldPrice > product.price;
+  const hasPromo = product.oldPrice && product.oldPrice > 0 && product.oldPrice > product.price;
   const discountPercentage = hasPromo 
     ? Math.round(((product.oldPrice! - product.price) / product.oldPrice!) * 100)
     : 0;
