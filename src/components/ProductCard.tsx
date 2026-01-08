@@ -26,7 +26,7 @@ export const ProductCard = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
 
-  const hasPromotion = oldPrice && oldPrice > price;
+  const hasPromotion = oldPrice && oldPrice > 0 && oldPrice > price;
   const discountPercentage = hasPromotion 
     ? Math.round(((oldPrice - price) / oldPrice) * 100)
     : 0;

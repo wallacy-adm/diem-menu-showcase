@@ -111,7 +111,7 @@ export function ProductModal({ isOpen, onClose, onSave, product, categories }: P
 
     const priceNum = parseFloat(price);
     const oldPriceValue = oldPrice ? parseFloat(oldPrice) : null;
-    const oldPriceNum = oldPriceValue && oldPriceValue > 0 ? oldPriceValue : undefined;
+    const oldPriceNum = oldPriceValue && oldPriceValue > 0 ? oldPriceValue : null;
 
     if (isNaN(priceNum) || priceNum <= 0) {
       toast({
