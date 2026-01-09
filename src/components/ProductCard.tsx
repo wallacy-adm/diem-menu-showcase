@@ -76,8 +76,8 @@ export const ProductCard = ({
                     )}
                   </div>
                   {timeRemaining && (
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
-                      <Clock className="h-3 w-3" />
+                    <div className="inline-flex items-center gap-1.5 bg-white/95 text-[#ff8c00] text-xs font-medium px-2.5 py-1 rounded-full mt-2 shadow-sm">
+                      <Clock className="h-3.5 w-3.5" />
                       <span>Termina em {timeRemaining}</span>
                     </div>
                   )}
