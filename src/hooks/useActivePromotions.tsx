@@ -8,6 +8,7 @@ export interface ActivePromotion {
   name: string;
   discounted_price: number;
   original_price: number;
+  end_date: string;
 }
 
 export function useActivePromotions() {
@@ -23,6 +24,7 @@ export function useActivePromotions() {
           product_id,
           discount_percentage,
           name,
+          end_date,
           menu_items (
             price
           )
@@ -47,11 +49,12 @@ export function useActivePromotions() {
           name: promo.name,
           discounted_price: discountedPrice,
           original_price: originalPrice,
+          end_date: promo.end_date,
         });
       });
 
       return promotionsMap;
     },
-    refetchInterval: 60000, // Refetch every minute to update status
+    refetchInterval: 30000, // Refetch every 30 seconds to update status
   });
 }
