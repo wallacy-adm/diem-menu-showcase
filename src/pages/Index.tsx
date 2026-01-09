@@ -262,12 +262,13 @@ const Index = () => {
 
               {items.length > 0 ? (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
-                  {items.map((item) => {
+                {items.map((item) => {
                     // Check if this product has an active promotion
                     const promotion = activePromotions?.get(item.id);
                     const displayPrice = promotion ? promotion.discounted_price : Number(item.price);
                     const displayOldPrice = promotion ? promotion.original_price : (item.old_price ? Number(item.old_price) : undefined);
                     const promotionName = promotion ? promotion.name : undefined;
+                    const promotionEndDate = promotion ? promotion.end_date : undefined;
                     
                     return (
                       <ProductCard
@@ -280,6 +281,7 @@ const Index = () => {
                         image={item.image}
                         category={item.category}
                         promotionName={promotionName}
+                        promotionEndDate={promotionEndDate}
                       />
                     );
                   })}

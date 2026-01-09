@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { ProductModal } from "./ProductModal";
 import { cn } from "@/lib/utils";
+import { useCountdown } from "@/hooks/useCountdown";
+import { Clock } from "lucide-react";
 
 interface ProductCardProps {
   id: string;
@@ -13,6 +13,7 @@ interface ProductCardProps {
   image: string;
   category: string;
   promotionName?: string;
+  promotionEndDate?: string;
 }
 
 export const ProductCard = ({
@@ -24,14 +25,19 @@ export const ProductCard = ({
   image,
   category,
   promotionName,
+  promotionEndDate,
 }: ProductCardProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const { timeRemaining, isExpired } = useCountdown(promotionEndDate);
 
-  const hasPromotion = oldPrice && oldPrice > 0 && oldPrice > price;
+  const hasPromotion = oldPrice && oldPrice > 0 && oldPrice > price && !isExpired;
   const discountPercentage = hasPromotion 
     ? Math.round(((oldPrice - price) / oldPrice) * 100)
     : 0;
+
+  // If promotion expired, show original price
+  const displayPrice = isExpired && oldPrice ? oldPrice : price;
 
   return (
     <>
@@ -55,22 +61,30 @@ export const ProductCard = ({
             {/* Price Section */}
             <div className="flex flex-col gap-1">
               {hasPromotion && (
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-sm text-[#8a8a8a] line-through">
-                    R$ {oldPrice?.toFixed(2)}
-                  </span>
-                  <span className="bg-white text-[#ff8c00] text-xs font-bold px-2 py-0.5 rounded">
-                    -{discountPercentage}%
-                  </span>
-                  {promotionName && (
-                    <span className="bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded">
-                      {promotionName}
+                <>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-sm text-[#8a8a8a] line-through">
+                      R$ {oldPrice?.toFixed(2)}
                     </span>
+                    <span className="bg-white text-[#ff8c00] text-xs font-bold px-2 py-0.5 rounded">
+                      -{discountPercentage}%
+                    </span>
+                    {promotionName && (
+                      <span className="bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded">
+                        {promotionName}
+                      </span>
+                    )}
+                  </div>
+                  {timeRemaining && (
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                      <Clock className="h-3 w-3" />
+                      <span>Termina em {timeRemaining}</span>
+                    </div>
                   )}
-                </div>
+                </>
               )}
               <div className="text-2xl font-extrabold text-[#00D084]" style={{ fontWeight: 800 }}>
-                R$ {price.toFixed(2)}
+                R$ {displayPrice.toFixed(2)}
               </div>
             </div>
           </div>
@@ -103,7 +117,7 @@ export const ProductCard = ({
       <ProductModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        product={{ id, name, description, price, oldPrice, image, category, promotionName }}
+        product={{ id, name, description, price: displayPrice, oldPrice: hasPromotion ? oldPrice : undefined, image, category, promotionName: hasPromotion ? promotionName : undefined }}
       />
     </>
   );
