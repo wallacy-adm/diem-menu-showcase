@@ -4,14 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -158,96 +150,100 @@ export function PromotionsSection() {
         </Button>
       </div>
 
-      {/* Promotions Table */}
-      <div className="bg-card rounded-lg border border-border overflow-hidden">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nome</TableHead>
-                <TableHead>Produto</TableHead>
-                <TableHead className="text-right">Preço</TableHead>
-                <TableHead className="text-center">Desconto</TableHead>
-                <TableHead className="text-center">Período</TableHead>
-                <TableHead className="text-center">Status</TableHead>
-                <TableHead className="text-center">Habilitada</TableHead>
-                <TableHead className="w-24 text-center">Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {promotions.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
-                    Nenhuma promoção cadastrada. Clique em "Nova Promoção" para começar.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                promotions.map((promo) => (
-                  <TableRow key={promo.id}>
-                    <TableCell className="font-medium">{promo.name}</TableCell>
-                    <TableCell className="max-w-[150px] truncate">{promo.product_name}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex flex-col items-end">
-                        <span className="text-muted-foreground line-through text-xs">
-                          R$ {promo.product_price.toFixed(2)}
-                        </span>
-                        <span className="text-primary font-bold">
-                          R$ {promo.discounted_price.toFixed(2)}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <Badge variant="destructive">
-                        -{promo.discount_percentage}%
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <div className="flex flex-col items-center gap-0.5 text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <Calendar className="w-3 h-3" />
-                          {formatDate(promo.start_date)}
-                        </span>
-                        <span>até</span>
-                        <span className="flex items-center gap-1">
-                          <Calendar className="w-3 h-3" />
-                          {formatDate(promo.end_date)}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {getStatusBadge(promo.status)}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <Switch
-                        checked={promo.active}
-                        onCheckedChange={() => handleToggleActive(promo)}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center justify-center gap-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleEdit(promo)}
-                        >
-                          <Pencil className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setDeletingId(promo.id)}
-                          className="text-destructive hover:text-destructive"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
+      {/* Promotions List - Mobile Friendly */}
+      <div className="space-y-4">
+        {promotions.length === 0 ? (
+          <div className="bg-card rounded-lg border border-border p-8 text-center text-muted-foreground">
+            Nenhuma promoção cadastrada. Clique em "Nova Promoção" para começar.
+          </div>
+        ) : (
+          promotions.map((promo) => (
+            <div
+              key={promo.id}
+              className="bg-card rounded-lg border border-border p-4 space-y-3"
+            >
+              {/* Header: Name + Status + Actions */}
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-foreground truncate">{promo.name}</h3>
+                  <p className="text-sm text-muted-foreground truncate">{promo.product_name}</p>
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  {getStatusBadge(promo.status)}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleEdit(promo)}
+                    className="gap-1"
+                  >
+                    <Pencil className="w-4 h-4" />
+                    Editar
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setDeletingId(promo.id)}
+                    className="gap-1 text-destructive border-destructive/50 hover:bg-destructive/10"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Excluir
+                  </Button>
+                </div>
+              </div>
+
+              {/* Info Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 border-t border-border">
+                {/* Price */}
+                <div className="space-y-1">
+                  <span className="text-xs text-muted-foreground">Preço</span>
+                  <div className="flex flex-col">
+                    <span className="text-muted-foreground line-through text-xs">
+                      R$ {promo.product_price.toFixed(2)}
+                    </span>
+                    <span className="text-primary font-bold">
+                      R$ {promo.discounted_price.toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Discount */}
+                <div className="space-y-1">
+                  <span className="text-xs text-muted-foreground">Desconto</span>
+                  <div>
+                    <Badge variant="destructive">-{promo.discount_percentage}%</Badge>
+                  </div>
+                </div>
+
+                {/* Period */}
+                <div className="space-y-1">
+                  <span className="text-xs text-muted-foreground">Período</span>
+                  <div className="text-xs">
+                    <div className="flex items-center gap-1">
+                      <Calendar className="w-3 h-3" />
+                      {formatDate(promo.start_date)}
+                    </div>
+                    <div className="flex items-center gap-1 mt-0.5">
+                      <Calendar className="w-3 h-3" />
+                      {formatDate(promo.end_date)}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Enabled Toggle */}
+                <div className="space-y-1">
+                  <span className="text-xs text-muted-foreground">Habilitada</span>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={promo.active}
+                      onCheckedChange={() => handleToggleActive(promo)}
+                    />
+                    <span className="text-xs">{promo.active ? "Sim" : "Não"}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
       </div>
 
       {/* Modals */}
