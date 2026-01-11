@@ -9,6 +9,8 @@ import { MessageCircle, Clock } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCountdown } from "@/hooks/useCountdown";
+import { cn } from "@/lib/utils";
+import type { HighlightLevel } from "@/hooks/useActivePromotions";
 
 interface ProductModalProps {
   isOpen: boolean;
@@ -23,6 +25,7 @@ interface ProductModalProps {
     category: string;
     promotionName?: string;
     promotionEndDate?: string;
+    highlightLevel?: HighlightLevel;
   };
 }
 
@@ -53,6 +56,16 @@ export const ProductModal = ({ isOpen, onClose, product }: ProductModalProps) =>
   const discountPercentage = hasPromo 
     ? Math.round(((product.oldPrice! - product.price) / product.oldPrice!) * 100)
     : 0;
+
+  const getTimerPulseClass = () => {
+    const level = product.highlightLevel || 'Leve';
+    switch (level) {
+      case 'Super Destaque': return 'animate-timer-pulse-super';
+      case 'Destaque': return 'animate-timer-pulse-destaque';
+      case 'Leve':
+      default: return 'animate-timer-pulse-leve';
+    }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -99,7 +112,10 @@ export const ProductModal = ({ isOpen, onClose, product }: ProductModalProps) =>
                   )}
                 </div>
                 {timeRemaining && (
-                  <div className="inline-flex items-center gap-1.5 bg-[#ff8c00]/15 text-[#ff8c00] text-sm font-semibold px-3 py-1.5 rounded-full animate-timer-pulse">
+                  <div className={cn(
+                    "inline-flex items-center gap-1.5 bg-[#ff8c00]/15 text-[#ff8c00] text-sm font-semibold px-3 py-1.5 rounded-full",
+                    getTimerPulseClass()
+                  )}>
                     <Clock className="h-4 w-4" />
                     <span>Termina em {timeRemaining}</span>
                   </div>

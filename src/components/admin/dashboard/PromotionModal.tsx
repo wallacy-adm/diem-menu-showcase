@@ -19,7 +19,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useAdminProducts } from "@/hooks/useAdminProducts";
-import type { PromotionWithProduct } from "@/hooks/useAdminPromotions";
+import type { PromotionWithProduct, HighlightLevel } from "@/hooks/useAdminPromotions";
 import { format, addDays } from "date-fns";
 
 interface PromotionModalProps {
@@ -47,6 +47,7 @@ export function PromotionModal({ isOpen, onClose, onSave, promotion }: Promotion
     active: true,
     start_date: getDefaultDates().startDate,
     end_date: getDefaultDates().endDate,
+    highlight_level: "Leve" as HighlightLevel,
   });
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
 
@@ -60,6 +61,7 @@ export function PromotionModal({ isOpen, onClose, onSave, promotion }: Promotion
         active: promotion.active,
         start_date: format(new Date(promotion.start_date), "yyyy-MM-dd'T'HH:mm"),
         end_date: format(new Date(promotion.end_date), "yyyy-MM-dd'T'HH:mm"),
+        highlight_level: promotion.highlight_level || "Leve",
       });
       const product = products.find(p => p.id === promotion.product_id);
       setSelectedProduct(product);
@@ -73,6 +75,7 @@ export function PromotionModal({ isOpen, onClose, onSave, promotion }: Promotion
         active: true,
         start_date: startDate,
         end_date: endDate,
+        highlight_level: "Leve",
       });
       setSelectedProduct(null);
     }
@@ -225,6 +228,27 @@ export function PromotionModal({ isOpen, onClose, onSave, promotion }: Promotion
               </div>
             </div>
           )}
+
+          {/* Highlight Level */}
+          <div className="space-y-2">
+            <Label htmlFor="highlight_level">Nível de Destaque</Label>
+            <p className="text-xs text-muted-foreground">
+              Define a intensidade da animação de destaque no cardápio
+            </p>
+            <Select
+              value={formData.highlight_level}
+              onValueChange={(value: HighlightLevel) => setFormData({ ...formData, highlight_level: value })}
+            >
+              <SelectTrigger className="bg-background border-border">
+                <SelectValue placeholder="Selecione o nível" />
+              </SelectTrigger>
+              <SelectContent className="z-[200] bg-popover" position="popper" sideOffset={4}>
+                <SelectItem value="Leve">Leve</SelectItem>
+                <SelectItem value="Destaque">Destaque</SelectItem>
+                <SelectItem value="Super Destaque">Super Destaque</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
           {/* Active Status */}
           <div className="flex items-center justify-between p-3 bg-secondary rounded-lg">

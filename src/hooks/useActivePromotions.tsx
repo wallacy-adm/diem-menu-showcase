@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
+export type HighlightLevel = 'Leve' | 'Destaque' | 'Super Destaque';
+
 export interface ActivePromotion {
   id: string;
   product_id: string;
@@ -9,6 +11,7 @@ export interface ActivePromotion {
   discounted_price: number;
   original_price: number;
   end_date: string;
+  highlight_level: HighlightLevel;
 }
 
 export function useActivePromotions() {
@@ -25,6 +28,7 @@ export function useActivePromotions() {
           discount_percentage,
           name,
           end_date,
+          highlight_level,
           menu_items (
             price
           )
@@ -50,6 +54,7 @@ export function useActivePromotions() {
           discounted_price: discountedPrice,
           original_price: originalPrice,
           end_date: promo.end_date,
+          highlight_level: promo.highlight_level || 'Leve',
         });
       });
 

@@ -105,8 +105,23 @@ All colors MUST be HSL.
   animation: pulse-glow 2s ease-in-out infinite;
 }
 
-/* Subtle pulse animation for featured products */
-@keyframes product-pulse {
+/* Pulse animations for featured products - 3 intensity levels */
+/* Level 1: Leve - Subtle, slow breathing */
+@keyframes product-pulse-leve {
+  0%, 100% {
+    box-shadow: 0 0 0 0 hsl(var(--primary) / 0);
+  }
+  50% {
+    box-shadow: 0 0 6px 1px hsl(var(--primary) / 0.15);
+  }
+}
+
+.animate-product-pulse-leve {
+  animation: product-pulse-leve 3.5s ease-in-out infinite;
+}
+
+/* Level 2: Destaque - Medium intensity */
+@keyframes product-pulse-destaque {
   0%, 100% {
     box-shadow: 0 0 0 0 hsl(var(--primary) / 0);
   }
@@ -115,12 +130,48 @@ All colors MUST be HSL.
   }
 }
 
-.animate-product-pulse {
-  animation: product-pulse 2.5s ease-in-out infinite;
+.animate-product-pulse-destaque {
+  animation: product-pulse-destaque 2.5s ease-in-out infinite;
 }
 
-/* More prominent pulse for countdown timer */
-@keyframes timer-pulse {
+/* Level 3: Super Destaque - Strong, fast, attention-grabbing */
+@keyframes product-pulse-super {
+  0%, 100% {
+    box-shadow: 0 0 0 0 hsl(var(--primary) / 0);
+  }
+  50% {
+    box-shadow: 0 0 18px 4px hsl(var(--primary) / 0.4);
+  }
+}
+
+.animate-product-pulse-super {
+  animation: product-pulse-super 1.8s ease-in-out infinite;
+}
+
+/* Backwards compatibility */
+.animate-product-pulse {
+  animation: product-pulse-destaque 2.5s ease-in-out infinite;
+}
+
+/* Timer pulse animations - 3 intensity levels */
+/* Level 1: Leve */
+@keyframes timer-pulse-leve {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(255, 140, 0, 0.2);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 4px 1px rgba(255, 140, 0, 0.3);
+    transform: scale(1.01);
+  }
+}
+
+.animate-timer-pulse-leve {
+  animation: timer-pulse-leve 2.5s ease-in-out infinite;
+}
+
+/* Level 2: Destaque */
+@keyframes timer-pulse-destaque {
   0%, 100% {
     box-shadow: 0 0 0 0 rgba(255, 140, 0, 0.3);
     transform: scale(1);
@@ -131,8 +182,29 @@ All colors MUST be HSL.
   }
 }
 
+.animate-timer-pulse-destaque {
+  animation: timer-pulse-destaque 1.8s ease-in-out infinite;
+}
+
+/* Level 3: Super Destaque */
+@keyframes timer-pulse-super {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(255, 140, 0, 0.4);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 12px 5px rgba(255, 140, 0, 0.7);
+    transform: scale(1.03);
+  }
+}
+
+.animate-timer-pulse-super {
+  animation: timer-pulse-super 1.3s ease-in-out infinite;
+}
+
+/* Backwards compatibility */
 .animate-timer-pulse {
-  animation: timer-pulse 1.8s ease-in-out infinite;
+  animation: timer-pulse-destaque 1.8s ease-in-out infinite;
 }
 
 @layer utilities {

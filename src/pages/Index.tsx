@@ -7,7 +7,7 @@ import { ProductCard } from "@/components/ProductCard";
 import { MenuFooter } from "@/components/MenuFooter";
 import { Loader2, Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { useActivePromotions } from "@/hooks/useActivePromotions";
+import { useActivePromotions, HighlightLevel } from "@/hooks/useActivePromotions";
 
 const Index = () => {
   const [activeCategory, setActiveCategory] = useState("");
@@ -269,6 +269,7 @@ const Index = () => {
                     const displayOldPrice = promotion ? promotion.original_price : (item.old_price ? Number(item.old_price) : undefined);
                     const promotionName = promotion ? promotion.name : undefined;
                     const promotionEndDate = promotion ? promotion.end_date : undefined;
+                    const highlightLevel = (promotion ? promotion.highlight_level : item.highlight_level) as HighlightLevel;
                     
                     return (
                       <ProductCard
@@ -283,6 +284,7 @@ const Index = () => {
                         promotionName={promotionName}
                         promotionEndDate={promotionEndDate}
                         featured={item.featured}
+                        highlightLevel={highlightLevel}
                       />
                     );
                   })}

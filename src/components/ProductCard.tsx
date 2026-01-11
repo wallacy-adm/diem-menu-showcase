@@ -3,6 +3,7 @@ import { ProductModal } from "./ProductModal";
 import { cn } from "@/lib/utils";
 import { useCountdown } from "@/hooks/useCountdown";
 import { Clock } from "lucide-react";
+import type { HighlightLevel } from "@/hooks/useActivePromotions";
 
 interface ProductCardProps {
   id: string;
@@ -15,6 +16,7 @@ interface ProductCardProps {
   promotionName?: string;
   promotionEndDate?: string;
   featured?: boolean;
+  highlightLevel?: HighlightLevel;
 }
 
 export const ProductCard = ({
@@ -28,6 +30,7 @@ export const ProductCard = ({
   promotionName,
   promotionEndDate,
   featured,
+  highlightLevel = 'Leve',
 }: ProductCardProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -41,12 +44,32 @@ export const ProductCard = ({
   // If promotion expired, show original price
   const displayPrice = isExpired && oldPrice ? oldPrice : price;
 
+  // Determine animation classes based on highlight level
+  const getProductPulseClass = () => {
+    if (!hasPromotion) return '';
+    switch (highlightLevel) {
+      case 'Super Destaque': return 'animate-product-pulse-super';
+      case 'Destaque': return 'animate-product-pulse-destaque';
+      case 'Leve':
+      default: return 'animate-product-pulse-leve';
+    }
+  };
+
+  const getTimerPulseClass = () => {
+    switch (highlightLevel) {
+      case 'Super Destaque': return 'animate-timer-pulse-super';
+      case 'Destaque': return 'animate-timer-pulse-destaque';
+      case 'Leve':
+      default: return 'animate-timer-pulse-leve';
+    }
+  };
+
   return (
     <>
       <div 
         className={cn(
           "bg-black rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 border border-border/30 cursor-pointer",
-          hasPromotion && "animate-product-pulse"
+          getProductPulseClass()
         )}
         onClick={() => setIsModalOpen(true)}
       >
@@ -81,7 +104,10 @@ export const ProductCard = ({
                     )}
                   </div>
                   {timeRemaining && (
-                    <div className="inline-flex items-center gap-1.5 bg-[#ff8c00]/15 text-[#ff8c00] text-xs font-semibold px-2.5 py-1 rounded-full mt-2 animate-timer-pulse">
+                    <div className={cn(
+                      "inline-flex items-center gap-1.5 bg-[#ff8c00]/15 text-[#ff8c00] text-xs font-semibold px-2.5 py-1 rounded-full mt-2",
+                      getTimerPulseClass()
+                    )}>
                       <Clock className="h-3.5 w-3.5" />
                       <span>Termina em {timeRemaining}</span>
                     </div>
@@ -131,7 +157,8 @@ export const ProductCard = ({
           image, 
           category, 
           promotionName: hasPromotion ? promotionName : undefined,
-          promotionEndDate: hasPromotion ? promotionEndDate : undefined
+          promotionEndDate: hasPromotion ? promotionEndDate : undefined,
+          highlightLevel: hasPromotion ? highlightLevel : undefined
         }}
       />
     </>
