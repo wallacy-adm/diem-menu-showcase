@@ -20,7 +20,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Product } from "@/hooks/useAdminProducts";
+import { Product, HighlightLevel } from "@/hooks/useAdminProducts";
 import { Category } from "@/hooks/useAdminCategories";
 
 interface ProductModalProps {
@@ -42,6 +42,7 @@ export function ProductModal({ isOpen, onClose, onSave, product, categories }: P
   const [imageUrl, setImageUrl] = useState("");
   const [visible, setVisible] = useState(true);
   const [featured, setFeatured] = useState(false);
+  const [highlightLevel, setHighlightLevel] = useState<HighlightLevel>("Leve");
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   useEffect(() => {
@@ -54,6 +55,7 @@ export function ProductModal({ isOpen, onClose, onSave, product, categories }: P
       setImageUrl(product.image || "");
       setVisible(product.visible ?? true);
       setFeatured(product.featured ?? false);
+      setHighlightLevel(product.highlight_level || "Leve");
       setImagePreview(product.image || null);
     } else {
       setName("");
@@ -64,6 +66,7 @@ export function ProductModal({ isOpen, onClose, onSave, product, categories }: P
       setImageUrl("");
       setVisible(true);
       setFeatured(false);
+      setHighlightLevel("Leve");
       setImagePreview(null);
     }
   }, [product, isOpen]);
@@ -131,6 +134,7 @@ export function ProductModal({ isOpen, onClose, onSave, product, categories }: P
       image: imageUrl,
       visible,
       featured,
+      highlight_level: highlightLevel,
     });
 
     onClose();
@@ -301,6 +305,28 @@ export function ProductModal({ isOpen, onClose, onSave, product, categories }: P
               checked={visible}
               onCheckedChange={setVisible}
             />
+          </div>
+
+          {/* Nível de Destaque */}
+          <div className="space-y-2">
+            <Label className="text-foreground">Nível de Destaque</Label>
+            <p className="text-xs text-muted-foreground mb-2">
+              Define a intensidade da animação de destaque no cardápio
+            </p>
+            <Select value={highlightLevel} onValueChange={(value: HighlightLevel) => setHighlightLevel(value)}>
+              <SelectTrigger className="bg-background border-border">
+                <SelectValue placeholder="Selecione o nível" />
+              </SelectTrigger>
+              <SelectContent 
+                className="z-[200] bg-popover" 
+                position="popper"
+                sideOffset={4}
+              >
+                <SelectItem value="Leve">Leve</SelectItem>
+                <SelectItem value="Destaque">Destaque</SelectItem>
+                <SelectItem value="Super Destaque">Super Destaque</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 

@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
+export type HighlightLevel = 'Leve' | 'Destaque' | 'Super Destaque';
+
 export interface Promotion {
   id: string;
   name: string;
@@ -12,6 +14,7 @@ export interface Promotion {
   end_date: string;
   created_at: string;
   updated_at: string;
+  highlight_level: HighlightLevel;
 }
 
 export interface PromotionWithProduct extends Promotion {

@@ -227,6 +227,7 @@ export function ProductsSection() {
         image: duplicatingProduct.image,
         visible: duplicatingProduct.visible,
         featured: duplicatingProduct.featured,
+        highlight_level: duplicatingProduct.highlight_level,
       });
       
       toast({
