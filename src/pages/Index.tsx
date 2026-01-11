@@ -282,6 +282,7 @@ const Index = () => {
                         category={item.category}
                         promotionName={promotionName}
                         promotionEndDate={promotionEndDate}
+                        featured={item.featured}
                       />
                     );
                   })}
