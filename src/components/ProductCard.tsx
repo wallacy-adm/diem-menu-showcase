@@ -14,6 +14,7 @@ interface ProductCardProps {
   category: string;
   promotionName?: string;
   promotionEndDate?: string;
+  featured?: boolean;
 }
 
 export const ProductCard = ({
@@ -26,6 +27,7 @@ export const ProductCard = ({
   category,
   promotionName,
   promotionEndDate,
+  featured,
 }: ProductCardProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -42,7 +44,10 @@ export const ProductCard = ({
   return (
     <>
       <div 
-        className="bg-black rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 border border-border/30 cursor-pointer"
+        className={cn(
+          "bg-black rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 border border-border/30 cursor-pointer",
+          hasPromotion && "animate-product-pulse"
+        )}
         onClick={() => setIsModalOpen(true)}
       >
         <div className="flex gap-4 p-4">
@@ -76,7 +81,7 @@ export const ProductCard = ({
                     )}
                   </div>
                   {timeRemaining && (
-                    <div className="inline-flex items-center gap-1.5 bg-white/95 text-[#ff8c00] text-xs font-medium px-2.5 py-1 rounded-full mt-2 shadow-sm">
+                    <div className="inline-flex items-center gap-1.5 bg-[#ff8c00]/15 text-[#ff8c00] text-xs font-semibold px-2.5 py-1 rounded-full mt-2 animate-timer-pulse">
                       <Clock className="h-3.5 w-3.5" />
                       <span>Termina em {timeRemaining}</span>
                     </div>
@@ -117,7 +122,17 @@ export const ProductCard = ({
       <ProductModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        product={{ id, name, description, price: displayPrice, oldPrice: hasPromotion ? oldPrice : undefined, image, category, promotionName: hasPromotion ? promotionName : undefined }}
+        product={{ 
+          id, 
+          name, 
+          description, 
+          price: displayPrice, 
+          oldPrice: hasPromotion ? oldPrice : undefined, 
+          image, 
+          category, 
+          promotionName: hasPromotion ? promotionName : undefined,
+          promotionEndDate: hasPromotion ? promotionEndDate : undefined
+        }}
       />
     </>
   );

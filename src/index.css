@@ -105,6 +105,36 @@ All colors MUST be HSL.
   animation: pulse-glow 2s ease-in-out infinite;
 }
 
+/* Subtle pulse animation for featured products */
+@keyframes product-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 hsl(var(--primary) / 0);
+  }
+  50% {
+    box-shadow: 0 0 12px 2px hsl(var(--primary) / 0.25);
+  }
+}
+
+.animate-product-pulse {
+  animation: product-pulse 2.5s ease-in-out infinite;
+}
+
+/* More prominent pulse for countdown timer */
+@keyframes timer-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(255, 140, 0, 0.3);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 8px 3px rgba(255, 140, 0, 0.5);
+    transform: scale(1.02);
+  }
+}
+
+.animate-timer-pulse {
+  animation: timer-pulse 1.8s ease-in-out infinite;
+}
+
 @layer utilities {
   .transition-smooth {
     transition: var(--transition-smooth);
