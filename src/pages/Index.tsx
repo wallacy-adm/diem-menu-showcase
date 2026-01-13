@@ -271,6 +271,9 @@ const Index = () => {
                     const promotionEndDate = promotion ? promotion.end_date : undefined;
                     const highlightLevel = (promotion ? promotion.highlight_level : item.highlight_level) as HighlightLevel;
                     
+                    // Category highlight is the primary rule - if category has highlight, product inherits it
+                    const categoryHasHighlight = category.highlight === true;
+                    
                     return (
                       <ProductCard
                         key={item.id}
@@ -285,6 +288,7 @@ const Index = () => {
                         promotionEndDate={promotionEndDate}
                         featured={item.featured}
                         highlightLevel={highlightLevel}
+                        categoryHighlight={categoryHasHighlight}
                       />
                     );
                   })}
