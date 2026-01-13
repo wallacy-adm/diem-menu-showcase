@@ -26,6 +26,7 @@ interface ProductModalProps {
     promotionName?: string;
     promotionEndDate?: string;
     highlightLevel?: HighlightLevel;
+    categoryHighlight?: boolean;
   };
 }
 
@@ -57,7 +58,11 @@ export const ProductModal = ({ isOpen, onClose, product }: ProductModalProps) =>
     ? Math.round(((product.oldPrice! - product.price) / product.oldPrice!) * 100)
     : 0;
 
+  // Category highlight is the primary rule - product inherits highlight from category
+  const isHighlightActive = product.categoryHighlight || hasPromo;
+
   const getTimerPulseClass = () => {
+    if (!isHighlightActive) return '';
     const level = product.highlightLevel || 'Leve';
     switch (level) {
       case 'Super Destaque': return 'animate-timer-pulse-super';

@@ -17,6 +17,7 @@ interface ProductCardProps {
   promotionEndDate?: string;
   featured?: boolean;
   highlightLevel?: HighlightLevel;
+  categoryHighlight?: boolean;
 }
 
 export const ProductCard = ({
@@ -31,6 +32,7 @@ export const ProductCard = ({
   promotionEndDate,
   featured,
   highlightLevel = 'Leve',
+  categoryHighlight = false,
 }: ProductCardProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -44,9 +46,14 @@ export const ProductCard = ({
   // If promotion expired, show original price
   const displayPrice = isExpired && oldPrice ? oldPrice : price;
 
+  // Determine if highlight should be active
+  // Category highlight is the primary rule - if category has highlight, product inherits it
+  // Product can only refine intensity, never disable inherited highlight
+  const isHighlightActive = categoryHighlight || hasPromotion;
+
   // Determine animation classes based on highlight level
   const getProductPulseClass = () => {
-    if (!hasPromotion) return '';
+    if (!isHighlightActive) return '';
     switch (highlightLevel) {
       case 'Super Destaque': return 'animate-product-pulse-super';
       case 'Destaque': return 'animate-product-pulse-destaque';
@@ -158,7 +165,8 @@ export const ProductCard = ({
           category, 
           promotionName: hasPromotion ? promotionName : undefined,
           promotionEndDate: hasPromotion ? promotionEndDate : undefined,
-          highlightLevel: hasPromotion ? highlightLevel : undefined
+          highlightLevel: isHighlightActive ? highlightLevel : undefined,
+          categoryHighlight
         }}
       />
     </>
