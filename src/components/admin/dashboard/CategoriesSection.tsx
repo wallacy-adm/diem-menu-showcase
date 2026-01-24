@@ -4,6 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -14,16 +21,32 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { useAdminCategories } from "@/hooks/useAdminCategories";
+import { useAdminCategories, HighlightLevel } from "@/hooks/useAdminCategories";
 import { cn } from "@/lib/utils";
 
 export function CategoriesSection() {
   const { toast } = useToast();
-  const { categories, addCategory, updateCategory, deleteCategory, toggleVisible, reorderCategories, toggleHighlight, isLoading } = useAdminCategories();
+  const { categories, addCategory, updateCategory, deleteCategory, toggleVisible, reorderCategories, toggleHighlight, updateHighlightLevel, isLoading } = useAdminCategories();
   const [newCategoryName, setNewCategoryName] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");
   const [deleteId, setDeleteId] = useState<string | null>(null);
+
+  const handleHighlightLevelChange = async (categoryId: string, level: HighlightLevel) => {
+    try {
+      await updateHighlightLevel({ id: categoryId, level });
+      toast({
+        title: "✅ Atualizado!",
+        description: "Nível de destaque atualizado.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Erro",
+        description: error.message || "Não foi possível atualizar o nível de destaque.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleAddCategory = async () => {
     if (!newCategoryName.trim()) {
@@ -276,7 +299,7 @@ export function CategoriesSection() {
                         className={cn(
                           "flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium transition-colors",
                           category.highlight 
-                            ? "bg-amber-500/20 text-amber-400 hover:bg-amber-500/30" 
+                            ? "bg-primary/20 text-primary hover:bg-primary/30" 
                             : "bg-muted text-muted-foreground hover:bg-muted/80"
                         )}
                         title={category.highlight ? "Desativar destaque" : "Ativar destaque"}
@@ -285,6 +308,23 @@ export function CategoriesSection() {
                         {category.highlight ? "Destaque" : "Normal"}
                       </button>
                     </div>
+
+                    {/* Highlight Level Selector - only show when highlight is active */}
+                    {category.highlight && (
+                      <Select
+                        value={category.highlight_level || 'Leve'}
+                        onValueChange={(value) => handleHighlightLevelChange(category.id, value as HighlightLevel)}
+                      >
+                        <SelectTrigger className="w-[130px] h-8 text-xs">
+                          <SelectValue placeholder="Nível" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Leve">🌿 Leve</SelectItem>
+                          <SelectItem value="Destaque">✨ Destaque</SelectItem>
+                          <SelectItem value="Super Destaque">🔥 Super Destaque</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
 
                     {/* Status */}
                     <div className="flex items-center gap-2">

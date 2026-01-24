@@ -19,6 +19,7 @@ export type Database = {
           created_at: string
           emoji: string
           highlight: boolean
+          highlight_level: string
           id: string
           name: string
           sort_order: number
@@ -29,6 +30,7 @@ export type Database = {
           created_at?: string
           emoji?: string
           highlight?: boolean
+          highlight_level?: string
           id?: string
           name: string
           sort_order?: number
@@ -39,6 +41,7 @@ export type Database = {
           created_at?: string
           emoji?: string
           highlight?: boolean
+          highlight_level?: string
           id?: string
           name?: string
           sort_order?: number
