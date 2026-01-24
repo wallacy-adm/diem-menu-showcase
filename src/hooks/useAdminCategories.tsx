@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
+export type HighlightLevel = 'Leve' | 'Destaque' | 'Super Destaque';
+
 export interface Category {
   id: string;
   name: string;
@@ -8,6 +10,7 @@ export interface Category {
   sort_order: number;
   emoji: string;
   highlight: boolean;
+  highlight_level: HighlightLevel;
 }
 
 export function useAdminCategories() {
@@ -142,6 +145,21 @@ export function useAdminCategories() {
     },
   });
 
+  const updateHighlightLevelMutation = useMutation({
+    mutationFn: async ({ id, level }: { id: string; level: HighlightLevel }) => {
+      const { error } = await supabase
+        .from('categories')
+        .update({ highlight_level: level })
+        .eq('id', id);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+    },
+  });
+
   return {
     categories,
     isLoading,
@@ -151,5 +169,6 @@ export function useAdminCategories() {
     toggleVisible: toggleVisibleMutation.mutateAsync,
     reorderCategories: reorderCategoriesMutation.mutateAsync,
     toggleHighlight: toggleHighlightMutation.mutateAsync,
+    updateHighlightLevel: updateHighlightLevelMutation.mutateAsync,
   };
 }
