@@ -47,9 +47,9 @@ export const ProductCard = ({
   const displayPrice = isExpired && oldPrice ? oldPrice : price;
 
   // Determine if highlight should be active
-  // Category highlight is the primary rule - if category has highlight, product inherits it
-  // Product can only refine intensity, never disable inherited highlight
-  const isHighlightActive = categoryHighlight || hasPromotion;
+  // Category highlight and product highlight (promotion/featured) can COEXIST
+  // Either one activates highlight, they don't cancel each other out
+  const isHighlightActive = categoryHighlight || hasPromotion || featured;
 
   // Determine animation classes based on highlight level
   const getProductPulseClass = () => {

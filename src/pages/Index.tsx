@@ -8,6 +8,7 @@ import { MenuFooter } from "@/components/MenuFooter";
 import { Loader2, Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useActivePromotions, HighlightLevel } from "@/hooks/useActivePromotions";
+import { cn } from "@/lib/utils";
 
 const Index = () => {
   const [activeCategory, setActiveCategory] = useState("");
@@ -263,11 +264,27 @@ const Index = () => {
                     default: return 'animate-emoji-leve';
                   }
                 };
+                
+                // Get section header glow class based on highlight level
+                const getSectionGlowClass = () => {
+                  if (!category.highlight) return '';
+                  switch (category.highlight_level) {
+                    case 'Super Destaque': return 'animate-category-glow-super rounded-lg px-3 py-1';
+                    case 'Destaque': return 'animate-category-glow-destaque rounded-lg px-3 py-1';
+                    case 'Leve':
+                    default: return 'animate-category-glow-leve rounded-lg px-3 py-1';
+                  }
+                };
+                
                 const emojiClass = getEmojiClass();
+                const sectionGlowClass = getSectionGlowClass();
                 
                 return (
                   <h2
-                    className="text-xl font-extrabold text-white mb-5 uppercase tracking-wide flex items-center gap-2"
+                    className={cn(
+                      "text-xl font-extrabold text-white mb-5 uppercase tracking-wide flex items-center gap-2 w-fit",
+                      sectionGlowClass
+                    )}
                     style={{ fontWeight: 800 }}
                   >
                     <span className={`text-2xl ${emojiClass}`}>{category.emoji}</span>

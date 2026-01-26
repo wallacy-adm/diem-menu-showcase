@@ -30,6 +30,7 @@ export function CategoriesSection() {
   const [newCategoryName, setNewCategoryName] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");
+  const [editingEmoji, setEditingEmoji] = useState("");
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const handleHighlightLevelChange = async (categoryId: string, level: HighlightLevel) => {
@@ -90,9 +91,10 @@ export function CategoriesSection() {
     }
   };
 
-  const handleStartEdit = (id: string, name: string) => {
+  const handleStartEdit = (id: string, name: string, emoji: string) => {
     setEditingId(id);
     setEditingName(name);
+    setEditingEmoji(emoji);
   };
 
   const handleSaveEdit = async () => {
@@ -107,13 +109,18 @@ export function CategoriesSection() {
 
     if (editingId) {
       try {
-        await updateCategory({ id: editingId, updates: { name: editingName.trim() } });
+        const updates: { name: string; emoji?: string } = { name: editingName.trim() };
+        if (editingEmoji.trim()) {
+          updates.emoji = editingEmoji.trim();
+        }
+        await updateCategory({ id: editingId, updates });
         toast({
           title: "✅ Sucesso!",
           description: "Categoria atualizada com sucesso!",
         });
         setEditingId(null);
         setEditingName("");
+        setEditingEmoji("");
       } catch (error: any) {
         toast({
           title: "Erro",
@@ -127,6 +134,7 @@ export function CategoriesSection() {
   const handleCancelEdit = () => {
     setEditingId(null);
     setEditingName("");
+    setEditingEmoji("");
   };
 
   const handleDeleteClick = (id: string) => {
@@ -264,11 +272,18 @@ export function CategoriesSection() {
                   </div>
                   
                   {editingId === category.id ? (
-                    <div className="flex gap-2 flex-1">
+                    <div className="flex gap-2 flex-1 items-center">
+                      <Input
+                        value={editingEmoji}
+                        onChange={(e) => setEditingEmoji(e.target.value)}
+                        placeholder="Emoji"
+                        className="w-16 text-center text-lg"
+                      />
                       <Input
                         value={editingName}
                         onChange={(e) => setEditingName(e.target.value)}
                         onKeyPress={(e) => e.key === "Enter" && handleSaveEdit()}
+                        placeholder="Nome da categoria"
                         className="flex-1"
                         autoFocus
                       />
@@ -364,7 +379,7 @@ export function CategoriesSection() {
                       <Button 
                         variant="ghost" 
                         size="sm"
-                        onClick={() => handleStartEdit(category.id, category.name)}
+                        onClick={() => handleStartEdit(category.id, category.name, category.emoji)}
                       >
                         <Pencil className="w-4 h-4" />
                       </Button>
