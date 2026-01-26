@@ -77,64 +77,68 @@ export const ProductCard = ({
     <>
       <div 
         className={cn(
-          "bg-black rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 border border-border/30 cursor-pointer",
+          "bg-[#0a0a0a] rounded-2xl overflow-hidden transition-all duration-300 cursor-pointer touch-manipulation",
+          "shadow-[0_2px_12px_rgba(0,0,0,0.4),0_1px_3px_rgba(0,0,0,0.3)]",
+          "hover:shadow-[0_4px_20px_rgba(0,0,0,0.5),0_2px_8px_rgba(0,212,132,0.1)]",
+          "border border-white/[0.06]",
+          "active:scale-[0.99] active:opacity-95",
           getProductPulseClass()
         )}
         onClick={() => setIsModalOpen(true)}
       >
-        <div className="flex gap-4 p-4">
+        <div className="flex gap-3 p-4 md:p-5 min-h-[140px]">
           {/* Content Left */}
-          <div className="flex-1 flex flex-col justify-between">
+          <div className="flex-1 flex flex-col justify-between min-w-0">
             {/* Product Info */}
-            <div>
-              <h3 className="text-[17px] md:text-[18px] font-extrabold text-white mb-2 line-clamp-2" style={{ fontWeight: 800 }}>
+            <div className="space-y-1.5">
+              <h3 className="text-[16px] md:text-[18px] font-extrabold text-white leading-snug line-clamp-2 tracking-[-0.01em]">
                 {name}
               </h3>
-              <p className="text-sm text-[#b3b3b3] line-clamp-3 mb-3">
+              <p className="text-[13px] md:text-sm text-muted-foreground leading-relaxed line-clamp-3">
                 {description}
               </p>
             </div>
 
             {/* Price Section */}
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-1.5 mt-3">
               {hasPromotion && (
                 <>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-sm text-[#8a8a8a] line-through">
+                    <span className="text-[13px] text-muted-foreground/70 line-through">
                       R$ {oldPrice?.toFixed(2)}
                     </span>
-                    <span className="bg-white text-[#ff8c00] text-xs font-bold px-2 py-0.5 rounded">
+                    <span className="bg-white text-[#ff8c00] text-[11px] font-bold px-2 py-0.5 rounded">
                       -{discountPercentage}%
                     </span>
                     {promotionName && (
-                      <span className="bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded">
+                      <span className="bg-primary text-primary-foreground text-[11px] font-bold px-2 py-0.5 rounded">
                         {promotionName}
                       </span>
                     )}
                   </div>
                   {timeRemaining && (
                     <div className={cn(
-                      "inline-flex items-center gap-1.5 bg-[#ff8c00]/15 text-[#ff8c00] text-xs font-semibold px-2.5 py-1 rounded-full mt-2",
+                      "inline-flex items-center gap-1.5 bg-[#ff8c00]/15 text-[#ff8c00] text-[11px] font-semibold px-2.5 py-1 rounded-full",
                       getTimerPulseClass()
                     )}>
-                      <Clock className="h-3.5 w-3.5" />
+                      <Clock className="h-3 w-3" />
                       <span>Termina em {timeRemaining}</span>
                     </div>
                   )}
                 </>
               )}
-              <div className="text-2xl font-extrabold text-[#00D084]" style={{ fontWeight: 800 }}>
+              <div className="text-xl md:text-2xl font-extrabold text-primary tracking-tight">
                 R$ {displayPrice.toFixed(2)}
               </div>
             </div>
           </div>
 
           {/* Image Right */}
-          <div className="w-[120px] h-[120px] flex-shrink-0 relative">
-            <div className="relative w-full h-full rounded-[14px] overflow-hidden bg-muted">
+          <div className="w-[100px] h-[100px] md:w-[120px] md:h-[120px] flex-shrink-0 self-center">
+            <div className="relative w-full h-full rounded-xl overflow-hidden bg-secondary/50">
               {!imageLoaded && (
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+                  <div className="w-6 h-6 border-3 border-primary border-t-transparent rounded-full animate-spin" />
                 </div>
               )}
               <img
