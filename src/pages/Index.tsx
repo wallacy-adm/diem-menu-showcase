@@ -328,6 +328,7 @@ const Index = () => {
                         featured={item.featured}
                         highlightLevel={effectiveHighlightLevel}
                         categoryHighlight={categoryHasHighlight}
+                        imagePositionY={item.image_position_y ?? 0}
                       />
                     );
                   })}

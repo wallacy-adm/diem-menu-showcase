@@ -15,6 +15,7 @@ export interface Product {
   sort_order: number;
   featured: boolean;
   highlight_level: HighlightLevel;
+  image_position_y: number;
 }
 
 export function useAdminProducts() {

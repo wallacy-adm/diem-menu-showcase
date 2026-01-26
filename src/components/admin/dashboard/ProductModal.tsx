@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Slider } from "@/components/ui/slider";
 import {
   Select,
   SelectContent,
@@ -43,6 +44,7 @@ export function ProductModal({ isOpen, onClose, onSave, product, categories }: P
   const [visible, setVisible] = useState(true);
   const [featured, setFeatured] = useState(false);
   const [highlightLevel, setHighlightLevel] = useState<HighlightLevel>("Leve");
+  const [imagePositionY, setImagePositionY] = useState(0);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   useEffect(() => {
@@ -56,6 +58,7 @@ export function ProductModal({ isOpen, onClose, onSave, product, categories }: P
       setVisible(product.visible ?? true);
       setFeatured(product.featured ?? false);
       setHighlightLevel(product.highlight_level || "Leve");
+      setImagePositionY(product.image_position_y ?? 0);
       setImagePreview(product.image || null);
     } else {
       setName("");
@@ -67,6 +70,7 @@ export function ProductModal({ isOpen, onClose, onSave, product, categories }: P
       setVisible(true);
       setFeatured(false);
       setHighlightLevel("Leve");
+      setImagePositionY(0);
       setImagePreview(null);
     }
   }, [product, isOpen]);
@@ -135,6 +139,7 @@ export function ProductModal({ isOpen, onClose, onSave, product, categories }: P
       visible,
       featured,
       highlight_level: highlightLevel,
+      image_position_y: imagePositionY,
     });
 
     onClose();
@@ -170,6 +175,7 @@ export function ProductModal({ isOpen, onClose, onSave, product, categories }: P
                     src={imagePreview}
                     alt="Preview"
                     className="w-full h-full object-cover"
+                    style={{ objectPosition: `center ${imagePositionY}px` }}
                   />
                   <Button
                     type="button"
@@ -201,6 +207,29 @@ export function ProductModal({ isOpen, onClose, onSave, product, categories }: P
                 </Button>
               )}
             </div>
+
+            {/* Posição Vertical da Imagem */}
+            {imagePreview && (
+              <div className="space-y-2">
+                <Label className="text-foreground">Posição vertical da imagem</Label>
+                <div className="flex items-center gap-4">
+                  <Slider
+                    value={[imagePositionY]}
+                    onValueChange={(value) => setImagePositionY(value[0])}
+                    min={-50}
+                    max={50}
+                    step={1}
+                    className="flex-1"
+                  />
+                  <span className="text-sm text-muted-foreground w-12 text-right">
+                    {imagePositionY}px
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Ajuste a posição vertical da imagem (-50 a +50 pixels)
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Nome */}

@@ -59,6 +59,7 @@ export type Database = {
           highlight_level: string
           id: string
           image: string
+          image_position_y: number | null
           name: string
           old_price: number | null
           price: number
@@ -74,6 +75,7 @@ export type Database = {
           highlight_level?: string
           id?: string
           image: string
+          image_position_y?: number | null
           name: string
           old_price?: number | null
           price: number
@@ -89,6 +91,7 @@ export type Database = {
           highlight_level?: string
           id?: string
           image?: string
+          image_position_y?: number | null
           name?: string
           old_price?: number | null
           price?: number
