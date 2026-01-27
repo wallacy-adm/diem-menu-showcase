@@ -175,28 +175,45 @@ export function ProductModal({ isOpen, onClose, onSave, product, categories }: P
             
             {imagePreview ? (
               <div className="space-y-4">
-                {/* Preview do Card (exatamente como no cardápio) */}
+                {/* Preview do Card - Réplica EXATA do cardápio */}
                 <div className="space-y-2">
-                  <Label className="text-sm text-muted-foreground">Prévia do cardápio</Label>
-                  <div className="relative w-full bg-[#0a0a0a] rounded-xl overflow-hidden border border-white/[0.06]">
-                    {/* Image container with exact menu proportions */}
-                    <div className="relative h-40 overflow-hidden">
-                      <img
-                        src={imagePreview}
-                        alt="Preview"
-                        className="w-full h-full object-cover"
-                        style={{
-                          objectPosition: `center ${imagePositionY}%`,
-                          transform: `scale(${imageZoom})`,
-                          transformOrigin: `center ${imagePositionY}%`,
-                        }}
-                      />
-                    </div>
-                    {/* Simulated card content */}
-                    <div className="p-3">
-                      <div className="h-3 w-3/4 bg-white/20 rounded mb-2"></div>
-                      <div className="h-2 w-1/2 bg-white/10 rounded mb-3"></div>
-                      <div className="h-4 w-1/4 bg-primary/50 rounded"></div>
+                  <Label className="text-sm text-muted-foreground">Prévia do cardápio (tamanho real)</Label>
+                  
+                  {/* Container que simula exatamente o card do ProductCard */}
+                  <div 
+                    className="bg-[#0a0a0a] rounded-2xl overflow-hidden border border-white/[0.06]"
+                    style={{
+                      boxShadow: '0 2px 12px rgba(0,0,0,0.4), 0 1px 3px rgba(0,0,0,0.3)',
+                    }}
+                  >
+                    <div className="flex gap-3 p-4 min-h-[140px]">
+                      {/* Content Left - Simulação do conteúdo */}
+                      <div className="flex-1 flex flex-col justify-between min-w-0">
+                        <div className="space-y-1.5">
+                          <div className="h-4 w-3/4 bg-white/20 rounded"></div>
+                          <div className="h-3 w-full bg-white/10 rounded"></div>
+                          <div className="h-3 w-2/3 bg-white/10 rounded"></div>
+                        </div>
+                        <div className="mt-3">
+                          <div className="h-5 w-1/3 bg-primary/50 rounded"></div>
+                        </div>
+                      </div>
+
+                      {/* Image Right - EXATAMENTE como no cardápio */}
+                      <div className="w-[100px] h-[100px] flex-shrink-0 self-center">
+                        <div className="relative w-full h-full rounded-xl overflow-hidden bg-secondary/50">
+                          <img
+                            src={imagePreview}
+                            alt="Preview"
+                            className="w-full h-full object-cover"
+                            style={{
+                              objectPosition: `center ${imagePositionY}%`,
+                              transform: `scale(${imageZoom})`,
+                              transformOrigin: `center ${imagePositionY}%`,
+                            }}
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
