@@ -60,6 +60,7 @@ export type Database = {
           id: string
           image: string
           image_position_y: number | null
+          image_zoom: number | null
           name: string
           old_price: number | null
           price: number
@@ -76,6 +77,7 @@ export type Database = {
           id?: string
           image: string
           image_position_y?: number | null
+          image_zoom?: number | null
           name: string
           old_price?: number | null
           price: number
@@ -92,6 +94,7 @@ export type Database = {
           id?: string
           image?: string
           image_position_y?: number | null
+          image_zoom?: number | null
           name?: string
           old_price?: number | null
           price?: number

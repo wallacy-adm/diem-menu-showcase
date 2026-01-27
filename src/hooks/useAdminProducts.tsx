@@ -16,6 +16,7 @@ export interface Product {
   featured: boolean;
   highlight_level: HighlightLevel;
   image_position_y: number;
+  image_zoom: number;
 }
 
 export function useAdminProducts() {
