@@ -19,6 +19,7 @@ interface ProductCardProps {
   highlightLevel?: HighlightLevel;
   categoryHighlight?: boolean;
   imagePositionY?: number;
+  imageZoom?: number;
 }
 
 export const ProductCard = ({
@@ -34,7 +35,8 @@ export const ProductCard = ({
   featured,
   highlightLevel = 'Leve',
   categoryHighlight = false,
-  imagePositionY = 0,
+  imagePositionY = 50,
+  imageZoom = 1.0,
 }: ProductCardProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -148,7 +150,11 @@ export const ProductCard = ({
                 width="120"
                 height="120"
                 onLoad={() => setImageLoaded(true)}
-                style={{ objectPosition: `center ${imagePositionY}px` }}
+                style={{ 
+                  objectPosition: `center ${imagePositionY}%`,
+                  transform: `scale(${imageZoom})`,
+                  transformOrigin: `center ${imagePositionY}%`,
+                }}
                 className={cn(
                   "w-full h-full object-cover transition-opacity duration-300",
                   imageLoaded ? "opacity-100" : "opacity-0"

@@ -44,7 +44,8 @@ export function ProductModal({ isOpen, onClose, onSave, product, categories }: P
   const [visible, setVisible] = useState(true);
   const [featured, setFeatured] = useState(false);
   const [highlightLevel, setHighlightLevel] = useState<HighlightLevel>("Leve");
-  const [imagePositionY, setImagePositionY] = useState(0);
+  const [imagePositionY, setImagePositionY] = useState(50);
+  const [imageZoom, setImageZoom] = useState(1.0);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   useEffect(() => {
@@ -58,7 +59,8 @@ export function ProductModal({ isOpen, onClose, onSave, product, categories }: P
       setVisible(product.visible ?? true);
       setFeatured(product.featured ?? false);
       setHighlightLevel(product.highlight_level || "Leve");
-      setImagePositionY(product.image_position_y ?? 0);
+      setImagePositionY(product.image_position_y ?? 50);
+      setImageZoom(product.image_zoom ?? 1.0);
       setImagePreview(product.image || null);
     } else {
       setName("");
@@ -70,7 +72,8 @@ export function ProductModal({ isOpen, onClose, onSave, product, categories }: P
       setVisible(true);
       setFeatured(false);
       setHighlightLevel("Leve");
-      setImagePositionY(0);
+      setImagePositionY(50);
+      setImageZoom(1.0);
       setImagePreview(null);
     }
   }, [product, isOpen]);
@@ -82,16 +85,16 @@ export function ProductModal({ isOpen, onClose, onSave, product, categories }: P
     if (!file.type.startsWith('image/')) {
       toast({
         title: "Erro",
-        description: "Por favor, selecione apenas arquivos de imagem",
+        description: "Por favor, selecione apenas arquivos de imagem (JPG, PNG, WebP)",
         variant: "destructive",
       });
       return;
     }
 
-    if (file.size > 2 * 1024 * 1024) {
+    if (file.size > 8 * 1024 * 1024) {
       toast({
         title: "Erro",
-        description: "A imagem deve ter no máximo 2MB",
+        description: "A imagem deve ter no máximo 8MB",
         variant: "destructive",
       });
       return;
@@ -140,6 +143,7 @@ export function ProductModal({ isOpen, onClose, onSave, product, categories }: P
       featured,
       highlight_level: highlightLevel,
       image_position_y: imagePositionY,
+      image_zoom: imageZoom,
     });
 
     onClose();
@@ -159,76 +163,117 @@ export function ProductModal({ isOpen, onClose, onSave, product, categories }: P
 
         <div className="space-y-6 py-4">
           {/* Upload de Imagem */}
-          <div className="space-y-2">
+          <div className="space-y-4">
             <Label className="text-foreground">Imagem do Produto *</Label>
-            <div className="flex flex-col gap-4">
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                className="hidden"
-              />
-              {imagePreview ? (
-                <div className="relative w-full h-48 bg-muted rounded-lg overflow-hidden border-2 border-border">
-                  <img
-                    src={imagePreview}
-                    alt="Preview"
-                    className="w-full h-full object-cover"
-                    style={{ objectPosition: `center ${imagePositionY}px` }}
-                  />
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="absolute bottom-2 right-2"
-                  >
-                    <Upload className="w-4 h-4 mr-2" />
-                    Alterar
-                  </Button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={handleImageUpload}
+              className="hidden"
+            />
+            
+            {imagePreview ? (
+              <div className="space-y-4">
+                {/* Preview do Card (exatamente como no cardápio) */}
+                <div className="space-y-2">
+                  <Label className="text-sm text-muted-foreground">Prévia do cardápio</Label>
+                  <div className="relative w-full bg-[#0a0a0a] rounded-xl overflow-hidden border border-white/[0.06]">
+                    {/* Image container with exact menu proportions */}
+                    <div className="relative h-40 overflow-hidden">
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        className="w-full h-full object-cover"
+                        style={{
+                          objectPosition: `center ${imagePositionY}%`,
+                          transform: `scale(${imageZoom})`,
+                          transformOrigin: `center ${imagePositionY}%`,
+                        }}
+                      />
+                    </div>
+                    {/* Simulated card content */}
+                    <div className="p-3">
+                      <div className="h-3 w-3/4 bg-white/20 rounded mb-2"></div>
+                      <div className="h-2 w-1/2 bg-white/10 rounded mb-3"></div>
+                      <div className="h-4 w-1/4 bg-primary/50 rounded"></div>
+                    </div>
+                  </div>
                 </div>
-              ) : (
+
+                {/* Controles de imagem */}
+                <div className="grid gap-4">
+                  {/* Zoom */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-foreground">Zoom da imagem</Label>
+                      <span className="text-sm text-muted-foreground font-mono">
+                        {(imageZoom * 100).toFixed(0)}%
+                      </span>
+                    </div>
+                    <Slider
+                      value={[imageZoom]}
+                      onValueChange={(value) => setImageZoom(value[0])}
+                      min={1.0}
+                      max={2.5}
+                      step={0.05}
+                      className="flex-1"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Aproxime ou afaste a imagem (100% a 250%)
+                    </p>
+                  </div>
+
+                  {/* Posição Vertical */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-foreground">Posição vertical</Label>
+                      <span className="text-sm text-muted-foreground font-mono">
+                        {imagePositionY}%
+                      </span>
+                    </div>
+                    <Slider
+                      value={[imagePositionY]}
+                      onValueChange={(value) => setImagePositionY(value[0])}
+                      min={0}
+                      max={100}
+                      step={1}
+                      className="flex-1"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      0% = topo, 50% = centro, 100% = base
+                    </p>
+                  </div>
+                </div>
+
+                {/* Alterar imagem */}
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => fileInputRef.current?.click()}
-                  className="w-full h-48 border-2 border-dashed border-border hover:border-primary"
+                  className="w-full"
                 >
-                  <div className="flex flex-col items-center gap-2">
-                    <ImageIcon className="w-12 h-12 text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground">
-                      Clique para selecionar uma imagem
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      Máximo 2MB
-                    </span>
-                  </div>
+                  <Upload className="w-4 h-4 mr-2" />
+                  Alterar imagem
                 </Button>
-              )}
-            </div>
-
-            {/* Posição Vertical da Imagem */}
-            {imagePreview && (
-              <div className="space-y-2">
-                <Label className="text-foreground">Posição vertical da imagem</Label>
-                <div className="flex items-center gap-4">
-                  <Slider
-                    value={[imagePositionY]}
-                    onValueChange={(value) => setImagePositionY(value[0])}
-                    min={-50}
-                    max={50}
-                    step={1}
-                    className="flex-1"
-                  />
-                  <span className="text-sm text-muted-foreground w-12 text-right">
-                    {imagePositionY}px
+              </div>
+            ) : (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => fileInputRef.current?.click()}
+                className="w-full h-48 border-2 border-dashed border-border hover:border-primary"
+              >
+                <div className="flex flex-col items-center gap-2">
+                  <ImageIcon className="w-12 h-12 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">
+                    Clique para selecionar uma imagem
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    JPG, PNG ou WebP • Máximo 8MB
                   </span>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  Ajuste a posição vertical da imagem (-50 a +50 pixels)
-                </p>
-              </div>
+              </Button>
             )}
           </div>
 
