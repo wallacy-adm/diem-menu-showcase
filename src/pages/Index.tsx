@@ -321,6 +321,9 @@ const Index = () => {
                     // Active promotion forces highlight to be visible
                     const forceHighlightFromPromotion = !!promotion;
                     
+                    // Product highlight_enabled from database
+                    const productHighlightEnabled = (item as any).highlight_enabled === true;
+                    
                     return (
                       <ProductCard
                         key={item.id}
@@ -335,6 +338,7 @@ const Index = () => {
                         promotionEndDate={promotionEndDate}
                         featured={item.featured}
                         highlightLevel={effectiveHighlightLevel}
+                        highlightEnabled={productHighlightEnabled || forceHighlightFromPromotion}
                         categoryHighlight={categoryHasHighlight || forceHighlightFromPromotion}
                         imagePositionY={item.image_position_y ?? 50}
                         imageZoom={item.image_zoom ?? 1.0}

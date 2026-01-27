@@ -56,6 +56,7 @@ export type Database = {
           created_at: string
           description: string
           featured: boolean
+          highlight_enabled: boolean
           highlight_level: string
           id: string
           image: string
@@ -73,6 +74,7 @@ export type Database = {
           created_at?: string
           description: string
           featured?: boolean
+          highlight_enabled?: boolean
           highlight_level?: string
           id?: string
           image: string
@@ -90,6 +92,7 @@ export type Database = {
           created_at?: string
           description?: string
           featured?: boolean
+          highlight_enabled?: boolean
           highlight_level?: string
           id?: string
           image?: string
