@@ -227,6 +227,7 @@ export function ProductsSection() {
         image: duplicatingProduct.image,
         visible: duplicatingProduct.visible,
         featured: duplicatingProduct.featured,
+        highlight_enabled: (duplicatingProduct as any).highlight_enabled ?? false,
         highlight_level: duplicatingProduct.highlight_level,
         image_position_y: duplicatingProduct.image_position_y ?? 50,
         image_zoom: duplicatingProduct.image_zoom ?? 1.0,

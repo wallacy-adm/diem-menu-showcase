@@ -17,6 +17,7 @@ interface ProductCardProps {
   promotionEndDate?: string;
   featured?: boolean;
   highlightLevel?: HighlightLevel;
+  highlightEnabled?: boolean;
   categoryHighlight?: boolean;
   imagePositionY?: number;
   imageZoom?: number;
@@ -34,6 +35,7 @@ export const ProductCard = ({
   promotionEndDate,
   featured,
   highlightLevel = 'Leve',
+  highlightEnabled = false,
   categoryHighlight = false,
   imagePositionY = 50,
   imageZoom = 1.0,
@@ -51,19 +53,15 @@ export const ProductCard = ({
   const displayPrice = isExpired && oldPrice ? oldPrice : price;
 
   // Determine if highlight should be active
-  // If product has active promotion, highlight is ALWAYS applied (overrides "Desligado")
+  // If product has active promotion, highlight is ALWAYS applied (overrides highlight_enabled = false)
   // Category highlight can also activate highlight independently
-  // "Desligado" means no highlight UNLESS there's an active promotion
-  const isHighlightActive = hasPromotion || categoryHighlight || (featured && highlightLevel !== 'Desligado');
-
-  // Use promotion's highlight level when there's an active promotion, otherwise use product's level
-  const effectiveHighlightLevel = hasPromotion ? highlightLevel : highlightLevel;
+  // highlight_enabled = false means no highlight UNLESS there's an active promotion
+  const isHighlightActive = hasPromotion || categoryHighlight || (highlightEnabled && featured);
 
   // Determine animation classes based on highlight level
   const getProductPulseClass = () => {
     if (!isHighlightActive) return '';
-    if (effectiveHighlightLevel === 'Desligado' && !hasPromotion) return '';
-    switch (effectiveHighlightLevel) {
+    switch (highlightLevel) {
       case 'Super Destaque': return 'animate-product-pulse-super';
       case 'Destaque': return 'animate-product-pulse-destaque';
       case 'Leve':
@@ -72,8 +70,7 @@ export const ProductCard = ({
   };
 
   const getTimerPulseClass = () => {
-    if (effectiveHighlightLevel === 'Desligado') return 'animate-timer-pulse-leve'; // Default for promotions
-    switch (effectiveHighlightLevel) {
+    switch (highlightLevel) {
       case 'Super Destaque': return 'animate-timer-pulse-super';
       case 'Destaque': return 'animate-timer-pulse-destaque';
       case 'Leve':

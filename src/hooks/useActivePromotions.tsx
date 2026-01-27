@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-export type HighlightLevel = 'Desligado' | 'Leve' | 'Destaque' | 'Super Destaque';
+export type HighlightLevel = 'Leve' | 'Destaque' | 'Super Destaque';
 
 export interface ActivePromotion {
   id: string;

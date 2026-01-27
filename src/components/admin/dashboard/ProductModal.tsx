@@ -43,7 +43,8 @@ export function ProductModal({ isOpen, onClose, onSave, product, categories }: P
   const [imageUrl, setImageUrl] = useState("");
   const [visible, setVisible] = useState(true);
   const [featured, setFeatured] = useState(false);
-  const [highlightLevel, setHighlightLevel] = useState<HighlightLevel>("Desligado");
+  const [highlightEnabled, setHighlightEnabled] = useState(false);
+  const [highlightLevel, setHighlightLevel] = useState<HighlightLevel>("Leve");
   const [imagePositionY, setImagePositionY] = useState(50);
   const [imageZoom, setImageZoom] = useState(1.0);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -58,6 +59,7 @@ export function ProductModal({ isOpen, onClose, onSave, product, categories }: P
       setImageUrl(product.image || "");
       setVisible(product.visible ?? true);
       setFeatured(product.featured ?? false);
+      setHighlightEnabled((product as any).highlight_enabled ?? false);
       setHighlightLevel(product.highlight_level || "Leve");
       setImagePositionY(product.image_position_y ?? 50);
       setImageZoom(product.image_zoom ?? 1.0);
@@ -71,7 +73,8 @@ export function ProductModal({ isOpen, onClose, onSave, product, categories }: P
       setImageUrl("");
       setVisible(true);
       setFeatured(false);
-      setHighlightLevel("Desligado");
+      setHighlightEnabled(false);
+      setHighlightLevel("Leve");
       setImagePositionY(50);
       setImageZoom(1.0);
       setImagePreview(null);
@@ -141,10 +144,11 @@ export function ProductModal({ isOpen, onClose, onSave, product, categories }: P
       image: imageUrl,
       visible,
       featured,
+      highlight_enabled: highlightEnabled,
       highlight_level: highlightLevel,
       image_position_y: imagePositionY,
       image_zoom: imageZoom,
-    });
+    } as any);
 
     onClose();
   };
@@ -398,28 +402,43 @@ export function ProductModal({ isOpen, onClose, onSave, product, categories }: P
             />
           </div>
 
-          {/* Nível de Destaque */}
-          <div className="space-y-2">
-            <Label className="text-foreground">Nível de Destaque</Label>
-            <p className="text-xs text-muted-foreground mb-2">
-              Define a intensidade da animação de destaque no cardápio
-            </p>
-            <Select value={highlightLevel} onValueChange={(value: HighlightLevel) => setHighlightLevel(value)}>
-              <SelectTrigger className="bg-background border-border">
-                <SelectValue placeholder="Selecione o nível" />
-              </SelectTrigger>
-              <SelectContent 
-                className="z-[200] bg-popover" 
-                position="popper"
-                sideOffset={4}
-              >
-                <SelectItem value="Desligado">Desligado (sem efeito)</SelectItem>
-                <SelectItem value="Leve">Leve</SelectItem>
-                <SelectItem value="Destaque">Destaque</SelectItem>
-                <SelectItem value="Super Destaque">Super Destaque</SelectItem>
-              </SelectContent>
-            </Select>
+          {/* Destaque do Produto */}
+          <div className="flex items-center justify-between p-4 bg-secondary rounded-lg">
+            <div>
+              <Label className="text-foreground">Destaque Ativo</Label>
+              <p className="text-sm text-muted-foreground">
+                {highlightEnabled ? "Destaque ativo no cardápio" : "Sem destaque no cardápio"}
+              </p>
+            </div>
+            <Switch
+              checked={highlightEnabled}
+              onCheckedChange={setHighlightEnabled}
+            />
           </div>
+
+          {/* Nível de Destaque - só aparece quando destaque está ativo */}
+          {highlightEnabled && (
+            <div className="space-y-2">
+              <Label className="text-foreground">Nível de Destaque</Label>
+              <p className="text-xs text-muted-foreground mb-2">
+                Define a intensidade da animação de destaque no cardápio
+              </p>
+              <Select value={highlightLevel} onValueChange={(value: HighlightLevel) => setHighlightLevel(value)}>
+                <SelectTrigger className="bg-background border-border">
+                  <SelectValue placeholder="Selecione o nível" />
+                </SelectTrigger>
+                <SelectContent 
+                  className="z-[200] bg-popover" 
+                  position="popper"
+                  sideOffset={4}
+                >
+                  <SelectItem value="Leve">Leve</SelectItem>
+                  <SelectItem value="Destaque">Destaque</SelectItem>
+                  <SelectItem value="Super Destaque">Super Destaque</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
         </div>
 
         <div className="flex justify-end gap-2 pt-4 border-t border-border">
