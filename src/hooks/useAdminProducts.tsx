@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-export type HighlightLevel = 'Leve' | 'Destaque' | 'Super Destaque';
+export type HighlightLevel = 'Desligado' | 'Leve' | 'Destaque' | 'Super Destaque';
 
 export interface Product {
   id: string;

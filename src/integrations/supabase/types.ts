@@ -220,6 +220,7 @@ export type Database = {
           id: string
           name: string
           product_id: string
+          sort_order: number
           start_date: string
           updated_at: string
         }
@@ -233,6 +234,7 @@ export type Database = {
           id?: string
           name: string
           product_id: string
+          sort_order?: number
           start_date?: string
           updated_at?: string
         }
@@ -246,6 +248,7 @@ export type Database = {
           id?: string
           name?: string
           product_id?: string
+          sort_order?: number
           start_date?: string
           updated_at?: string
         }

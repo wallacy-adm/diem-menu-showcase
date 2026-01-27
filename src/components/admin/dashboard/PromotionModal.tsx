@@ -48,6 +48,7 @@ export function PromotionModal({ isOpen, onClose, onSave, promotion }: Promotion
     start_date: getDefaultDates().startDate,
     end_date: getDefaultDates().endDate,
     highlight_level: "Leve" as HighlightLevel,
+    sort_order: "0",
   });
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
 
@@ -62,6 +63,7 @@ export function PromotionModal({ isOpen, onClose, onSave, promotion }: Promotion
         start_date: format(new Date(promotion.start_date), "yyyy-MM-dd'T'HH:mm"),
         end_date: format(new Date(promotion.end_date), "yyyy-MM-dd'T'HH:mm"),
         highlight_level: promotion.highlight_level || "Leve",
+        sort_order: (promotion as any).sort_order?.toString() || "0",
       });
       const product = products.find(p => p.id === promotion.product_id);
       setSelectedProduct(product);
@@ -76,6 +78,7 @@ export function PromotionModal({ isOpen, onClose, onSave, promotion }: Promotion
         start_date: startDate,
         end_date: endDate,
         highlight_level: "Leve",
+        sort_order: "0",
       });
       setSelectedProduct(null);
     }
@@ -101,6 +104,7 @@ export function PromotionModal({ isOpen, onClose, onSave, promotion }: Promotion
       discount_percentage: parseFloat(formData.discount_percentage),
       start_date: new Date(formData.start_date).toISOString(),
       end_date: new Date(formData.end_date).toISOString(),
+      sort_order: parseInt(formData.sort_order) || 0,
     };
 
     if (promotion) {
@@ -179,6 +183,22 @@ export function PromotionModal({ isOpen, onClose, onSave, promotion }: Promotion
               placeholder="Ex: 15"
               required
             />
+          </div>
+
+          {/* Sort Order */}
+          <div className="space-y-2">
+            <Label htmlFor="sort_order">Ordem da Promoção</Label>
+            <Input
+              id="sort_order"
+              type="number"
+              min="0"
+              value={formData.sort_order}
+              onChange={(e) => setFormData({ ...formData, sort_order: e.target.value })}
+              placeholder="Ex: 1"
+            />
+            <p className="text-xs text-muted-foreground">
+              Número menor aparece primeiro no cardápio (1 → 2 → 3...)
+            </p>
           </div>
 
           {/* Date Range */}

@@ -43,7 +43,7 @@ export function ProductModal({ isOpen, onClose, onSave, product, categories }: P
   const [imageUrl, setImageUrl] = useState("");
   const [visible, setVisible] = useState(true);
   const [featured, setFeatured] = useState(false);
-  const [highlightLevel, setHighlightLevel] = useState<HighlightLevel>("Leve");
+  const [highlightLevel, setHighlightLevel] = useState<HighlightLevel>("Desligado");
   const [imagePositionY, setImagePositionY] = useState(50);
   const [imageZoom, setImageZoom] = useState(1.0);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -71,7 +71,7 @@ export function ProductModal({ isOpen, onClose, onSave, product, categories }: P
       setImageUrl("");
       setVisible(true);
       setFeatured(false);
-      setHighlightLevel("Leve");
+      setHighlightLevel("Desligado");
       setImagePositionY(50);
       setImageZoom(1.0);
       setImagePreview(null);
@@ -413,6 +413,7 @@ export function ProductModal({ isOpen, onClose, onSave, product, categories }: P
                 position="popper"
                 sideOffset={4}
               >
+                <SelectItem value="Desligado">Desligado (sem efeito)</SelectItem>
                 <SelectItem value="Leve">Leve</SelectItem>
                 <SelectItem value="Destaque">Destaque</SelectItem>
                 <SelectItem value="Super Destaque">Super Destaque</SelectItem>

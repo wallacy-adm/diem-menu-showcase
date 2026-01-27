@@ -308,10 +308,18 @@ const Index = () => {
                     const categoryHasHighlight = category.highlight === true;
                     const categoryHighlightLevel = category.highlight_level as HighlightLevel;
                     
-                    // Use category's highlight level when category is highlighted, otherwise use product/promotion level
-                    const effectiveHighlightLevel = categoryHasHighlight 
-                      ? categoryHighlightLevel 
-                      : (promotion ? promotion.highlight_level : item.highlight_level) as HighlightLevel;
+                    // If product has active promotion, highlight is ALWAYS applied
+                    // Use promotion's highlight level when there's an active promotion
+                    // Otherwise use category's highlight level (if category has highlight)
+                    // Otherwise use product's own highlight level
+                    const effectiveHighlightLevel: HighlightLevel = promotion 
+                      ? (promotion.highlight_level as HighlightLevel)
+                      : categoryHasHighlight 
+                        ? categoryHighlightLevel 
+                        : (item.highlight_level as HighlightLevel);
+                    
+                    // Active promotion forces highlight to be visible
+                    const forceHighlightFromPromotion = !!promotion;
                     
                     return (
                       <ProductCard
@@ -327,7 +335,7 @@ const Index = () => {
                         promotionEndDate={promotionEndDate}
                         featured={item.featured}
                         highlightLevel={effectiveHighlightLevel}
-                        categoryHighlight={categoryHasHighlight}
+                        categoryHighlight={categoryHasHighlight || forceHighlightFromPromotion}
                         imagePositionY={item.image_position_y ?? 50}
                         imageZoom={item.image_zoom ?? 1.0}
                       />

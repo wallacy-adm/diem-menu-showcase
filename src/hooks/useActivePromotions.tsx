@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-export type HighlightLevel = 'Leve' | 'Destaque' | 'Super Destaque';
+export type HighlightLevel = 'Desligado' | 'Leve' | 'Destaque' | 'Super Destaque';
 
 export interface ActivePromotion {
   id: string;
@@ -12,6 +12,7 @@ export interface ActivePromotion {
   original_price: number;
   end_date: string;
   highlight_level: HighlightLevel;
+  sort_order: number;
 }
 
 export function useActivePromotions() {
@@ -29,13 +30,15 @@ export function useActivePromotions() {
           name,
           end_date,
           highlight_level,
+          sort_order,
           menu_items (
             price
           )
         `)
         .eq('active', true)
         .lte('start_date', now)
-        .gte('end_date', now);
+        .gte('end_date', now)
+        .order('sort_order', { ascending: true });
 
       if (error) throw error;
 
@@ -55,6 +58,7 @@ export function useActivePromotions() {
           original_price: originalPrice,
           end_date: promo.end_date,
           highlight_level: promo.highlight_level || 'Leve',
+          sort_order: promo.sort_order || 0,
         });
       });
 

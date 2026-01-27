@@ -82,13 +82,18 @@ export const ProductModal = ({ isOpen, onClose, product }: ProductModalProps) =>
         </DialogHeader>
 
         <div className="space-y-6">
-          <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-secondary">
-            <img
-              src={product.image}
-              alt={product.name}
-              loading="lazy"
-              className="w-full h-full object-cover"
-            />
+          <div className="space-y-1">
+            <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-secondary">
+              <img
+                src={product.image}
+                alt={product.name}
+                loading="lazy"
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <p className="text-xs text-muted-foreground text-center">
+              Imagem meramente ilustrativa
+            </p>
           </div>
 
           <div>
