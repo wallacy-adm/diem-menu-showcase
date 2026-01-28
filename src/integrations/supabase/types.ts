@@ -157,6 +157,7 @@ export type Database = {
           created_at: string
           guest_name: string | null
           guest_phone: string | null
+          guest_token: string | null
           id: string
           notes: string | null
           status: string
@@ -168,6 +169,7 @@ export type Database = {
           created_at?: string
           guest_name?: string | null
           guest_phone?: string | null
+          guest_token?: string | null
           id?: string
           notes?: string | null
           status?: string
@@ -179,6 +181,7 @@ export type Database = {
           created_at?: string
           guest_name?: string | null
           guest_phone?: string | null
+          guest_token?: string | null
           id?: string
           notes?: string | null
           status?: string
