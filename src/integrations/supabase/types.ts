@@ -355,6 +355,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      validate_order: {
+        Args: { _guest_name: string; _guest_phone: string; _total: number }
+        Returns: boolean
+      }
+      validate_order_item: {
+        Args: { _menu_item_id: string; _quantity: number; _unit_price: number }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin" | "customer"
