@@ -36,21 +36,23 @@ export const InfoModal = ({ isOpen, onClose, settings }: InfoModalProps) => {
         </DialogHeader>
 
         <div className="space-y-4 py-4">
-          {/* Address - Non-interactive text */}
-          <div 
-            className="flex items-start gap-4 p-5 rounded-xl bg-secondary/50 border border-border select-text cursor-default"
-            style={{ pointerEvents: 'none', touchAction: 'none', userSelect: 'text' }}
+          {/* Address - Clickable Google Maps link */}
+          <a
+            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(settings?.address || "BR-104, Km 118, Lagoa Seca – PB")}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-start gap-4 p-5 rounded-xl bg-secondary/50 border border-border hover:bg-secondary/70 transition-colors cursor-pointer"
           >
-            <MapPin className="h-6 w-6 text-primary flex-shrink-0 mt-0.5 pointer-events-none" />
-            <div className="pointer-events-none">
-              <h3 className="font-bold text-base text-foreground mb-1.5 pointer-events-none">
+            <MapPin className="h-6 w-6 text-primary flex-shrink-0 mt-0.5" />
+            <div>
+              <h3 className="font-bold text-base text-foreground mb-1.5">
                 Endereço
               </h3>
-              <span className="text-sm text-muted-foreground leading-relaxed block pointer-events-none">
+              <span className="text-sm text-primary underline">
                 {settings?.address || "BR-104, Km 118, Lagoa Seca – PB"}
               </span>
             </div>
-          </div>
+          </a>
 
           {/* Instagram - Clickable link */}
           <a
