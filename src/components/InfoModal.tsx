@@ -38,7 +38,7 @@ export const InfoModal = ({ isOpen, onClose, settings }: InfoModalProps) => {
         <div className="space-y-4 py-4">
           {/* Address - Clickable Google Maps link */}
           <a
-            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(settings?.address || "BR-104, Km 118, Lagoa Seca – PB")}`}
+            href="https://maps.app.goo.gl/5TZTQ7G4614ZHQmM8"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-start gap-4 p-5 rounded-xl bg-secondary/50 border border-border hover:bg-secondary/70 transition-colors cursor-pointer"
