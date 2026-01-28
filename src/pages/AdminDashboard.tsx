@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 import { AdminSidebar } from "@/components/admin/dashboard/AdminSidebar";
 import { DashboardHeader } from "@/components/admin/dashboard/DashboardHeader";
 import { CategoriesSection } from "@/components/admin/dashboard/CategoriesSection";
@@ -13,13 +14,24 @@ type ActiveSection = "categories" | "products" | "promotions" | "settings";
 export default function AdminDashboard() {
   const [activeSection, setActiveSection] = useState<ActiveSection>("products");
   const navigate = useNavigate();
-  const { session, isLoading } = useAuth();
+  const { session, isAdmin, isLoading } = useAuth();
+  const { toast } = useToast();
 
   useEffect(() => {
-    if (!isLoading && !session) {
-      navigate('/admin/login');
+    if (!isLoading) {
+      if (!session) {
+        navigate('/admin/login');
+      } else if (isAdmin === false) {
+        // Authenticated but not admin
+        toast({
+          title: "Acesso Negado",
+          description: "Você não tem permissão para acessar esta página.",
+          variant: "destructive"
+        });
+        navigate('/');
+      }
     }
-  }, [session, isLoading, navigate]);
+  }, [session, isAdmin, isLoading, navigate, toast]);
 
   const handleLogout = () => {
     // Logout removed - dashboard is now public
@@ -33,7 +45,7 @@ export default function AdminDashboard() {
     );
   }
 
-  if (!session) {
+  if (!session || !isAdmin) {
     return null;
   }
 
