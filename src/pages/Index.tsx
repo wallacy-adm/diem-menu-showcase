@@ -1,23 +1,36 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { MenuHeader } from "@/components/MenuHeader";
 import { CategoryChips } from "@/components/CategoryChips";
 import { ProductCard } from "@/components/ProductCard";
 import { MenuFooter } from "@/components/MenuFooter";
-import { Loader2, Search, X } from "lucide-react";
+import { Loader2, Search, X, RefreshCw } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { useActivePromotions, HighlightLevel } from "@/hooks/useActivePromotions";
 import { cn } from "@/lib/utils";
+
+const LOADING_TIMEOUT_MS = 8000;
 
 const Index = () => {
   const [activeCategory, setActiveCategory] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [loadingTimedOut, setLoadingTimedOut] = useState(false);
+  const [isReloading, setIsReloading] = useState(false);
   const sectionRefs = useRef<Map<string, HTMLElement>>(new Map());
   const isManualScrollRef = useRef(false);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  const queryClient = useQueryClient();
 
-  const { data: categories, isLoading: categoriesLoading } = useQuery({
+  const { 
+    data: categories, 
+    isLoading: categoriesLoading,
+    isError: categoriesError,
+    isFetched: categoriesFetched
+  } = useQuery({
     queryKey: ["categories"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -29,9 +42,16 @@ const Index = () => {
       if (error) throw error;
       return data;
     },
+    staleTime: 30000,
+    retry: 2,
   });
 
-  const { data: menuItems, isLoading: itemsLoading } = useQuery({
+  const { 
+    data: menuItems, 
+    isLoading: itemsLoading,
+    isError: itemsError,
+    isFetched: itemsFetched
+  } = useQuery({
     queryKey: ["menuItems"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -43,11 +63,49 @@ const Index = () => {
       if (error) throw error;
       return data;
     },
+    staleTime: 30000,
+    retry: 2,
   });
 
   const { data: activePromotions } = useActivePromotions();
 
+  // Unified loading state - only false when BOTH are loaded successfully
   const isLoading = categoriesLoading || itemsLoading;
+  const hasError = categoriesError || itemsError;
+  const isDataReady = categoriesFetched && itemsFetched && 
+                      categories && categories.length > 0 && 
+                      menuItems !== undefined;
+
+  // Loading timeout management
+  useEffect(() => {
+    if (isLoading && !loadingTimedOut) {
+      loadingTimeoutRef.current = setTimeout(() => {
+        setLoadingTimedOut(true);
+      }, LOADING_TIMEOUT_MS);
+    }
+
+    // Clear timeout when loading completes
+    if (!isLoading && loadingTimeoutRef.current) {
+      clearTimeout(loadingTimeoutRef.current);
+      loadingTimeoutRef.current = null;
+      setLoadingTimedOut(false);
+      setIsReloading(false);
+    }
+
+    return () => {
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
+      }
+    };
+  }, [isLoading, loadingTimedOut]);
+
+  // Handle reload action
+  const handleReload = useCallback(() => {
+    setIsReloading(true);
+    setLoadingTimedOut(false);
+    queryClient.invalidateQueries({ queryKey: ["categories"] });
+    queryClient.invalidateQueries({ queryKey: ["menuItems"] });
+  }, [queryClient]);
 
   // Filter items by search query
   const filteredItems = useMemo(() => {
@@ -59,13 +117,20 @@ const Index = () => {
     );
   }, [menuItems, searchQuery]);
 
-  const groupedItems = filteredItems?.reduce((acc, item) => {
-    if (!acc[item.category]) {
-      acc[item.category] = [];
-    }
-    acc[item.category].push(item);
-    return acc;
-  }, {} as Record<string, typeof filteredItems>);
+  const groupedItems = useMemo(() => {
+    if (!filteredItems || !categories) return {};
+    return filteredItems.reduce((acc, item) => {
+      // Only group items into categories that actually exist
+      const categoryExists = categories.some(cat => cat.name === item.category);
+      if (categoryExists) {
+        if (!acc[item.category]) {
+          acc[item.category] = [];
+        }
+        acc[item.category].push(item);
+      }
+      return acc;
+    }, {} as Record<string, typeof filteredItems>);
+  }, [filteredItems, categories]);
 
   // Calculate active category based on scroll position
   const calculateActiveCategory = useCallback(() => {
@@ -184,18 +249,55 @@ const Index = () => {
     }
   }, []);
 
-  if (isLoading) {
+  // Loading state with timeout fallback
+  if (isLoading || !isDataReady) {
+    // Show timeout fallback if loading takes too long
+    if (loadingTimedOut || hasError) {
+      return (
+        <div className="min-h-screen flex flex-col items-center justify-center bg-background px-6 text-center gap-4">
+          <p className="text-muted-foreground text-sm max-w-xs">
+            {hasError 
+              ? "Ocorreu um erro ao carregar o cardápio." 
+              : "Estamos carregando o cardápio. Caso demore, toque para recarregar."}
+          </p>
+          <Button 
+            onClick={handleReload}
+            variant="outline"
+            disabled={isReloading}
+            className="gap-2"
+          >
+            <RefreshCw className={cn("h-4 w-4", isReloading && "animate-spin")} />
+            Recarregar cardápio
+          </Button>
+        </div>
+      );
+    }
+
+    // Normal loading state
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-3">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="text-muted-foreground text-sm">Carregando cardápio…</p>
       </div>
     );
   }
 
+  // Safety check - if we somehow get here without categories, show reload
   if (!categories || categories.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background px-6 text-center gap-4">
+        <p className="text-muted-foreground text-sm max-w-xs">
+          Nenhuma categoria disponível no momento.
+        </p>
+        <Button 
+          onClick={handleReload}
+          variant="outline"
+          disabled={isReloading}
+          className="gap-2"
+        >
+          <RefreshCw className={cn("h-4 w-4", isReloading && "animate-spin")} />
+          Recarregar cardápio
+        </Button>
       </div>
     );
   }
