@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { MenuHeader } from "@/components/MenuHeader";
 import { CategoryChips } from "@/components/CategoryChips";
@@ -11,25 +11,19 @@ import { Button } from "@/components/ui/button";
 import { useActivePromotions, HighlightLevel } from "@/hooks/useActivePromotions";
 import { cn } from "@/lib/utils";
 
-const LOADING_TIMEOUT_MS = 8000;
-
 const Index = () => {
   const [activeCategory, setActiveCategory] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [loadingTimedOut, setLoadingTimedOut] = useState(false);
-  const [isReloading, setIsReloading] = useState(false);
   const sectionRefs = useRef<Map<string, HTMLElement>>(new Map());
   const isManualScrollRef = useRef(false);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  
-  const queryClient = useQueryClient();
 
+  // Fetch categories
   const { 
     data: categories, 
     isLoading: categoriesLoading,
     isError: categoriesError,
-    isFetched: categoriesFetched
+    refetch: refetchCategories
   } = useQuery({
     queryKey: ["categories"],
     queryFn: async () => {
@@ -42,15 +36,14 @@ const Index = () => {
       if (error) throw error;
       return data;
     },
-    staleTime: 30000,
-    retry: 2,
   });
 
+  // Fetch menu items
   const { 
     data: menuItems, 
     isLoading: itemsLoading,
     isError: itemsError,
-    isFetched: itemsFetched
+    refetch: refetchItems
   } = useQuery({
     queryKey: ["menuItems"],
     queryFn: async () => {
@@ -63,49 +56,20 @@ const Index = () => {
       if (error) throw error;
       return data;
     },
-    staleTime: 30000,
-    retry: 2,
   });
 
   const { data: activePromotions } = useActivePromotions();
 
-  // Unified loading state - only false when BOTH are loaded successfully
+  // Simple unified states
   const isLoading = categoriesLoading || itemsLoading;
   const hasError = categoriesError || itemsError;
-  const isDataReady = categoriesFetched && itemsFetched && 
-                      categories && categories.length > 0 && 
-                      menuItems !== undefined;
+  const isReady = !isLoading && !hasError && categories && categories.length > 0 && menuItems;
 
-  // Loading timeout management
-  useEffect(() => {
-    if (isLoading && !loadingTimedOut) {
-      loadingTimeoutRef.current = setTimeout(() => {
-        setLoadingTimedOut(true);
-      }, LOADING_TIMEOUT_MS);
-    }
-
-    // Clear timeout when loading completes
-    if (!isLoading && loadingTimeoutRef.current) {
-      clearTimeout(loadingTimeoutRef.current);
-      loadingTimeoutRef.current = null;
-      setLoadingTimedOut(false);
-      setIsReloading(false);
-    }
-
-    return () => {
-      if (loadingTimeoutRef.current) {
-        clearTimeout(loadingTimeoutRef.current);
-      }
-    };
-  }, [isLoading, loadingTimedOut]);
-
-  // Handle reload action
-  const handleReload = useCallback(() => {
-    setIsReloading(true);
-    setLoadingTimedOut(false);
-    queryClient.invalidateQueries({ queryKey: ["categories"] });
-    queryClient.invalidateQueries({ queryKey: ["menuItems"] });
-  }, [queryClient]);
+  // Manual retry handler
+  const handleRetry = useCallback(() => {
+    refetchCategories();
+    refetchItems();
+  }, [refetchCategories, refetchItems]);
 
   // Filter items by search query
   const filteredItems = useMemo(() => {
@@ -249,31 +213,8 @@ const Index = () => {
     }
   }, []);
 
-  // Loading state with timeout fallback
-  if (isLoading || !isDataReady) {
-    // Show timeout fallback if loading takes too long
-    if (loadingTimedOut || hasError) {
-      return (
-        <div className="min-h-screen flex flex-col items-center justify-center bg-background px-6 text-center gap-4">
-          <p className="text-muted-foreground text-sm max-w-xs">
-            {hasError 
-              ? "Ocorreu um erro ao carregar o cardápio." 
-              : "Estamos carregando o cardápio. Caso demore, toque para recarregar."}
-          </p>
-          <Button 
-            onClick={handleReload}
-            variant="outline"
-            disabled={isReloading}
-            className="gap-2"
-          >
-            <RefreshCw className={cn("h-4 w-4", isReloading && "animate-spin")} />
-            Recarregar cardápio
-          </Button>
-        </div>
-      );
-    }
-
-    // Normal loading state
+  // Loading state
+  if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-3">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -282,21 +223,20 @@ const Index = () => {
     );
   }
 
-  // Safety check - if we somehow get here without categories, show reload
-  if (!categories || categories.length === 0) {
+  // Error state
+  if (hasError || !isReady) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background px-6 text-center gap-4">
         <p className="text-muted-foreground text-sm max-w-xs">
-          Nenhuma categoria disponível no momento.
+          Não foi possível carregar o cardápio. Toque para tentar novamente.
         </p>
         <Button 
-          onClick={handleReload}
+          onClick={handleRetry}
           variant="outline"
-          disabled={isReloading}
           className="gap-2"
         >
-          <RefreshCw className={cn("h-4 w-4", isReloading && "animate-spin")} />
-          Recarregar cardápio
+          <RefreshCw className="h-4 w-4" />
+          Tentar novamente
         </Button>
       </div>
     );
