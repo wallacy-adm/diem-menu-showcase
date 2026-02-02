@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useActivePromotions, HighlightLevel } from "@/hooks/useActivePromotions";
 import { cn } from "@/lib/utils";
+import { useSessionCache } from "@/hooks/useSessionCache";
 
 const Index = () => {
   const [activeCategory, setActiveCategory] = useState("");
@@ -18,7 +19,15 @@ const Index = () => {
   const isManualScrollRef = useRef(false);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Fetch categories
+  // Session cache hooks for instant loading
+  const categoriesCache = useSessionCache<any[]>('categories');
+  const menuItemsCache = useSessionCache<any[]>('menuItems');
+
+  // Get initial data from cache for instant rendering
+  const cachedCategories = useMemo(() => categoriesCache.getCache(), []);
+  const cachedMenuItems = useMemo(() => menuItemsCache.getCache(), []);
+
+  // Fetch categories with cache support
   const { 
     data: categories, 
     isLoading: categoriesLoading,
@@ -34,11 +43,19 @@ const Index = () => {
         .order("sort_order", { ascending: true });
 
       if (error) throw error;
+      
+      // Update cache on successful fetch
+      if (data && data.length > 0) {
+        categoriesCache.setCache(data);
+      }
       return data;
     },
+    initialData: cachedCategories || undefined,
+    staleTime: 30000, // 30 seconds
+    refetchOnWindowFocus: false,
   });
 
-  // Fetch menu items
+  // Fetch menu items with cache support
   const { 
     data: menuItems, 
     isLoading: itemsLoading,
@@ -54,16 +71,28 @@ const Index = () => {
         .order("sort_order", { ascending: true });
 
       if (error) throw error;
+      
+      // Update cache on successful fetch
+      if (data && data.length > 0) {
+        menuItemsCache.setCache(data);
+      }
       return data;
     },
+    initialData: cachedMenuItems || undefined,
+    staleTime: 30000, // 30 seconds
+    refetchOnWindowFocus: false,
   });
+
 
   const { data: activePromotions } = useActivePromotions();
 
-  // Simple unified states
-  const isLoading = categoriesLoading || itemsLoading;
-  const hasError = categoriesError || itemsError;
-  const isReady = !isLoading && !hasError && categories && categories.length > 0 && menuItems;
+  // Check if we have displayable data (from cache or fresh fetch)
+  const hasDisplayableData = categories && categories.length > 0 && menuItems && menuItems.length > 0;
+  
+  // Only show loading if we don't have any data to display (no cache, no fresh data)
+  const isLoading = (categoriesLoading || itemsLoading) && !hasDisplayableData;
+  const hasError = (categoriesError || itemsError) && !hasDisplayableData;
+  const isReady = hasDisplayableData;
 
   // Manual retry handler
   const handleRetry = useCallback(() => {
