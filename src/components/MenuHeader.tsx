@@ -20,10 +20,6 @@ export const MenuHeader = () => {
       if (error) throw error;
       return data;
     },
-    staleTime: 300000, // 5 minutes - prevent refetches
-    gcTime: 600000, // 10 minutes cache
-    refetchOnWindowFocus: false,
-    refetchOnMount: false, // Don't refetch on component remount
   });
 
   // Use dynamic images from settings, fallback to local assets
