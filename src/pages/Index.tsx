@@ -23,11 +23,11 @@ const Index = () => {
   const categoriesCache = useSessionCache<any[]>('categories');
   const menuItemsCache = useSessionCache<any[]>('menuItems');
 
-  // Get initial data from cache for instant rendering
+  // Get initial data from cache ONCE on mount for instant rendering
   const cachedCategories = useMemo(() => categoriesCache.getCache(), []);
   const cachedMenuItems = useMemo(() => menuItemsCache.getCache(), []);
 
-  // Fetch categories with cache support
+  // Fetch categories - single call with cache hydration
   const { 
     data: categories, 
     isLoading: categoriesLoading,
@@ -51,11 +51,13 @@ const Index = () => {
       return data;
     },
     initialData: cachedCategories || undefined,
-    staleTime: 30000, // 30 seconds
+    staleTime: 60000, // 1 minute - increased to reduce refetches
+    gcTime: 300000, // 5 minutes cache retention
     refetchOnWindowFocus: false,
+    refetchOnMount: !cachedCategories, // Only refetch on mount if no cache
   });
 
-  // Fetch menu items with cache support
+  // Fetch menu items - single call with cache hydration
   const { 
     data: menuItems, 
     isLoading: itemsLoading,
@@ -79,18 +81,19 @@ const Index = () => {
       return data;
     },
     initialData: cachedMenuItems || undefined,
-    staleTime: 30000, // 30 seconds
+    staleTime: 60000, // 1 minute
+    gcTime: 300000, // 5 minutes cache retention
     refetchOnWindowFocus: false,
+    refetchOnMount: !cachedMenuItems, // Only refetch on mount if no cache
   });
-
 
   const { data: activePromotions } = useActivePromotions();
 
   // Check if we have displayable data (from cache or fresh fetch)
   const hasDisplayableData = categories && categories.length > 0 && menuItems && menuItems.length > 0;
   
-  // Only show loading if we don't have any data to display (no cache, no fresh data)
-  const isLoading = (categoriesLoading || itemsLoading) && !hasDisplayableData;
+  // Only show loading on FIRST load when no cache exists
+  const isInitialLoading = (categoriesLoading || itemsLoading) && !hasDisplayableData;
   const hasError = (categoriesError || itemsError) && !hasDisplayableData;
   const isReady = hasDisplayableData;
 
@@ -242,8 +245,8 @@ const Index = () => {
     }
   }, []);
 
-  // Loading state
-  if (isLoading) {
+  // Loading state - only on first load without cache
+  if (isInitialLoading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-3">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
