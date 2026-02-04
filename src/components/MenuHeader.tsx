@@ -1,13 +1,18 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { InfoModal } from "./InfoModal";
 import { Button } from "./ui/button";
 import fallbackHeroImage from "@/assets/carpe-diem-hero.jpg";
 import fallbackLogoImage from "@/assets/carpe-diem-logo.png";
+import { useSessionCache } from "@/hooks/useSessionCache";
 
 export const MenuHeader = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  // Cache settings for instant rendering
+  const settingsCache = useSessionCache<any>('settings');
+  const cachedSettings = useMemo(() => settingsCache.getCache(), []);
 
   const { data: settings } = useQuery({
     queryKey: ["settings"],
@@ -18,8 +23,18 @@ export const MenuHeader = () => {
         .single();
 
       if (error) throw error;
+      
+      // Update cache on successful fetch
+      if (data) {
+        settingsCache.setCache(data);
+      }
       return data;
     },
+    initialData: cachedSettings || undefined,
+    staleTime: 60000, // 1 minute
+    gcTime: 300000, // 5 minutes
+    refetchOnWindowFocus: false,
+    refetchOnMount: !cachedSettings,
   });
 
   // Use dynamic images from settings, fallback to local assets
