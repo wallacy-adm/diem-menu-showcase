@@ -5,7 +5,8 @@ import { MenuHeader } from "@/components/MenuHeader";
 import { CategoryChips } from "@/components/CategoryChips";
 import { ProductCard } from "@/components/ProductCard";
 import { MenuFooter } from "@/components/MenuFooter";
-import { Loader2, Search, X, RefreshCw } from "lucide-react";
+import { CategorySkeleton } from "@/components/CategorySkeleton";
+import { Search, X, RefreshCw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useActivePromotions, HighlightLevel } from "@/hooks/useActivePromotions";
@@ -92,9 +93,10 @@ const Index = () => {
   // Check if we have displayable data (from cache or fresh fetch)
   const hasDisplayableData = categories && categories.length > 0 && menuItems && menuItems.length > 0;
   
-  // Only show loading on FIRST load when no cache exists
-  const isInitialLoading = (categoriesLoading || itemsLoading) && !hasDisplayableData;
+  // Error state - only when no data at all
   const hasError = (categoriesError || itemsError) && !hasDisplayableData;
+  
+  // Ready to render products
   const isReady = hasDisplayableData;
 
   // Manual retry handler
@@ -245,50 +247,28 @@ const Index = () => {
     }
   }, []);
 
-  // Loading state - only on first load without cache
-  if (isInitialLoading) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-3">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="text-muted-foreground text-sm">Carregando cardápio…</p>
-      </div>
-    );
-  }
-
-  // Error state
-  if (hasError || !isReady) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-background px-6 text-center gap-4">
-        <p className="text-muted-foreground text-sm max-w-xs">
-          Não foi possível carregar o cardápio. Toque para tentar novamente.
-        </p>
-        <Button 
-          onClick={handleRetry}
-          variant="outline"
-          className="gap-2"
-        >
-          <RefreshCw className="h-4 w-4" />
-          Tentar novamente
-        </Button>
-      </div>
-    );
-  }
+  // Show skeleton loading inside the layout - never block the initial render
+  const showSkeletons = !isReady && !hasError;
+  
+  // For error state, show inline error message instead of blocking the whole page
+  const showError = hasError && !hasDisplayableData;
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Phase 1: Static UI - Always render immediately */}
       <MenuHeader />
       <CategoryChips
-        categories={categories.map((cat) => ({ 
+        categories={categories ? categories.map((cat) => ({ 
           name: cat.name, 
           emoji: cat.emoji,
           highlight: cat.highlight,
           highlight_level: cat.highlight_level as 'Leve' | 'Destaque' | 'Super Destaque'
-        }))}
+        })) : []}
         activeCategory={activeCategory}
         onCategoryClick={handleCategoryClick}
       />
 
-      {/* Search Field */}
+      {/* Search Field - Always visible */}
       <div className="container mx-auto px-4 pt-4">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -311,7 +291,34 @@ const Index = () => {
       </div>
 
       <main className="container mx-auto px-4 py-6">
-        {categories.map((category) => {
+        {/* Phase 2-3: Show skeletons while loading */}
+        {showSkeletons && (
+          <>
+            <CategorySkeleton />
+            <CategorySkeleton />
+            <CategorySkeleton />
+          </>
+        )}
+        
+        {/* Error state - inline, not blocking */}
+        {showError && (
+          <div className="flex flex-col items-center justify-center py-16 text-center gap-4">
+            <p className="text-muted-foreground text-sm max-w-xs">
+              Não foi possível carregar o cardápio. Toque para tentar novamente.
+            </p>
+            <Button 
+              onClick={handleRetry}
+              variant="outline"
+              className="gap-2"
+            >
+              <RefreshCw className="h-4 w-4" />
+              Tentar novamente
+            </Button>
+          </div>
+        )}
+
+        {/* Phase 3-4: Render categories and products when ready */}
+        {isReady && categories.map((category) => {
           const items = groupedItems?.[category.name] || [];
           
           // Hide category completely if no items match during search

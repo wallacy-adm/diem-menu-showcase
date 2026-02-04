@@ -37,21 +37,18 @@ export default function AdminDashboard() {
     // Logout removed - dashboard is now public
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-muted-foreground">Carregando...</p>
-      </div>
-    );
-  }
+  // Render layout immediately, show loading state inside the layout
+  const showAuthLoading = isLoading;
+  const showAccessDenied = !isLoading && (!session || !isAdmin);
 
-  if (!session || !isAdmin) {
+  // If access denied, return null (redirect will happen via useEffect)
+  if (showAccessDenied) {
     return null;
   }
 
   return (
     <div className="min-h-screen bg-background flex w-full max-w-full overflow-x-hidden">
-      {/* Sidebar */}
+      {/* Sidebar - renders immediately */}
       <AdminSidebar 
         activeSection={activeSection}
         onSectionChange={setActiveSection}
@@ -59,20 +56,28 @@ export default function AdminDashboard() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0 overflow-x-hidden">
-        {/* Header */}
+        {/* Header - renders immediately */}
         <DashboardHeader onLogout={handleLogout} />
 
         {/* Content Area */}
         <main className="flex-1 p-4 sm:p-6 overflow-y-auto overflow-x-hidden">
           <div className="max-w-full sm:max-w-7xl mx-auto w-full">
-            {activeSection === "categories" && <CategoriesSection />}
-            {activeSection === "products" && <ProductsSection />}
-            {activeSection === "promotions" && <PromotionsSection />}
-            {activeSection === "settings" && <SettingsSection />}
+            {showAuthLoading ? (
+              <div className="flex items-center justify-center py-20">
+                <p className="text-muted-foreground">Carregando...</p>
+              </div>
+            ) : (
+              <>
+                {activeSection === "categories" && <CategoriesSection />}
+                {activeSection === "products" && <ProductsSection />}
+                {activeSection === "promotions" && <PromotionsSection />}
+                {activeSection === "settings" && <SettingsSection />}
+              </>
+            )}
           </div>
         </main>
 
-        {/* Footer */}
+        {/* Footer - renders immediately */}
         <footer className="border-t border-border p-4 text-center flex-shrink-0">
           <p className="text-xs text-muted-foreground">
             Painel administrativo do cardápio Carpe Diem Motel — Uso interno exclusivo.
