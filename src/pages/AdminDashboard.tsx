@@ -11,6 +11,15 @@ import { SettingsSection } from "@/components/admin/dashboard/SettingsSection";
 
 type ActiveSection = "categories" | "products" | "promotions" | "settings";
 
+/**
+ * AdminDashboard - Admin Panel
+ * 
+ * Architecture:
+ * - Static shell (sidebar, header, footer) - ALWAYS mounted immediately
+ * - Dynamic content sections - load asynchronously without blocking first paint
+ * 
+ * This ensures first paint happens immediately with the layout visible.
+ */
 export default function AdminDashboard() {
   const [activeSection, setActiveSection] = useState<ActiveSection>("products");
   const navigate = useNavigate();
@@ -48,7 +57,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-background flex w-full max-w-full overflow-x-hidden">
-      {/* Sidebar - renders immediately */}
+      {/* Sidebar - renders immediately (static shell) */}
       <AdminSidebar 
         activeSection={activeSection}
         onSectionChange={setActiveSection}
@@ -56,10 +65,10 @@ export default function AdminDashboard() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0 overflow-x-hidden">
-        {/* Header - renders immediately */}
+        {/* Header - renders immediately (static shell) */}
         <DashboardHeader onLogout={handleLogout} />
 
-        {/* Content Area */}
+        {/* Content Area - dynamic content loads here */}
         <main className="flex-1 p-4 sm:p-6 overflow-y-auto overflow-x-hidden">
           <div className="max-w-full sm:max-w-7xl mx-auto w-full">
             {showAuthLoading ? (
@@ -77,7 +86,7 @@ export default function AdminDashboard() {
           </div>
         </main>
 
-        {/* Footer - renders immediately */}
+        {/* Footer - renders immediately (static shell) */}
         <footer className="border-t border-border p-4 text-center flex-shrink-0">
           <p className="text-xs text-muted-foreground">
             Painel administrativo do cardápio Carpe Diem Motel — Uso interno exclusivo.
