@@ -46,15 +46,35 @@ export const MenuHeader = () => {
 
   return (
     <>
+      {/* HERO SECTION - ALWAYS MOUNTED, NEVER CONDITIONAL */}
       <header className="relative min-h-[240px] overflow-hidden bg-black">
-        {/* Hero Background Image with Gradient Overlay - Always maintain structure */}
+        {/* Hero Background - Always rendered, uses CSS for visibility control */}
+        {/* Background solid fallback - always visible */}
+        <div className="absolute inset-0 bg-[#0a0a0a]" />
+        
+        {/* Hero Background Image with Gradient Overlay - Always mounted in DOM */}
+        {backgroundImage && (
+          <img
+            src={backgroundImage}
+            alt=""
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
+            className="absolute inset-0 w-full h-full object-cover"
+            style={{ zIndex: 1 }}
+            onError={(e) => {
+              // Hide on error but keep mounted
+              (e.target as HTMLImageElement).style.opacity = '0';
+            }}
+          />
+        )}
+        
+        {/* Gradient overlay - always visible */}
         <div 
-          className="absolute inset-0 bg-cover bg-center"
+          className="absolute inset-0 pointer-events-none"
           style={{ 
-            backgroundImage: backgroundImage 
-              ? `linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0.3)), url(${backgroundImage})`
-              : undefined,
-            backgroundColor: backgroundImage ? undefined : '#0a0a0a'
+            zIndex: 2,
+            background: 'linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0.3))'
           }}
         />
 
