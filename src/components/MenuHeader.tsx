@@ -57,7 +57,10 @@ export const MenuHeader = () => {
   return (
     <>
       {/* HERO SECTION - ALWAYS MOUNTED, NEVER CONDITIONAL, FIXED HEIGHT */}
-      <header className="relative h-[240px] overflow-hidden bg-black flex-shrink-0">
+      <header
+        className="relative h-[240px] overflow-hidden bg-black flex-shrink-0"
+        style={{ height: 240, minHeight: 240, flexShrink: 0 }}
+      >
         {/* Background solid fallback - always visible */}
         <div className="absolute inset-0 bg-[#0a0a0a]" />
 
