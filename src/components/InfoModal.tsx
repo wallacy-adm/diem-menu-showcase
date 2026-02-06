@@ -1,4 +1,4 @@
-import { MapPin, MessageCircle, Instagram } from "lucide-react";
+import { MapPin, Instagram, MessageCircle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -15,12 +15,12 @@ interface InfoModalProps {
 }
 
 export const InfoModal = ({ isOpen, onClose, settings }: InfoModalProps) => {
-  // Centralized WhatsApp URL - uses settings or fallback
-  const whatsappUrl = settings?.whatsapp_url || "https://wa.me/5583999999999";
+  const handleInstagramClick = () => {
+    window.open(settings?.instagram_url || "https://instagram.com", "_blank");
+  };
 
-  const handleComplaintsClick = () => {
-    const message = encodeURIComponent("Olá, gostaria de registrar uma reclamação ou sugestão.");
-    window.open(`${whatsappUrl}?text=${message}`, "_blank");
+  const handleWhatsAppClick = () => {
+    window.open(settings?.whatsapp_url || "https://wa.me/", "_blank");
   };
 
   return (
@@ -31,55 +31,48 @@ export const InfoModal = ({ isOpen, onClose, settings }: InfoModalProps) => {
             {settings?.brand_name || "Carpe Diem Motel"}
           </DialogTitle>
           <DialogDescription className="text-muted-foreground text-base mt-2">
-            Informações do estabelecimento
+            Entre em contato conosco
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
-          {/* Address - Clickable Google Maps link */}
-          <a
-            href="https://maps.app.goo.gl/5TZTQ7G4614ZHQmM8"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-start gap-4 p-5 rounded-xl bg-secondary/50 border border-border hover:bg-secondary/70 transition-colors cursor-pointer"
+          <div 
+            className="flex items-start gap-4 p-5 rounded-xl bg-secondary/50 border border-border select-text cursor-default"
+            style={{ pointerEvents: 'none', touchAction: 'none', userSelect: 'text' }}
+            onClick={undefined}
+            onTouchStart={undefined}
+            onPointerDown={undefined}
           >
-            <MapPin className="h-6 w-6 text-primary flex-shrink-0 mt-0.5" />
-            <div>
-              <h3 className="font-bold text-base text-foreground mb-1.5">
+            <MapPin className="h-6 w-6 text-primary flex-shrink-0 mt-0.5 pointer-events-none" />
+            <div className="pointer-events-none">
+              <h3 className="font-bold text-base text-foreground mb-1.5 pointer-events-none">
                 Endereço
               </h3>
-              <span className="text-sm text-primary underline">
+              <span className="text-sm text-muted-foreground leading-relaxed block pointer-events-none">
                 {settings?.address || "BR-104, Km 118, Lagoa Seca – PB"}
               </span>
             </div>
-          </a>
+          </div>
 
-          {/* Instagram - Clickable link */}
-          <a
-            href={settings?.instagram_url || "https://instagram.com/carpediemmotel"}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-start gap-4 p-5 rounded-xl bg-secondary/50 border border-border hover:bg-secondary/70 transition-colors cursor-pointer"
-          >
-            <Instagram className="h-6 w-6 text-primary flex-shrink-0 mt-0.5" />
-            <div>
-              <h3 className="font-bold text-base text-foreground mb-1.5">
-                Instagram
-              </h3>
-              <span className="text-sm text-primary underline">
-                Siga-nos no Instagram
-              </span>
-            </div>
-          </a>
-
-          {/* Complaints/Suggestions - Clickable WhatsApp link */}
           <Button
-            onClick={handleComplaintsClick}
+            onClick={handleInstagramClick}
+            className="w-full justify-start gap-4 h-auto p-5 bg-secondary hover:bg-secondary/80 text-foreground border border-border rounded-xl"
+            variant="outline"
+          >
+            <Instagram className="h-6 w-6 text-primary" />
+            <div className="text-left">
+              <h3 className="font-bold text-base">Instagram</h3>
+              <p className="text-sm text-muted-foreground">Siga-nos no Instagram</p>
+            </div>
+          </Button>
+
+          <Button
+            onClick={handleWhatsAppClick}
             className="w-full justify-start gap-4 h-auto p-5 bg-primary hover:bg-primary/90 text-black rounded-xl font-semibold"
           >
             <MessageCircle className="h-6 w-6" />
             <div className="text-left">
-              <h3 className="font-bold text-base">Reclamações ou Sugestões</h3>
+              <h3 className="font-bold text-base">WhatsApp</h3>
               <p className="text-sm opacity-80">Fale conosco pelo WhatsApp</p>
             </div>
           </Button>

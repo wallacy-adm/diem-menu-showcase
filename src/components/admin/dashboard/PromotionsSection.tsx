@@ -1,8 +1,15 @@
 import { useState } from "react";
-import { Plus, Pencil, Trash2, Calendar, Clock, CheckCircle, XCircle } from "lucide-react";
+import { Plus, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,8 +23,6 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useAdminPromotions, type PromotionWithProduct } from "@/hooks/useAdminPromotions";
 import { PromotionModal } from "./PromotionModal";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
 
 export function PromotionsSection() {
   const { toast } = useToast();
@@ -97,36 +102,6 @@ export function PromotionsSection() {
     }
   };
 
-  const getStatusBadge = (status: 'active' | 'scheduled' | 'ended') => {
-    switch (status) {
-      case 'active':
-        return (
-          <Badge className="bg-green-600 text-white gap-1">
-            <CheckCircle className="w-3 h-3" />
-            Ativa
-          </Badge>
-        );
-      case 'scheduled':
-        return (
-          <Badge className="bg-blue-600 text-white gap-1">
-            <Clock className="w-3 h-3" />
-            Agendada
-          </Badge>
-        );
-      case 'ended':
-        return (
-          <Badge variant="secondary" className="gap-1">
-            <XCircle className="w-3 h-3" />
-            Encerrada
-          </Badge>
-        );
-    }
-  };
-
-  const formatDate = (dateStr: string) => {
-    return format(new Date(dateStr), "dd/MM/yyyy HH:mm", { locale: ptBR });
-  };
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -141,7 +116,7 @@ export function PromotionsSection() {
         <div>
           <h2 className="text-2xl font-bold text-foreground">Promoções</h2>
           <p className="text-sm text-muted-foreground mt-1">
-            Gerencie as promoções com período automático
+            Gerencie as promoções dos produtos do cardápio
           </p>
         </div>
         <Button onClick={handleCreate} className="gap-2">
@@ -150,100 +125,78 @@ export function PromotionsSection() {
         </Button>
       </div>
 
-      {/* Promotions List - Mobile Friendly */}
-      <div className="space-y-4">
-        {promotions.length === 0 ? (
-          <div className="bg-card rounded-lg border border-border p-8 text-center text-muted-foreground">
-            Nenhuma promoção cadastrada. Clique em "Nova Promoção" para começar.
-          </div>
-        ) : (
-          promotions.map((promo) => (
-            <div
-              key={promo.id}
-              className="bg-card rounded-lg border border-border p-4 space-y-3"
-            >
-              {/* Header: Name + Status + Actions */}
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-foreground truncate">{promo.name}</h3>
-                  <p className="text-sm text-muted-foreground truncate">{promo.product_name}</p>
-                </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  {getStatusBadge(promo.status)}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleEdit(promo)}
-                    className="gap-1"
-                  >
-                    <Pencil className="w-4 h-4" />
-                    Editar
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setDeletingId(promo.id)}
-                    className="gap-1 text-destructive border-destructive/50 hover:bg-destructive/10"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                    Excluir
-                  </Button>
-                </div>
-              </div>
-
-              {/* Info Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 border-t border-border">
-                {/* Price */}
-                <div className="space-y-1">
-                  <span className="text-xs text-muted-foreground">Preço</span>
-                  <div className="flex flex-col">
-                    <span className="text-muted-foreground line-through text-xs">
-                      R$ {promo.product_price.toFixed(2)}
+      {/* Promotions Table */}
+      <div className="bg-card rounded-lg border border-border overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Nome</TableHead>
+              <TableHead>Produto</TableHead>
+              <TableHead className="text-right">Preço Original</TableHead>
+              <TableHead className="text-right">Preço Promocional</TableHead>
+              <TableHead className="text-center">Desconto</TableHead>
+              <TableHead className="text-center">Status</TableHead>
+              <TableHead className="w-32 text-center">Ações</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {promotions.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                  Nenhuma promoção cadastrada. Clique em "Nova Promoção" para começar.
+                </TableCell>
+              </TableRow>
+            ) : (
+              promotions.map((promo) => (
+                <TableRow key={promo.id}>
+                  <TableCell className="font-medium">{promo.name}</TableCell>
+                  <TableCell>{promo.product_name}</TableCell>
+                  <TableCell className="text-right text-muted-foreground line-through">
+                    R$ {promo.product_price.toFixed(2)}
+                  </TableCell>
+                  <TableCell className="text-right text-primary font-bold">
+                    R$ {promo.discounted_price.toFixed(2)}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-destructive text-destructive-foreground">
+                      -{promo.discount_percentage}%
                     </span>
-                    <span className="text-primary font-bold">
-                      R$ {promo.discounted_price.toFixed(2)}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Discount */}
-                <div className="space-y-1">
-                  <span className="text-xs text-muted-foreground">Desconto</span>
-                  <div>
-                    <Badge variant="destructive">-{promo.discount_percentage}%</Badge>
-                  </div>
-                </div>
-
-                {/* Period */}
-                <div className="space-y-1">
-                  <span className="text-xs text-muted-foreground">Período</span>
-                  <div className="text-xs">
-                    <div className="flex items-center gap-1">
-                      <Calendar className="w-3 h-3" />
-                      {formatDate(promo.start_date)}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <div className="flex items-center justify-center gap-2">
+                      <Switch
+                        checked={promo.active}
+                        onCheckedChange={() => handleToggleActive(promo)}
+                      />
+                      <span className="text-xs text-muted-foreground">
+                        {promo.active ? "Ativa" : "Inativa"}
+                      </span>
                     </div>
-                    <div className="flex items-center gap-1 mt-0.5">
-                      <Calendar className="w-3 h-3" />
-                      {formatDate(promo.end_date)}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center justify-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEdit(promo)}
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setDeletingId(promo.id)}
+                        className="text-destructive hover:text-destructive"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
                     </div>
-                  </div>
-                </div>
-
-                {/* Enabled Toggle */}
-                <div className="space-y-1">
-                  <span className="text-xs text-muted-foreground">Habilitada</span>
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      checked={promo.active}
-                      onCheckedChange={() => handleToggleActive(promo)}
-                    />
-                    <span className="text-xs">{promo.active ? "Sim" : "Não"}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))
-        )}
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
       </div>
 
       {/* Modals */}

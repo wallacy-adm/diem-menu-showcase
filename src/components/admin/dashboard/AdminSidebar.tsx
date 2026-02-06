@@ -1,7 +1,5 @@
 import { Tag, UtensilsCrossed, Percent, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useSettings } from "@/hooks/useSettings";
-import carpeDiemLogo from "@/assets/carpe-diem-logo.png";
 
 interface AdminSidebarProps {
   activeSection: string;
@@ -16,25 +14,20 @@ const menuItems = [
 ] as const;
 
 export function AdminSidebar({ activeSection, onSectionChange }: AdminSidebarProps) {
-  const { settings } = useSettings();
-  
-  const adminLogo = settings?.admin_logo_url || carpeDiemLogo;
-  const brandName = settings?.brand_name || "Carpe Diem Motel";
-
   return (
     <aside className="w-64 bg-card border-r border-border flex flex-col">
       {/* Logo */}
       <div className="p-6 border-b border-border">
         <img 
-          src={adminLogo}
-          alt={brandName}
-          className="w-20 h-20 mx-auto rounded-lg object-contain"
+          src="/src/assets/carpe-diem-logo.png"
+          alt="Carpe Diem Motel"
+          className="w-20 h-20 mx-auto rounded-lg"
         />
         <h2 className="text-sm font-semibold text-center mt-3 text-foreground">
           Painel Administrativo
         </h2>
         <p className="text-xs text-muted-foreground text-center mt-1">
-          {brandName}
+          Carpe Diem Motel
         </p>
       </div>
 

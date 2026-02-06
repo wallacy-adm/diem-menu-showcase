@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Plus, Search, Pencil, Trash2, ChevronDown, ChevronRight, ArrowUp, ArrowDown, Copy } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, ChevronDown, ChevronRight, ArrowUp, ArrowDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -20,7 +20,6 @@ import {
 } from "@/components/ui/collapsible";
 import { useToast } from "@/hooks/use-toast";
 import { ProductModal } from "./ProductModal";
-import { DuplicateProductModal } from "./DuplicateProductModal";
 import { useAdminProducts, Product } from "@/hooks/useAdminProducts";
 import { useAdminCategories } from "@/hooks/useAdminCategories";
 
@@ -33,8 +32,6 @@ export function ProductsSection() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(categories.map(c => c.name)));
-  const [duplicatingProduct, setDuplicatingProduct] = useState<Product | null>(null);
-  const [isDuplicating, setIsDuplicating] = useState(false);
 
   // Group products by category and sort by sort_order
   const groupedProducts = useMemo(() => {
@@ -209,46 +206,6 @@ export function ProductsSection() {
     }
   };
 
-  const handleDuplicateClick = (product: Product) => {
-    setDuplicatingProduct(product);
-  };
-
-  const handleDuplicateProduct = async (targetCategory: string) => {
-    if (!duplicatingProduct) return;
-    
-    setIsDuplicating(true);
-    try {
-      await addProduct({
-        name: duplicatingProduct.name,
-        description: duplicatingProduct.description,
-        category: targetCategory,
-        price: duplicatingProduct.price,
-        old_price: duplicatingProduct.old_price,
-        image: duplicatingProduct.image,
-        visible: duplicatingProduct.visible,
-        featured: duplicatingProduct.featured,
-        highlight_enabled: (duplicatingProduct as any).highlight_enabled ?? false,
-        highlight_level: duplicatingProduct.highlight_level,
-        image_position_y: duplicatingProduct.image_position_y ?? 50,
-        image_zoom: duplicatingProduct.image_zoom ?? 1.0,
-      });
-      
-      toast({
-        title: "✅ Duplicado!",
-        description: `Produto copiado para "${targetCategory}" com sucesso.`,
-      });
-      setDuplicatingProduct(null);
-    } catch (error: any) {
-      toast({
-        title: "Erro",
-        description: error.message || "Não foi possível duplicar o produto.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsDuplicating(false);
-    }
-  };
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -311,24 +268,24 @@ export function ProductsSection() {
                 onOpenChange={() => toggleCategory(category.name)}
               >
                 <div className="bg-card rounded-lg border border-border overflow-hidden">
-                  {/* Category Header - Visual distinction */}
+                  {/* Category Header */}
                   <CollapsibleTrigger asChild>
-                    <div className="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-muted/60 transition-colors bg-muted/40 border-b border-border">
+                    <div className="flex items-center justify-between p-4 cursor-pointer hover:bg-muted/50 transition-colors">
                       <div className="flex items-center gap-3">
                         {isExpanded ? (
-                          <ChevronDown className="w-5 h-5 text-primary" />
+                          <ChevronDown className="w-5 h-5 text-muted-foreground" />
                         ) : (
                           <ChevronRight className="w-5 h-5 text-muted-foreground" />
                         )}
-                        <span className="text-xl">{category.emoji}</span>
-                        <h3 className="font-bold text-foreground text-base">{category.name}</h3>
-                        <span className="text-xs text-muted-foreground bg-background px-2 py-0.5 rounded-full border border-border">
+                        <span className="text-lg">{category.emoji}</span>
+                        <h3 className="font-semibold text-foreground">{category.name}</h3>
+                        <span className="text-sm text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
                           {categoryProducts.length} {categoryProducts.length === 1 ? 'produto' : 'produtos'}
                         </span>
                       </div>
                       {!category.visible && (
-                        <span className="text-xs bg-destructive/10 text-destructive px-2 py-1 rounded font-medium">
-                          Oculta
+                        <span className="text-xs bg-muted text-muted-foreground px-2 py-1 rounded">
+                          Categoria oculta
                         </span>
                       )}
                     </div>
@@ -341,111 +298,99 @@ export function ProductsSection() {
                         Nenhum produto nesta categoria
                       </div>
                     ) : (
-                      <div className="border-t border-border divide-y divide-border/50">
+                      <div className="border-t border-border">
                         {categoryProducts.map((product, index) => {
                           const discount = calculateDiscount(product.price, product.old_price);
                           return (
                             <div
                               key={product.id}
-                              className="p-3 hover:bg-muted/30 transition-colors"
+                              className={`flex items-center gap-4 p-4 hover:bg-muted/30 transition-colors ${
+                                index !== categoryProducts.length - 1 ? 'border-b border-border/50' : ''
+                              }`}
                             >
-                              {/* Mobile-first: stack vertically */}
-                              <div className="flex items-start gap-3">
-                                {/* Product Image */}
-                                <div className="relative w-12 h-12 flex-shrink-0">
-                                  <img
-                                    src={product.image}
-                                    alt={product.name}
-                                    className="w-full h-full object-cover rounded-lg"
-                                  />
-                                  {discount && (
-                                    <div className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[10px] font-bold px-1 py-0.5 rounded">
-                                      -{discount}%
-                                    </div>
-                                  )}
-                                </div>
-
-                                {/* Product Info & Price */}
-                                <div className="flex-1 min-w-0">
-                                  <h4 className="font-medium text-foreground text-sm truncate">{product.name}</h4>
-                                  <p className="text-xs text-muted-foreground truncate">{product.description}</p>
-                                  <div className="flex items-center gap-2 mt-1">
-                                    <span className="text-primary font-bold text-sm">
-                                      R$ {product.price.toFixed(2)}
-                                    </span>
-                                    {product.old_price && (
-                                      <span className="text-[10px] text-muted-foreground line-through">
-                                        R$ {product.old_price.toFixed(2)}
-                                      </span>
-                                    )}
+                              {/* Product Image */}
+                              <div className="relative w-14 h-14 flex-shrink-0">
+                                <img
+                                  src={product.image}
+                                  alt={product.name}
+                                  className="w-full h-full object-cover rounded-lg"
+                                />
+                                {discount && (
+                                  <div className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs font-bold px-1.5 py-0.5 rounded">
+                                    -{discount}%
                                   </div>
-                                </div>
-
-                                {/* Status Switch */}
-                                <div className="flex items-center gap-1.5 flex-shrink-0">
-                                  <Switch
-                                    checked={product.visible}
-                                    onCheckedChange={() => handleToggleVisible(product.id)}
-                                  />
-                                  <span className="text-[10px] text-muted-foreground w-10">
-                                    {product.visible ? "Ativo" : "Inativo"}
-                                  </span>
-                                </div>
+                                )}
                               </div>
 
-                              {/* Actions Row */}
-                              <div className="flex items-center justify-end gap-1 mt-2">
-                                {/* Reorder Buttons */}
+                              {/* Product Info */}
+                              <div className="flex-1 min-w-0">
+                                <h4 className="font-medium text-foreground truncate">{product.name}</h4>
+                                <p className="text-sm text-muted-foreground truncate">{product.description}</p>
+                              </div>
+
+                              {/* Price */}
+                              <div className="flex flex-col items-end flex-shrink-0">
+                                <span className="text-primary font-bold">
+                                  R$ {product.price.toFixed(2)}
+                                </span>
+                                {product.old_price && (
+                                  <span className="text-xs text-muted-foreground line-through">
+                                    R$ {product.old_price.toFixed(2)}
+                                  </span>
+                                )}
+                              </div>
+
+                              {/* Status */}
+                              <div className="flex items-center gap-2 flex-shrink-0">
+                                <Switch
+                                  checked={product.visible}
+                                  onCheckedChange={() => handleToggleVisible(product.id)}
+                                />
+                                <span className="text-xs text-muted-foreground w-12">
+                                  {product.visible ? "Ativo" : "Inativo"}
+                                </span>
+                              </div>
+
+                              {/* Reorder Buttons */}
+                              <div className="flex flex-col gap-0.5 flex-shrink-0">
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  className="h-7 w-7 p-0"
+                                  className="h-6 w-6 p-0"
                                   onClick={() => handleMoveUp(product, categoryProducts, index)}
                                   disabled={index === 0}
                                   title="Mover para cima"
                                 >
-                                  <ArrowUp className="w-3.5 h-3.5" />
+                                  <ArrowUp className="w-3 h-3" />
                                 </Button>
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  className="h-7 w-7 p-0"
+                                  className="h-6 w-6 p-0"
                                   onClick={() => handleMoveDown(product, categoryProducts, index)}
                                   disabled={index === categoryProducts.length - 1}
                                   title="Mover para baixo"
                                 >
-                                  <ArrowDown className="w-3.5 h-3.5" />
+                                  <ArrowDown className="w-3 h-3" />
                                 </Button>
+                              </div>
 
-                                <div className="w-px h-4 bg-border mx-1" />
-
-                                {/* Action Buttons */}
+                              {/* Actions */}
+                              <div className="flex items-center gap-1 flex-shrink-0">
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  className="h-7 w-7 p-0"
-                                  onClick={() => handleDuplicateClick(product)}
-                                  title="Duplicar para outra categoria"
-                                >
-                                  <Copy className="w-3.5 h-3.5" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="h-7 w-7 p-0"
                                   onClick={() => handleEdit(product)}
-                                  title="Editar produto"
                                 >
-                                  <Pencil className="w-3.5 h-3.5" />
+                                  <Pencil className="w-4 h-4" />
                                 </Button>
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  className="h-7 w-7 p-0 text-destructive hover:text-destructive"
                                   onClick={() => handleDeleteClick(product.id)}
-                                  title="Excluir produto"
+                                  className="text-destructive hover:text-destructive"
                                 >
-                                  <Trash2 className="w-3.5 h-3.5" />
+                                  <Trash2 className="w-4 h-4" />
                                 </Button>
                               </div>
                             </div>
@@ -470,15 +415,6 @@ export function ProductsSection() {
         onSave={handleSaveProduct}
         product={editingProduct || undefined}
         categories={categories}
-      />
-
-      <DuplicateProductModal
-        isOpen={!!duplicatingProduct}
-        onClose={() => setDuplicatingProduct(null)}
-        onDuplicate={handleDuplicateProduct}
-        product={duplicatingProduct}
-        categories={categories}
-        isLoading={isDuplicating}
       />
 
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>

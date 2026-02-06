@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { useSettings } from "@/hooks/useSettings";
 
@@ -18,12 +17,9 @@ export function SettingsSection() {
     instagram_url: "",
     whatsapp_url: "",
     footer_note: "",
-    show_logo: true,
-    show_bg: true,
   });
   const [logoPreview, setLogoPreview] = useState<string>("");
   const [bgPreview, setBgPreview] = useState<string>("");
-  const [adminLogoPreview, setAdminLogoPreview] = useState<string>("");
 
   useEffect(() => {
     if (settings) {
@@ -34,18 +30,15 @@ export function SettingsSection() {
         instagram_url: settings.instagram_url,
         whatsapp_url: settings.whatsapp_url,
         footer_note: settings.footer_note,
-        show_logo: settings.show_logo ?? true,
-        show_bg: settings.show_bg ?? true,
       });
       
-      if (settings.logo_url) {
-        setLogoPreview(settings.logo_url);
+      // Load previews from saved settings if they exist
+      const settingsWithImages = settings as any;
+      if (settingsWithImages.logo_url) {
+        setLogoPreview(settingsWithImages.logo_url);
       }
-      if (settings.bg_url) {
-        setBgPreview(settings.bg_url);
-      }
-      if (settings.admin_logo_url) {
-        setAdminLogoPreview(settings.admin_logo_url);
+      if (settingsWithImages.bg_url) {
+        setBgPreview(settingsWithImages.bg_url);
       }
     }
   }, [settings]);
@@ -110,43 +103,12 @@ export function SettingsSection() {
     reader.readAsDataURL(file);
   };
 
-  const handleAdminLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (!file.type.startsWith('image/')) {
-      toast({
-        title: "Erro",
-        description: "Por favor, selecione um arquivo de imagem válido.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (file.size > 2 * 1024 * 1024) {
-      toast({
-        title: "Erro",
-        description: "A imagem deve ter no máximo 2MB.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const base64String = reader.result as string;
-      setAdminLogoPreview(base64String);
-    };
-    reader.readAsDataURL(file);
-  };
-
   const handleSave = async () => {
     try {
       const dataToSave = {
         ...formData,
         ...(logoPreview && { logo_url: logoPreview }),
         ...(bgPreview && { bg_url: bgPreview }),
-        ...(adminLogoPreview && { admin_logo_url: adminLogoPreview }),
       };
       await updateSettings(dataToSave);
       toast({
@@ -204,19 +166,7 @@ export function SettingsSection() {
 
         {/* Logo Upload */}
         <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <Label>Logomarca do Cardápio</Label>
-            <div className="flex items-center gap-2">
-              <Label htmlFor="show-logo" className="text-sm text-muted-foreground">
-                Exibir no cardápio
-              </Label>
-              <Switch
-                id="show-logo"
-                checked={formData.show_logo}
-                onCheckedChange={(checked) => setFormData({ ...formData, show_logo: checked })}
-              />
-            </div>
-          </div>
+          <Label>Logomarca</Label>
           <div className="flex gap-4">
             <div className="flex-1">
               <label 
@@ -249,19 +199,7 @@ export function SettingsSection() {
 
         {/* Background Image Upload */}
         <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <Label>Imagem de Fundo do Cardápio</Label>
-            <div className="flex items-center gap-2">
-              <Label htmlFor="show-bg" className="text-sm text-muted-foreground">
-                Exibir no cardápio
-              </Label>
-              <Switch
-                id="show-bg"
-                checked={formData.show_bg}
-                onCheckedChange={(checked) => setFormData({ ...formData, show_bg: checked })}
-              />
-            </div>
-          </div>
+          <Label>Imagem de Fundo</Label>
           <div className="flex gap-4">
             <div className="flex-1">
               <label 
@@ -287,42 +225,6 @@ export function SettingsSection() {
             {bgPreview && (
               <div className="w-32 h-32 border border-border rounded-lg overflow-hidden bg-muted">
                 <img src={bgPreview} alt="Background preview" className="w-full h-full object-cover" />
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Admin Panel Logo Upload */}
-        <div className="space-y-2">
-          <Label>Logo do Painel Administrativo</Label>
-          <p className="text-xs text-muted-foreground">
-            Esta imagem aparece no canto superior esquerdo do painel admin
-          </p>
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <label 
-                htmlFor="admin-logo-upload"
-                className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-primary transition-colors cursor-pointer flex flex-col items-center justify-center"
-              >
-                <Upload className="w-6 h-6 mb-2 text-muted-foreground" />
-                <p className="text-sm text-muted-foreground">
-                  Clique para fazer upload da logo do painel
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Máx. 2MB - PNG, JPG, WEBP
-                </p>
-              </label>
-              <input
-                id="admin-logo-upload"
-                type="file"
-                accept="image/*"
-                onChange={handleAdminLogoUpload}
-                className="hidden"
-              />
-            </div>
-            {adminLogoPreview && (
-              <div className="w-32 h-32 border border-border rounded-lg overflow-hidden flex items-center justify-center bg-muted">
-                <img src={adminLogoPreview} alt="Admin logo preview" className="max-w-full max-h-full object-contain" />
               </div>
             )}
           </div>

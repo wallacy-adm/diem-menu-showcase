@@ -1,16 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-export type HighlightLevel = 'Leve' | 'Destaque' | 'Super Destaque';
-
 export interface Category {
   id: string;
   name: string;
   visible: boolean;
   sort_order: number;
   emoji: string;
-  highlight: boolean;
-  highlight_level: HighlightLevel;
 }
 
 export function useAdminCategories() {
@@ -127,39 +123,6 @@ export function useAdminCategories() {
     },
   });
 
-  const toggleHighlightMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const category = categories.find(c => c.id === id);
-      if (!category) throw new Error('Category not found');
-      
-      const { error } = await supabase
-        .from('categories')
-        .update({ highlight: !category.highlight })
-        .eq('id', id);
-      
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
-      queryClient.invalidateQueries({ queryKey: ['categories'] });
-    },
-  });
-
-  const updateHighlightLevelMutation = useMutation({
-    mutationFn: async ({ id, level }: { id: string; level: HighlightLevel }) => {
-      const { error } = await supabase
-        .from('categories')
-        .update({ highlight_level: level })
-        .eq('id', id);
-      
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
-      queryClient.invalidateQueries({ queryKey: ['categories'] });
-    },
-  });
-
   return {
     categories,
     isLoading,
@@ -168,7 +131,5 @@ export function useAdminCategories() {
     deleteCategory: deleteCategoryMutation.mutateAsync,
     toggleVisible: toggleVisibleMutation.mutateAsync,
     reorderCategories: reorderCategoriesMutation.mutateAsync,
-    toggleHighlight: toggleHighlightMutation.mutateAsync,
-    updateHighlightLevel: updateHighlightLevelMutation.mutateAsync,
   };
 }

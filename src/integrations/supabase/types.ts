@@ -18,8 +18,6 @@ export type Database = {
         Row: {
           created_at: string
           emoji: string
-          highlight: boolean
-          highlight_level: string
           id: string
           name: string
           sort_order: number
@@ -29,8 +27,6 @@ export type Database = {
         Insert: {
           created_at?: string
           emoji?: string
-          highlight?: boolean
-          highlight_level?: string
           id?: string
           name: string
           sort_order?: number
@@ -40,8 +36,6 @@ export type Database = {
         Update: {
           created_at?: string
           emoji?: string
-          highlight?: boolean
-          highlight_level?: string
           id?: string
           name?: string
           sort_order?: number
@@ -56,12 +50,8 @@ export type Database = {
           created_at: string
           description: string
           featured: boolean
-          highlight_enabled: boolean
-          highlight_level: string
           id: string
           image: string
-          image_position_y: number | null
-          image_zoom: number | null
           name: string
           old_price: number | null
           price: number
@@ -74,12 +64,8 @@ export type Database = {
           created_at?: string
           description: string
           featured?: boolean
-          highlight_enabled?: boolean
-          highlight_level?: string
           id?: string
           image: string
-          image_position_y?: number | null
-          image_zoom?: number | null
           name: string
           old_price?: number | null
           price: number
@@ -92,12 +78,8 @@ export type Database = {
           created_at?: string
           description?: string
           featured?: boolean
-          highlight_enabled?: boolean
-          highlight_level?: string
           id?: string
           image?: string
-          image_position_y?: number | null
-          image_zoom?: number | null
           name?: string
           old_price?: number | null
           price?: number
@@ -157,7 +139,6 @@ export type Database = {
           created_at: string
           guest_name: string | null
           guest_phone: string | null
-          guest_token: string | null
           id: string
           notes: string | null
           status: string
@@ -169,7 +150,6 @@ export type Database = {
           created_at?: string
           guest_name?: string | null
           guest_phone?: string | null
-          guest_token?: string | null
           id?: string
           notes?: string | null
           status?: string
@@ -181,7 +161,6 @@ export type Database = {
           created_at?: string
           guest_name?: string | null
           guest_phone?: string | null
-          guest_token?: string | null
           id?: string
           notes?: string | null
           status?: string
@@ -221,13 +200,9 @@ export type Database = {
           created_at: string
           description: string | null
           discount_percentage: number
-          end_date: string
-          highlight_level: string
           id: string
           name: string
           product_id: string
-          sort_order: number
-          start_date: string
           updated_at: string
         }
         Insert: {
@@ -235,13 +210,9 @@ export type Database = {
           created_at?: string
           description?: string | null
           discount_percentage: number
-          end_date?: string
-          highlight_level?: string
           id?: string
           name: string
           product_id: string
-          sort_order?: number
-          start_date?: string
           updated_at?: string
         }
         Update: {
@@ -249,13 +220,9 @@ export type Database = {
           created_at?: string
           description?: string | null
           discount_percentage?: number
-          end_date?: string
-          highlight_level?: string
           id?: string
           name?: string
           product_id?: string
-          sort_order?: number
-          start_date?: string
           updated_at?: string
         }
         Relationships: [
@@ -271,7 +238,6 @@ export type Database = {
       settings: {
         Row: {
           address: string
-          admin_logo_url: string | null
           bg_url: string | null
           brand_name: string
           created_at: string
@@ -279,8 +245,6 @@ export type Database = {
           id: string
           instagram_url: string
           logo_url: string | null
-          show_bg: boolean
-          show_logo: boolean
           tagline: string
           theme_accent: string
           updated_at: string
@@ -288,7 +252,6 @@ export type Database = {
         }
         Insert: {
           address?: string
-          admin_logo_url?: string | null
           bg_url?: string | null
           brand_name?: string
           created_at?: string
@@ -296,8 +259,6 @@ export type Database = {
           id?: string
           instagram_url?: string
           logo_url?: string | null
-          show_bg?: boolean
-          show_logo?: boolean
           tagline?: string
           theme_accent?: string
           updated_at?: string
@@ -305,7 +266,6 @@ export type Database = {
         }
         Update: {
           address?: string
-          admin_logo_url?: string | null
           bg_url?: string | null
           brand_name?: string
           created_at?: string
@@ -313,8 +273,6 @@ export type Database = {
           id?: string
           instagram_url?: string
           logo_url?: string | null
-          show_bg?: boolean
-          show_logo?: boolean
           tagline?: string
           theme_accent?: string
           updated_at?: string
@@ -353,14 +311,6 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
-        Returns: boolean
-      }
-      validate_order: {
-        Args: { _guest_name: string; _guest_phone: string; _total: number }
-        Returns: boolean
-      }
-      validate_order_item: {
-        Args: { _menu_item_id: string; _quantity: number; _unit_price: number }
         Returns: boolean
       }
     }

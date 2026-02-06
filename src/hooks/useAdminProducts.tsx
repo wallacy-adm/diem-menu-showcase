@@ -1,8 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-export type HighlightLevel = 'Leve' | 'Destaque' | 'Super Destaque';
-
 export interface Product {
   id: string;
   name: string;
@@ -14,10 +12,6 @@ export interface Product {
   visible: boolean;
   sort_order: number;
   featured: boolean;
-  highlight_level: HighlightLevel;
-  highlight_enabled: boolean;
-  image_position_y: number;
-  image_zoom: number;
 }
 
 export function useAdminProducts() {

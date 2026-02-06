@@ -1,15 +1,8 @@
 import { useState } from "react";
-import { Plus, Pencil, Trash2, ArrowUp, ArrowDown, Sparkles } from "lucide-react";
+import { Plus, Pencil, Trash2, ArrowUp, ArrowDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,33 +14,15 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { useAdminCategories, HighlightLevel } from "@/hooks/useAdminCategories";
-import { cn } from "@/lib/utils";
+import { useAdminCategories } from "@/hooks/useAdminCategories";
 
 export function CategoriesSection() {
   const { toast } = useToast();
-  const { categories, addCategory, updateCategory, deleteCategory, toggleVisible, reorderCategories, toggleHighlight, updateHighlightLevel, isLoading } = useAdminCategories();
+  const { categories, addCategory, updateCategory, deleteCategory, toggleVisible, reorderCategories, isLoading } = useAdminCategories();
   const [newCategoryName, setNewCategoryName] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");
-  const [editingEmoji, setEditingEmoji] = useState("");
   const [deleteId, setDeleteId] = useState<string | null>(null);
-
-  const handleHighlightLevelChange = async (categoryId: string, level: HighlightLevel) => {
-    try {
-      await updateHighlightLevel({ id: categoryId, level });
-      toast({
-        title: "✅ Atualizado!",
-        description: "Nível de destaque atualizado.",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Erro",
-        description: error.message || "Não foi possível atualizar o nível de destaque.",
-        variant: "destructive",
-      });
-    }
-  };
 
   const handleAddCategory = async () => {
     if (!newCategoryName.trim()) {
@@ -91,10 +66,9 @@ export function CategoriesSection() {
     }
   };
 
-  const handleStartEdit = (id: string, name: string, emoji: string) => {
+  const handleStartEdit = (id: string, name: string) => {
     setEditingId(id);
     setEditingName(name);
-    setEditingEmoji(emoji);
   };
 
   const handleSaveEdit = async () => {
@@ -109,18 +83,13 @@ export function CategoriesSection() {
 
     if (editingId) {
       try {
-        const updates: { name: string; emoji?: string } = { name: editingName.trim() };
-        if (editingEmoji.trim()) {
-          updates.emoji = editingEmoji.trim();
-        }
-        await updateCategory({ id: editingId, updates });
+        await updateCategory({ id: editingId, updates: { name: editingName.trim() } });
         toast({
           title: "✅ Sucesso!",
           description: "Categoria atualizada com sucesso!",
         });
         setEditingId(null);
         setEditingName("");
-        setEditingEmoji("");
       } catch (error: any) {
         toast({
           title: "Erro",
@@ -134,7 +103,6 @@ export function CategoriesSection() {
   const handleCancelEdit = () => {
     setEditingId(null);
     setEditingName("");
-    setEditingEmoji("");
   };
 
   const handleDeleteClick = (id: string) => {
@@ -200,22 +168,6 @@ export function CategoriesSection() {
     }
   };
 
-  const handleToggleHighlight = async (id: string) => {
-    try {
-      await toggleHighlight(id);
-      toast({
-        title: "✅ Atualizado!",
-        description: "Destaque da categoria atualizado.",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Erro",
-        description: error.message || "Não foi possível atualizar o destaque.",
-        variant: "destructive",
-      });
-    }
-  };
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -272,18 +224,11 @@ export function CategoriesSection() {
                   </div>
                   
                   {editingId === category.id ? (
-                    <div className="flex gap-2 flex-1 items-center">
-                      <Input
-                        value={editingEmoji}
-                        onChange={(e) => setEditingEmoji(e.target.value)}
-                        placeholder="Emoji"
-                        className="w-16 text-center text-lg"
-                      />
+                    <div className="flex gap-2 flex-1">
                       <Input
                         value={editingName}
                         onChange={(e) => setEditingName(e.target.value)}
                         onKeyPress={(e) => e.key === "Enter" && handleSaveEdit()}
-                        placeholder="Nome da categoria"
                         className="flex-1"
                         autoFocus
                       />
@@ -307,40 +252,6 @@ export function CategoriesSection() {
                 {/* Status & Actions */}
                 {editingId !== category.id && (
                   <div className="flex items-center gap-4">
-                    {/* Highlight Toggle */}
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => handleToggleHighlight(category.id)}
-                        className={cn(
-                          "flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium transition-colors",
-                          category.highlight 
-                            ? "bg-primary/20 text-primary hover:bg-primary/30" 
-                            : "bg-muted text-muted-foreground hover:bg-muted/80"
-                        )}
-                        title={category.highlight ? "Desativar destaque" : "Ativar destaque"}
-                      >
-                        <Sparkles className="w-3.5 h-3.5" />
-                        {category.highlight ? "Destaque" : "Normal"}
-                      </button>
-                    </div>
-
-                    {/* Highlight Level Selector - only show when highlight is active */}
-                    {category.highlight && (
-                      <Select
-                        value={category.highlight_level || 'Leve'}
-                        onValueChange={(value) => handleHighlightLevelChange(category.id, value as HighlightLevel)}
-                      >
-                        <SelectTrigger className="w-[130px] h-8 text-xs">
-                          <SelectValue placeholder="Nível" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Leve">🌿 Leve</SelectItem>
-                          <SelectItem value="Destaque">✨ Destaque</SelectItem>
-                          <SelectItem value="Super Destaque">🔥 Super Destaque</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    )}
-
                     {/* Status */}
                     <div className="flex items-center gap-2">
                       <Switch
@@ -379,7 +290,7 @@ export function CategoriesSection() {
                       <Button 
                         variant="ghost" 
                         size="sm"
-                        onClick={() => handleStartEdit(category.id, category.name, category.emoji)}
+                        onClick={() => handleStartEdit(category.id, category.name)}
                       >
                         <Pencil className="w-4 h-4" />
                       </Button>
