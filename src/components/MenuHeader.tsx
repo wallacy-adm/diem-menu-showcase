@@ -69,7 +69,7 @@ export const MenuHeader = () => {
           decoding="async"
           fetchPriority="high"
           className="absolute inset-0 w-full h-full object-cover"
-          style={{ zIndex: 1, opacity: showBackground ? 1 : 0 }}
+          style={{ zIndex: 1 }}
           onError={() => {
             // Fall back to local asset; never hide/unmount
             setBgSrc(fallbackHeroImage);
