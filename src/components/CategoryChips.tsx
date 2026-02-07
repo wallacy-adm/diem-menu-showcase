@@ -1,8 +1,15 @@
 import { useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
+type HighlightLevel = 'Leve' | 'Destaque' | 'Super Destaque';
+
 interface CategoryChipsProps {
-  categories: Array<{ name: string; emoji: string }>;
+  categories: Array<{ 
+    name: string; 
+    emoji: string; 
+    highlight?: boolean;
+    highlight_level?: HighlightLevel;
+  }>;
   activeCategory: string;
   onCategoryClick: (category: string) => void;
 }
@@ -36,6 +43,28 @@ export const CategoryChips = ({
     });
   }, [activeCategory]);
 
+  // Get emoji animation class based on highlight level
+  const getEmojiAnimationClass = (highlight?: boolean, level?: HighlightLevel) => {
+    if (!highlight) return '';
+    switch (level) {
+      case 'Super Destaque': return 'animate-emoji-super';
+      case 'Destaque': return 'animate-emoji-destaque';
+      case 'Leve':
+      default: return 'animate-emoji-leve';
+    }
+  };
+
+  // Get chip glow class based on highlight level
+  const getChipGlowClass = (highlight?: boolean, level?: HighlightLevel) => {
+    if (!highlight) return '';
+    switch (level) {
+      case 'Super Destaque': return 'animate-category-glow-super';
+      case 'Destaque': return 'animate-category-glow-destaque';
+      case 'Leve':
+      default: return 'animate-category-glow-leve';
+    }
+  };
+
   return (
     <nav className="sticky top-0 z-40 bg-[#0C0C0C] border-b border-[#1f1f1f]">
       <div
@@ -48,29 +77,39 @@ export const CategoryChips = ({
         role="tablist"
         aria-label="Categorias"
       >
-        {categories.map((category) => (
-          <button
-            key={category.name}
-            ref={(el) => {
-              if (el) chipRefs.current.set(category.name, el);
-            }}
-            onClick={() => onCategoryClick(category.name)}
-            className={cn(
-              "whitespace-nowrap px-3.5 py-2.5 rounded-full text-[14px] transition-all flex-shrink-0",
-              activeCategory === category.name
-                ? "bg-[#00D084] text-black border border-[#00D084] shadow-[0_2px_0_0_#00D084]"
-                : "bg-[#14161a] text-white border border-[#2a2f36]"
-            )}
-            style={{
-              fontWeight: activeCategory === category.name ? 800 : 400,
-            }}
-            role="tab"
-            aria-selected={activeCategory === category.name}
-            aria-label={`Ver categoria ${category.name}`}
-          >
-            {category.emoji} {category.name}
-          </button>
-        ))}
+        {categories.map((category) => {
+          const isActive = activeCategory === category.name;
+          const isHighlighted = category.highlight && !isActive;
+          const emojiAnimationClass = getEmojiAnimationClass(category.highlight, category.highlight_level);
+          const chipGlowClass = !isActive ? getChipGlowClass(category.highlight, category.highlight_level) : '';
+          
+          return (
+            <button
+              key={category.name}
+              ref={(el) => {
+                if (el) chipRefs.current.set(category.name, el);
+              }}
+              onClick={() => onCategoryClick(category.name)}
+              className={cn(
+                "whitespace-nowrap px-3.5 py-2.5 rounded-full text-[14px] transition-all flex-shrink-0",
+                isActive
+                  ? "bg-[#00D084] text-black border border-[#00D084] shadow-[0_2px_0_0_#00D084]"
+                  : isHighlighted
+                    ? "bg-[#14161a] text-white border border-[#00D084]/50"
+                    : "bg-[#14161a] text-white border border-[#2a2f36]",
+                chipGlowClass
+              )}
+              style={{
+                fontWeight: isActive ? 800 : isHighlighted ? 600 : 400,
+              }}
+              role="tab"
+              aria-selected={isActive}
+              aria-label={`Ver categoria ${category.name}`}
+            >
+              <span className={emojiAnimationClass}>{category.emoji}</span> {category.name}
+            </button>
+          );
+        })}
       </div>
     </nav>
   );

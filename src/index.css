@@ -51,6 +51,9 @@ All colors MUST be HSL.
 
     /* Transitions */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Highlight animation color */
+    --highlight-glow: 160 100% 41%;
   }
 }
 
@@ -62,16 +65,25 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-tap-highlight-color: transparent;
   }
 
-  /* Smooth scrolling */
+  /* Smooth scrolling with better performance */
   html {
     scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Prevent layout shifts during scroll */
+  main, section {
+    contain: layout style;
   }
 
   /* Custom scrollbar */
   ::-webkit-scrollbar {
-    width: 8px;
+    width: 6px;
   }
 
   ::-webkit-scrollbar-track {
@@ -80,12 +92,252 @@ All colors MUST be HSL.
 
   ::-webkit-scrollbar-thumb {
     background: hsl(var(--muted));
-    border-radius: 4px;
+    border-radius: 3px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
     background: hsl(var(--primary));
   }
+}
+
+/* Highlight animation for featured categories */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 4px 1px hsl(var(--highlight-glow) / 0.4);
+  }
+  50% {
+    box-shadow: 0 0 8px 2px hsl(var(--highlight-glow) / 0.6);
+  }
+}
+
+.animate-highlight-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Category highlight glow - 3 intensity levels */
+@keyframes category-glow-leve {
+  0%, 100% {
+    box-shadow: 0 0 4px 1px hsl(var(--highlight-glow) / 0.3);
+  }
+  50% {
+    box-shadow: 0 0 6px 2px hsl(var(--highlight-glow) / 0.45);
+  }
+}
+
+@keyframes category-glow-destaque {
+  0%, 100% {
+    box-shadow: 0 0 6px 2px hsl(var(--highlight-glow) / 0.4);
+  }
+  50% {
+    box-shadow: 0 0 12px 3px hsl(var(--highlight-glow) / 0.6);
+  }
+}
+
+@keyframes category-glow-super {
+  0%, 100% {
+    box-shadow: 0 0 8px 3px hsl(var(--highlight-glow) / 0.5);
+  }
+  50% {
+    box-shadow: 0 0 18px 5px hsl(var(--highlight-glow) / 0.75);
+  }
+}
+
+.animate-category-glow-leve {
+  animation: category-glow-leve 3s ease-in-out infinite;
+}
+
+.animate-category-glow-destaque {
+  animation: category-glow-destaque 2.2s ease-in-out infinite;
+}
+
+.animate-category-glow-super {
+  animation: category-glow-super 1.6s ease-in-out infinite;
+}
+
+/* Organic emoji animations - flame-like organic movement */
+/* Level 1: Leve - very subtle breathing */
+@keyframes emoji-float-leve {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg) scale(1);
+  }
+  25% {
+    transform: translateY(-1px) rotate(0.5deg) scale(1.01);
+  }
+  50% {
+    transform: translateY(-1.5px) rotate(-0.5deg) scale(1.02);
+  }
+  75% {
+    transform: translateY(-0.5px) rotate(0.3deg) scale(1.01);
+  }
+}
+
+/* Level 2: Destaque - visible organic movement */
+@keyframes emoji-float-destaque {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg) scale(1);
+    filter: brightness(1);
+  }
+  20% {
+    transform: translateY(-2px) rotate(1deg) scale(1.03);
+    filter: brightness(1.05);
+  }
+  40% {
+    transform: translateY(-3px) rotate(-0.8deg) scale(1.05);
+    filter: brightness(1.1);
+  }
+  60% {
+    transform: translateY(-2px) rotate(0.5deg) scale(1.04);
+    filter: brightness(1.05);
+  }
+  80% {
+    transform: translateY(-1px) rotate(-0.3deg) scale(1.02);
+    filter: brightness(1.02);
+  }
+}
+
+/* Level 3: Super Destaque - strong flame-like movement */
+@keyframes emoji-float-super {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg) scale(1);
+    filter: brightness(1) drop-shadow(0 0 2px hsl(var(--primary) / 0.4));
+  }
+  15% {
+    transform: translateY(-3px) rotate(1.5deg) scale(1.05);
+    filter: brightness(1.1) drop-shadow(0 0 4px hsl(var(--primary) / 0.5));
+  }
+  30% {
+    transform: translateY(-5px) rotate(-1deg) scale(1.08);
+    filter: brightness(1.15) drop-shadow(0 0 6px hsl(var(--primary) / 0.6));
+  }
+  50% {
+    transform: translateY(-4px) rotate(1.2deg) scale(1.06);
+    filter: brightness(1.12) drop-shadow(0 0 5px hsl(var(--primary) / 0.55));
+  }
+  70% {
+    transform: translateY(-2px) rotate(-0.8deg) scale(1.04);
+    filter: brightness(1.08) drop-shadow(0 0 3px hsl(var(--primary) / 0.45));
+  }
+  85% {
+    transform: translateY(-1px) rotate(0.5deg) scale(1.02);
+    filter: brightness(1.04) drop-shadow(0 0 2px hsl(var(--primary) / 0.4));
+  }
+}
+
+.animate-emoji-leve {
+  animation: emoji-float-leve 4s ease-in-out infinite;
+  display: inline-block;
+}
+
+.animate-emoji-destaque {
+  animation: emoji-float-destaque 2.8s ease-in-out infinite;
+  display: inline-block;
+}
+
+.animate-emoji-super {
+  animation: emoji-float-super 2s ease-in-out infinite;
+  display: inline-block;
+}
+
+/* Pulse animations for featured products - 3 intensity levels */
+/* Level 1: Leve - Subtle, slow breathing */
+@keyframes product-pulse-leve {
+  0%, 100% {
+    box-shadow: 0 0 0 0 hsl(var(--primary) / 0);
+  }
+  50% {
+    box-shadow: 0 0 6px 1px hsl(var(--primary) / 0.15);
+  }
+}
+
+.animate-product-pulse-leve {
+  animation: product-pulse-leve 3.5s ease-in-out infinite;
+}
+
+/* Level 2: Destaque - Medium intensity */
+@keyframes product-pulse-destaque {
+  0%, 100% {
+    box-shadow: 0 0 0 0 hsl(var(--primary) / 0);
+  }
+  50% {
+    box-shadow: 0 0 12px 2px hsl(var(--primary) / 0.25);
+  }
+}
+
+.animate-product-pulse-destaque {
+  animation: product-pulse-destaque 2.5s ease-in-out infinite;
+}
+
+/* Level 3: Super Destaque - Strong, fast, attention-grabbing */
+@keyframes product-pulse-super {
+  0%, 100% {
+    box-shadow: 0 0 0 0 hsl(var(--primary) / 0);
+  }
+  50% {
+    box-shadow: 0 0 18px 4px hsl(var(--primary) / 0.4);
+  }
+}
+
+.animate-product-pulse-super {
+  animation: product-pulse-super 1.8s ease-in-out infinite;
+}
+
+/* Backwards compatibility */
+.animate-product-pulse {
+  animation: product-pulse-destaque 2.5s ease-in-out infinite;
+}
+
+/* Timer pulse animations - 3 intensity levels */
+/* Level 1: Leve */
+@keyframes timer-pulse-leve {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(255, 140, 0, 0.2);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 4px 1px rgba(255, 140, 0, 0.3);
+    transform: scale(1.01);
+  }
+}
+
+.animate-timer-pulse-leve {
+  animation: timer-pulse-leve 2.5s ease-in-out infinite;
+}
+
+/* Level 2: Destaque */
+@keyframes timer-pulse-destaque {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(255, 140, 0, 0.3);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 8px 3px rgba(255, 140, 0, 0.5);
+    transform: scale(1.02);
+  }
+}
+
+.animate-timer-pulse-destaque {
+  animation: timer-pulse-destaque 1.8s ease-in-out infinite;
+}
+
+/* Level 3: Super Destaque */
+@keyframes timer-pulse-super {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(255, 140, 0, 0.4);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 12px 5px rgba(255, 140, 0, 0.7);
+    transform: scale(1.03);
+  }
+}
+
+.animate-timer-pulse-super {
+  animation: timer-pulse-super 1.3s ease-in-out infinite;
+}
+
+/* Backwards compatibility */
+.animate-timer-pulse {
+  animation: timer-pulse-destaque 1.8s ease-in-out infinite;
 }
 
 @layer utilities {

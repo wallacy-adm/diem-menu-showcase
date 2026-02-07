@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { X } from "lucide-react";
+import { X, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,8 +12,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useAdminProducts } from "@/hooks/useAdminProducts";
-import type { PromotionWithProduct } from "@/hooks/useAdminPromotions";
+import type { PromotionWithProduct, HighlightLevel } from "@/hooks/useAdminPromotions";
+import { format, addDays } from "date-fns";
 
 interface PromotionModalProps {
   isOpen: boolean;
@@ -24,12 +31,24 @@ interface PromotionModalProps {
 
 export function PromotionModal({ isOpen, onClose, onSave, promotion }: PromotionModalProps) {
   const { products } = useAdminProducts();
+  
+  const getDefaultDates = () => {
+    const now = new Date();
+    const startDate = format(now, "yyyy-MM-dd'T'HH:mm");
+    const endDate = format(addDays(now, 7), "yyyy-MM-dd'T'HH:mm");
+    return { startDate, endDate };
+  };
+
   const [formData, setFormData] = useState({
     name: "",
     description: "",
     discount_percentage: "0",
     product_id: "",
     active: true,
+    start_date: getDefaultDates().startDate,
+    end_date: getDefaultDates().endDate,
+    highlight_level: "Leve" as HighlightLevel,
+    sort_order: "0",
   });
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
 
@@ -41,20 +60,29 @@ export function PromotionModal({ isOpen, onClose, onSave, promotion }: Promotion
         discount_percentage: promotion.discount_percentage.toString(),
         product_id: promotion.product_id,
         active: promotion.active,
+        start_date: format(new Date(promotion.start_date), "yyyy-MM-dd'T'HH:mm"),
+        end_date: format(new Date(promotion.end_date), "yyyy-MM-dd'T'HH:mm"),
+        highlight_level: promotion.highlight_level || "Leve",
+        sort_order: (promotion as any).sort_order?.toString() || "0",
       });
       const product = products.find(p => p.id === promotion.product_id);
       setSelectedProduct(product);
     } else {
+      const { startDate, endDate } = getDefaultDates();
       setFormData({
         name: "",
         description: "",
         discount_percentage: "0",
         product_id: "",
         active: true,
+        start_date: startDate,
+        end_date: endDate,
+        highlight_level: "Leve",
+        sort_order: "0",
       });
       setSelectedProduct(null);
     }
-  }, [promotion, products]);
+  }, [promotion, products, isOpen]);
 
   const handleProductChange = (productId: string) => {
     setFormData({ ...formData, product_id: productId });
@@ -74,6 +102,9 @@ export function PromotionModal({ isOpen, onClose, onSave, promotion }: Promotion
     const data = {
       ...formData,
       discount_percentage: parseFloat(formData.discount_percentage),
+      start_date: new Date(formData.start_date).toISOString(),
+      end_date: new Date(formData.end_date).toISOString(),
+      sort_order: parseInt(formData.sort_order) || 0,
     };
 
     if (promotion) {
@@ -83,26 +114,16 @@ export function PromotionModal({ isOpen, onClose, onSave, promotion }: Promotion
     }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-card rounded-lg shadow-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-border">
-          <h2 className="text-xl font-bold text-foreground">
+    <Dialog open={isOpen} onOpenChange={onClose} modal>
+      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto overflow-x-visible">
+        <DialogHeader>
+          <DialogTitle className="text-xl font-bold">
             {promotion ? "Editar Promoção" : "Nova Promoção"}
-          </h2>
-          <button
-            onClick={onClose}
-            className="text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+          </DialogTitle>
+        </DialogHeader>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           {/* Name */}
           <div className="space-y-2">
             <Label htmlFor="name">Nome da Promoção *</Label>
@@ -123,7 +144,7 @@ export function PromotionModal({ isOpen, onClose, onSave, promotion }: Promotion
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               placeholder="Descrição da promoção..."
-              rows={3}
+              rows={2}
             />
           </div>
 
@@ -135,10 +156,10 @@ export function PromotionModal({ isOpen, onClose, onSave, promotion }: Promotion
               onValueChange={handleProductChange}
               required
             >
-              <SelectTrigger>
+              <SelectTrigger className="bg-background border-border">
                 <SelectValue placeholder="Selecione um produto" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="z-[200] bg-popover" position="popper" sideOffset={4}>
                 {products.map((product) => (
                   <SelectItem key={product.id} value={product.id}>
                     {product.name} - R$ {product.price.toFixed(2)}
@@ -164,6 +185,52 @@ export function PromotionModal({ isOpen, onClose, onSave, promotion }: Promotion
             />
           </div>
 
+          {/* Sort Order */}
+          <div className="space-y-2">
+            <Label htmlFor="sort_order">Ordem da Promoção</Label>
+            <Input
+              id="sort_order"
+              type="number"
+              min="0"
+              value={formData.sort_order}
+              onChange={(e) => setFormData({ ...formData, sort_order: e.target.value })}
+              placeholder="Ex: 1"
+            />
+            <p className="text-xs text-muted-foreground">
+              Número menor aparece primeiro no cardápio (1 → 2 → 3...)
+            </p>
+          </div>
+
+          {/* Date Range */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <Label htmlFor="start_date" className="flex items-center gap-1">
+                <Calendar className="w-3 h-3" />
+                Data Início *
+              </Label>
+              <Input
+                id="start_date"
+                type="datetime-local"
+                value={formData.start_date}
+                onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="end_date" className="flex items-center gap-1">
+                <Calendar className="w-3 h-3" />
+                Data Fim *
+              </Label>
+              <Input
+                id="end_date"
+                type="datetime-local"
+                value={formData.end_date}
+                onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+                required
+              />
+            </div>
+          </div>
+
           {/* Price Preview */}
           {selectedProduct && formData.discount_percentage && (
             <div className="bg-muted/50 rounded-lg p-4 space-y-2">
@@ -182,9 +249,30 @@ export function PromotionModal({ isOpen, onClose, onSave, promotion }: Promotion
             </div>
           )}
 
+          {/* Highlight Level */}
+          <div className="space-y-2">
+            <Label htmlFor="highlight_level">Nível de Destaque</Label>
+            <p className="text-xs text-muted-foreground">
+              Define a intensidade da animação de destaque no cardápio
+            </p>
+            <Select
+              value={formData.highlight_level}
+              onValueChange={(value: HighlightLevel) => setFormData({ ...formData, highlight_level: value })}
+            >
+              <SelectTrigger className="bg-background border-border">
+                <SelectValue placeholder="Selecione o nível" />
+              </SelectTrigger>
+              <SelectContent className="z-[200] bg-popover" position="popper" sideOffset={4}>
+                <SelectItem value="Leve">Leve</SelectItem>
+                <SelectItem value="Destaque">Destaque</SelectItem>
+                <SelectItem value="Super Destaque">Super Destaque</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           {/* Active Status */}
-          <div className="flex items-center justify-between">
-            <Label htmlFor="active">Status da Promoção</Label>
+          <div className="flex items-center justify-between p-3 bg-secondary rounded-lg">
+            <Label htmlFor="active">Promoção Habilitada</Label>
             <div className="flex items-center gap-2">
               <Switch
                 id="active"
@@ -192,13 +280,13 @@ export function PromotionModal({ isOpen, onClose, onSave, promotion }: Promotion
                 onCheckedChange={(checked) => setFormData({ ...formData, active: checked })}
               />
               <span className="text-sm text-muted-foreground">
-                {formData.active ? "Ativa" : "Inativa"}
+                {formData.active ? "Sim" : "Não"}
               </span>
             </div>
           </div>
 
           {/* Actions */}
-          <div className="flex gap-3 pt-4">
+          <div className="flex gap-3 pt-2">
             <Button
               type="button"
               variant="outline"
@@ -212,7 +300,7 @@ export function PromotionModal({ isOpen, onClose, onSave, promotion }: Promotion
             </Button>
           </div>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

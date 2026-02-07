@@ -7,6 +7,8 @@ import { ProductCard } from "@/components/ProductCard";
 import { MenuFooter } from "@/components/MenuFooter";
 import { Loader2, Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { useActivePromotions, HighlightLevel } from "@/hooks/useActivePromotions";
+import { cn } from "@/lib/utils";
 
 const Index = () => {
   const [activeCategory, setActiveCategory] = useState("");
@@ -42,6 +44,8 @@ const Index = () => {
       return data;
     },
   });
+
+  const { data: activePromotions } = useActivePromotions();
 
   const isLoading = categoriesLoading || itemsLoading;
 
@@ -200,7 +204,12 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <MenuHeader />
       <CategoryChips
-        categories={categories.map((cat) => ({ name: cat.name, emoji: cat.emoji }))}
+        categories={categories.map((cat) => ({ 
+          name: cat.name, 
+          emoji: cat.emoji,
+          highlight: cat.highlight,
+          highlight_level: cat.highlight_level as 'Leve' | 'Destaque' | 'Super Destaque'
+        }))}
         activeCategory={activeCategory}
         onCategoryClick={handleCategoryClick}
       />
@@ -244,29 +253,94 @@ const Index = () => {
               className="mb-10"
               style={{ scrollMarginTop: "72px" }}
             >
-              <h2
-                className="text-xl font-extrabold text-white mb-5 uppercase tracking-wide flex items-center gap-2"
-                style={{ fontWeight: 800 }}
-              >
-                <span className="text-2xl">{category.emoji}</span>
-                {category.name}
-                <span className="text-2xl">{category.emoji}</span>
-              </h2>
+              {(() => {
+                // Get emoji animation class for section header
+                const getEmojiClass = () => {
+                  if (!category.highlight) return '';
+                  switch (category.highlight_level) {
+                    case 'Super Destaque': return 'animate-emoji-super';
+                    case 'Destaque': return 'animate-emoji-destaque';
+                    case 'Leve':
+                    default: return 'animate-emoji-leve';
+                  }
+                };
+                
+                // Get section header glow class based on highlight level
+                const getSectionGlowClass = () => {
+                  if (!category.highlight) return '';
+                  switch (category.highlight_level) {
+                    case 'Super Destaque': return 'animate-category-glow-super rounded-lg px-3 py-1';
+                    case 'Destaque': return 'animate-category-glow-destaque rounded-lg px-3 py-1';
+                    case 'Leve':
+                    default: return 'animate-category-glow-leve rounded-lg px-3 py-1';
+                  }
+                };
+                
+                const emojiClass = getEmojiClass();
+                const sectionGlowClass = getSectionGlowClass();
+                
+                return (
+                  <h2
+                    className={cn(
+                      "text-xl font-extrabold text-white mb-5 uppercase tracking-wide flex items-center gap-2 w-fit",
+                      sectionGlowClass
+                    )}
+                    style={{ fontWeight: 800 }}
+                  >
+                    <span className={`text-2xl ${emojiClass}`}>{category.emoji}</span>
+                    {category.name}
+                    <span className={`text-2xl ${emojiClass}`}>{category.emoji}</span>
+                  </h2>
+                );
+              })()}
 
               {items.length > 0 ? (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
-                  {items.map((item) => (
-                    <ProductCard
-                      key={item.id}
-                      id={item.id}
-                      name={item.name}
-                      description={item.description}
-                      price={Number(item.price)}
-                      oldPrice={item.old_price ? Number(item.old_price) : undefined}
-                      image={item.image}
-                      category={item.category}
-                    />
-                  ))}
+                  {items.map((item) => {
+                    // Check if this product has an active promotion
+                    const promotion = activePromotions?.get(item.id);
+                    const displayPrice = promotion ? promotion.discounted_price : Number(item.price);
+                    const displayOldPrice = promotion ? promotion.original_price : (item.old_price ? Number(item.old_price) : undefined);
+                    const promotionName = promotion ? promotion.name : undefined;
+                    const promotionEndDate = promotion ? promotion.end_date : undefined;
+                    
+                    // Category highlight is the primary rule - if category has highlight, product inherits it
+                    const categoryHasHighlight = category.highlight === true;
+                    const categoryHighlightLevel = category.highlight_level as HighlightLevel;
+                    
+                    // If product has active promotion, highlight is ALWAYS applied
+                    // Use promotion's highlight level when there's an active promotion
+                    // Otherwise use category's highlight level (if category has highlight)
+                    // Otherwise use product's own highlight level
+                    const effectiveHighlightLevel: HighlightLevel = promotion 
+                      ? (promotion.highlight_level as HighlightLevel)
+                      : categoryHasHighlight 
+                        ? categoryHighlightLevel 
+                        : (item.highlight_level as HighlightLevel);
+                    
+                    // Active promotion forces highlight to be visible
+                    const forceHighlightFromPromotion = !!promotion;
+                    
+                    return (
+                      <ProductCard
+                        key={item.id}
+                        id={item.id}
+                        name={item.name}
+                        description={item.description}
+                        price={displayPrice}
+                        oldPrice={displayOldPrice}
+                        image={item.image}
+                        category={item.category}
+                        promotionName={promotionName}
+                        promotionEndDate={promotionEndDate}
+                        featured={item.featured}
+                        highlightLevel={effectiveHighlightLevel}
+                        categoryHighlight={categoryHasHighlight || forceHighlightFromPromotion}
+                        imagePositionY={item.image_position_y ?? 50}
+                        imageZoom={item.image_zoom ?? 1.0}
+                      />
+                    );
+                  })}
                 </div>
               ) : (
                 <p className="text-[#b3b3b3] text-sm text-center py-8">

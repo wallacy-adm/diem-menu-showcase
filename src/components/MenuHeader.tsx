@@ -23,17 +23,23 @@ export const MenuHeader = () => {
   });
 
   // Use dynamic images from settings, fallback to local assets
-  const backgroundImage = settings?.bg_url || fallbackHeroImage;
-  const logoImage = settings?.logo_url || fallbackLogoImage;
+  // Respect show_logo and show_bg toggles
+  const showBackground = settings?.show_bg !== false;
+  const showLogo = settings?.show_logo !== false;
+  const backgroundImage = showBackground ? (settings?.bg_url || fallbackHeroImage) : null;
+  const logoImage = showLogo ? (settings?.logo_url || fallbackLogoImage) : null;
 
   return (
     <>
       <header className="relative min-h-[240px] overflow-hidden bg-black">
-        {/* Hero Background Image with Gradient Overlay */}
+        {/* Hero Background Image with Gradient Overlay - Always maintain structure */}
         <div 
-          className="absolute inset-0 bg-cover bg-center brightness-110"
+          className="absolute inset-0 bg-cover bg-center"
           style={{ 
-            backgroundImage: `linear-gradient(180deg, rgba(0,0,0,0.45), rgba(0,0,0,0.45)), url(${backgroundImage})`
+            backgroundImage: backgroundImage 
+              ? `linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0.3)), url(${backgroundImage})`
+              : undefined,
+            backgroundColor: backgroundImage ? undefined : '#0a0a0a'
           }}
         />
 
@@ -65,24 +71,28 @@ export const MenuHeader = () => {
           </Button>
         </div>
 
-        {/* Content Container */}
-        <div className="relative z-10 grid place-items-center text-center px-4 py-8 pb-6 max-w-[720px] mx-auto">
-          {/* Logo - Dynamic from settings */}
-          <img 
-            src={logoImage} 
-            alt={settings?.brand_name || "Carpe Diem Motel"} 
-            className="w-[120px] h-[120px] rounded-xl object-cover border-2 border-white shadow-[0_8px_20px_rgba(0,0,0,0.35)] mb-3 block"
-          />
+        {/* Content Container - Fixed structure layout */}
+        <div className="relative z-10 flex flex-col items-center text-center px-4 py-8 pb-6 max-w-[720px] mx-auto">
+          {/* Logo Space Holder - Always reserves 120px + 12px margin, never collapses */}
+          <div className="flex items-center justify-center w-[120px] h-[120px] mb-3">
+            {logoImage && (
+              <img 
+                src={logoImage} 
+                alt={settings?.brand_name || "Carpe Diem Motel"} 
+                className="w-[120px] h-[120px] rounded-xl object-cover border-2 border-white shadow-[0_8px_20px_rgba(0,0,0,0.35)]"
+              />
+            )}
+          </div>
 
-          {/* Title */}
-          <h1 className="text-[24px] leading-[1.1] text-white mb-0.5" style={{ fontWeight: 800 }}>
-            {settings?.tagline || "Aproveite o Momento!"}
-          </h1>
-
-          {/* Subtitle */}
-          <p className="text-[14px] text-[#b3b3b3]">
-            {settings?.brand_name || "Carpe Diem Motel"} – {settings?.address || "BR-104, Km 118, Lagoa Seca – PB"}
-          </p>
+          {/* Slogan Block - Fixed position, never moves */}
+          <div className="flex flex-col items-center justify-center">
+            <h1 className="text-[24px] leading-[1.1] text-white mb-0.5" style={{ fontWeight: 800 }}>
+              {settings?.tagline || "Aproveite o Momento!"}
+            </h1>
+            <p className="text-[14px] text-[#b3b3b3]">
+              {settings?.brand_name || "Carpe Diem Motel"}
+            </p>
+          </div>
         </div>
       </header>
 
