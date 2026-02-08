@@ -56,6 +56,7 @@ export type Database = {
           created_at: string
           description: string
           featured: boolean
+          highlight_enabled: boolean
           highlight_level: string
           id: string
           image: string
@@ -73,6 +74,7 @@ export type Database = {
           created_at?: string
           description: string
           featured?: boolean
+          highlight_enabled?: boolean
           highlight_level?: string
           id?: string
           image: string
@@ -90,6 +92,7 @@ export type Database = {
           created_at?: string
           description?: string
           featured?: boolean
+          highlight_enabled?: boolean
           highlight_level?: string
           id?: string
           image?: string
@@ -154,6 +157,7 @@ export type Database = {
           created_at: string
           guest_name: string | null
           guest_phone: string | null
+          guest_token: string | null
           id: string
           notes: string | null
           status: string
@@ -165,6 +169,7 @@ export type Database = {
           created_at?: string
           guest_name?: string | null
           guest_phone?: string | null
+          guest_token?: string | null
           id?: string
           notes?: string | null
           status?: string
@@ -176,6 +181,7 @@ export type Database = {
           created_at?: string
           guest_name?: string | null
           guest_phone?: string | null
+          guest_token?: string | null
           id?: string
           notes?: string | null
           status?: string
@@ -347,6 +353,14 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      validate_order: {
+        Args: { _guest_name: string; _guest_phone: string; _total: number }
+        Returns: boolean
+      }
+      validate_order_item: {
+        Args: { _menu_item_id: string; _quantity: number; _unit_price: number }
         Returns: boolean
       }
     }
