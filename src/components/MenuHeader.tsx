@@ -1,16 +1,24 @@
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { InfoModal } from "./InfoModal";
 import { Button } from "./ui/button";
 import fallbackHeroImage from "@/assets/carpe-diem-hero.jpg";
 import fallbackLogoImage from "@/assets/carpe-diem-logo.png";
+import { cn } from "@/lib/utils";
 
-export const MenuHeader = () => {
+const InfoModal = lazy(() => import("./InfoModal").then((m) => ({ default: m.InfoModal })));
+
+interface MenuHeaderProps {
+  isSearchActive?: boolean;
+}
+
+export const MenuHeader = ({ isSearchActive = false }: MenuHeaderProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { data: settings } = useQuery({
     queryKey: ["settings"],
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("settings")
@@ -22,8 +30,6 @@ export const MenuHeader = () => {
     },
   });
 
-  // Use dynamic images from settings, fallback to local assets
-  // Respect show_logo and show_bg toggles
   const showBackground = settings?.show_bg !== false;
   const showLogo = settings?.show_logo !== false;
   const backgroundImage = showBackground ? (settings?.bg_url || fallbackHeroImage) : null;
@@ -31,27 +37,36 @@ export const MenuHeader = () => {
 
   return (
     <>
-      <header className="relative min-h-[240px] overflow-hidden bg-black">
-        {/* Hero Background Image with Gradient Overlay - Always maintain structure */}
-        <div 
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ 
-            backgroundImage: backgroundImage 
-              ? `linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0.3)), url(${backgroundImage})`
-              : undefined,
-            backgroundColor: backgroundImage ? undefined : '#0a0a0a'
-          }}
-        />
+      <header
+        className={cn(
+          "relative min-h-[240px] overflow-hidden bg-black transition-opacity duration-200",
+          isSearchActive ? "opacity-95" : "opacity-100"
+        )}
+      >
+        <div className="absolute inset-0">
+          {backgroundImage ? (
+            <>
+              <img
+                src={backgroundImage}
+                alt="Imagem de destaque do cardápio"
+                loading="eager"
+                fetchpriority="high"
+                decoding="async"
+                className="h-full w-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-b from-black/25 to-black/30" />
+            </>
+          ) : (
+            <div className="h-full w-full bg-[#0a0a0a]" />
+          )}
+        </div>
 
-        {/* Top Bar with Status and Info */}
         <div className="absolute top-3 left-3 right-3 z-20 flex justify-between items-center gap-2 pointer-events-none">
-          {/* Status Badge */}
           <div className="flex items-center gap-2 bg-black/55 backdrop-blur-sm px-2.5 py-1.5 rounded-full border border-[#2a2a2a] pointer-events-auto">
             <div className="w-2 h-2 bg-[#d6f5e6] rounded-full animate-pulse" />
             <span className="text-[#d6f5e6] text-xs">Aberto</span>
           </div>
 
-          {/* Info Button */}
           <Button
             onClick={() => setIsModalOpen(true)}
             onTouchStart={(e) => {
@@ -64,43 +79,40 @@ export const MenuHeader = () => {
             }}
             size="sm"
             className="bg-black/55 backdrop-blur-sm border border-[#2a2a2a] hover:bg-black/70 active:bg-black/80 rounded-[10px] px-2.5 py-1.5 h-auto text-xs text-white touch-manipulation pointer-events-auto cursor-pointer select-none"
-            style={{ WebkitTapHighlightColor: 'transparent' }}
+            style={{ WebkitTapHighlightColor: "transparent" }}
             aria-label="Informações"
           >
             ℹ️ Informação
           </Button>
         </div>
 
-        {/* Content Container - Fixed structure layout */}
         <div className="relative z-10 flex flex-col items-center text-center px-4 py-8 pb-6 max-w-[720px] mx-auto">
-          {/* Logo Space Holder - Always reserves 120px + 12px margin, never collapses */}
           <div className="flex items-center justify-center w-[120px] h-[120px] mb-3">
             {logoImage && (
-              <img 
-                src={logoImage} 
-                alt={settings?.brand_name || "Carpe Diem Motel"} 
+              <img
+                src={logoImage}
+                alt={settings?.brand_name || "Carpe Diem Motel"}
+                loading="eager"
+                decoding="async"
                 className="w-[120px] h-[120px] rounded-xl object-cover border-2 border-white shadow-[0_8px_20px_rgba(0,0,0,0.35)]"
               />
             )}
           </div>
 
-          {/* Slogan Block - Fixed position, never moves */}
           <div className="flex flex-col items-center justify-center">
             <h1 className="text-[24px] leading-[1.1] text-white mb-0.5" style={{ fontWeight: 800 }}>
               {settings?.tagline || "Aproveite o Momento!"}
             </h1>
-            <p className="text-[14px] text-[#b3b3b3]">
-              {settings?.brand_name || "Carpe Diem Motel"}
-            </p>
+            <p className="text-[14px] text-[#b3b3b3]">{settings?.brand_name || "Carpe Diem Motel"}</p>
           </div>
         </div>
       </header>
 
-      <InfoModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        settings={settings}
-      />
+      {isModalOpen && (
+        <Suspense fallback={null}>
+          <InfoModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} settings={settings} />
+        </Suspense>
+      )}
     </>
   );
 };

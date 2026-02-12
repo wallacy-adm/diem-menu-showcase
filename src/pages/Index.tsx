@@ -5,26 +5,29 @@ import { MenuHeader } from "@/components/MenuHeader";
 import { CategoryChips } from "@/components/CategoryChips";
 import { ProductCard } from "@/components/ProductCard";
 import { MenuFooter } from "@/components/MenuFooter";
-import { Loader2, Search, X } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useActivePromotions, HighlightLevel } from "@/hooks/useActivePromotions";
 import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
+
+const INITIAL_VISIBLE_PRODUCTS = 12;
+const LOAD_MORE_STEP = 12;
 
 const Index = () => {
   const [activeCategory, setActiveCategory] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [visibleProductsCount, setVisibleProductsCount] = useState(INITIAL_VISIBLE_PRODUCTS);
   const sectionRefs = useRef<Map<string, HTMLElement>>(new Map());
   const isManualScrollRef = useRef(false);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const { data: categories, isLoading: categoriesLoading } = useQuery({
     queryKey: ["categories"],
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("categories")
-        .select("*")
-        .eq("visible", true)
-        .order("sort_order", { ascending: true });
+      const { data, error } = await supabase.from("categories").select("*").eq("visible", true).order("sort_order", { ascending: true });
 
       if (error) throw error;
       return data;
@@ -33,12 +36,10 @@ const Index = () => {
 
   const { data: menuItems, isLoading: itemsLoading } = useQuery({
     queryKey: ["menuItems"],
+    staleTime: 2 * 60 * 1000,
+    refetchOnWindowFocus: false,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("menu_items")
-        .select("*")
-        .eq("visible", true)
-        .order("sort_order", { ascending: true });
+      const { data, error } = await supabase.from("menu_items").select("*").eq("visible", true).order("sort_order", { ascending: true });
 
       if (error) throw error;
       return data;
@@ -49,29 +50,55 @@ const Index = () => {
 
   const isLoading = categoriesLoading || itemsLoading;
 
-  // Filter items by search query
   const filteredItems = useMemo(() => {
     if (!menuItems) return [];
     if (!searchQuery.trim()) return menuItems;
     const query = searchQuery.toLowerCase().trim();
-    return menuItems.filter(item => 
-      item.name.toLowerCase().includes(query)
-    );
+    return menuItems.filter((item) => item.name.toLowerCase().includes(query));
   }, [menuItems, searchQuery]);
 
-  const groupedItems = filteredItems?.reduce((acc, item) => {
-    if (!acc[item.category]) {
-      acc[item.category] = [];
-    }
-    acc[item.category].push(item);
-    return acc;
-  }, {} as Record<string, typeof filteredItems>);
+  const groupedItems = useMemo(() => {
+    return filteredItems?.reduce((acc, item) => {
+      if (!acc[item.category]) {
+        acc[item.category] = [];
+      }
+      acc[item.category].push(item);
+      return acc;
+    }, {} as Record<string, typeof filteredItems>);
+  }, [filteredItems]);
 
-  // Calculate active category based on scroll position
+  const limitedGroupedItems = useMemo(() => {
+    if (!categories || searchQuery.trim()) return groupedItems;
+
+    let remaining = visibleProductsCount;
+    const limited: Record<string, typeof filteredItems> = {};
+
+    categories.forEach((category) => {
+      const items = groupedItems?.[category.name] || [];
+      if (remaining <= 0) {
+        limited[category.name] = [];
+        return;
+      }
+      const slice = items.slice(0, remaining);
+      limited[category.name] = slice;
+      remaining -= slice.length;
+    });
+
+    return limited;
+  }, [categories, groupedItems, visibleProductsCount, searchQuery]);
+
+  const hasMoreProducts = !searchQuery.trim() && filteredItems.length > visibleProductsCount;
+
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setVisibleProductsCount(INITIAL_VISIBLE_PRODUCTS);
+    }
+  }, [searchQuery]);
+
   const calculateActiveCategory = useCallback(() => {
     if (!categories || categories.length === 0) return;
 
-    const navHeight = 72; // header + category bar height
+    const navHeight = 72;
     const scrollPosition = window.scrollY + navHeight + 20;
 
     let currentCategory = categories[0].name;
@@ -81,7 +108,7 @@ const Index = () => {
       if (element) {
         const rect = element.getBoundingClientRect();
         const elementTop = rect.top + window.scrollY;
-        
+
         if (elementTop <= scrollPosition) {
           currentCategory = category.name;
         }
@@ -91,37 +118,35 @@ const Index = () => {
     setActiveCategory(currentCategory);
   }, [categories]);
 
-  // Click handler - scroll to section
-  const handleCategoryClick = useCallback((category: string) => {
-    const element = sectionRefs.current.get(category);
-    if (!element) return;
+  const handleCategoryClick = useCallback(
+    (category: string) => {
+      const element = sectionRefs.current.get(category);
+      if (!element) return;
 
-    // Set manual scroll flag
-    isManualScrollRef.current = true;
-    setActiveCategory(category);
+      isManualScrollRef.current = true;
+      setActiveCategory(category);
 
-    const navHeight = 56;
-    const buffer = 16;
-    const elementPosition = element.getBoundingClientRect().top + window.scrollY;
-    const offsetPosition = elementPosition - navHeight - buffer;
+      const navHeight = 56;
+      const buffer = 16;
+      const elementPosition = element.getBoundingClientRect().top + window.scrollY;
+      const offsetPosition = elementPosition - navHeight - buffer;
 
-    window.scrollTo({
-      top: offsetPosition,
-      behavior: "smooth",
-    });
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth",
+      });
 
-    // Clear manual scroll flag after animation completes
-    if (scrollTimeoutRef.current) {
-      clearTimeout(scrollTimeoutRef.current);
-    }
-    scrollTimeoutRef.current = setTimeout(() => {
-      isManualScrollRef.current = false;
-      // Recalculate to sync with actual position
-      calculateActiveCategory();
-    }, 600);
-  }, [calculateActiveCategory]);
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+      scrollTimeoutRef.current = setTimeout(() => {
+        isManualScrollRef.current = false;
+        calculateActiveCategory();
+      }, 600);
+    },
+    [calculateActiveCategory]
+  );
 
-  // Touch/wheel event - immediately release manual scroll lock
   useEffect(() => {
     const releaseManualScroll = () => {
       if (isManualScrollRef.current) {
@@ -133,7 +158,6 @@ const Index = () => {
       }
     };
 
-    // Listen for user-initiated scroll gestures
     window.addEventListener("touchmove", releaseManualScroll, { passive: true });
     window.addEventListener("wheel", releaseManualScroll, { passive: true });
 
@@ -143,14 +167,12 @@ const Index = () => {
     };
   }, []);
 
-  // Scroll event handler with throttle
   useEffect(() => {
     if (!categories || categories.length === 0) return;
 
     let ticking = false;
 
     const handleScroll = () => {
-      // Skip only if manual scroll is active
       if (isManualScrollRef.current) return;
 
       if (!ticking) {
@@ -162,7 +184,6 @@ const Index = () => {
       }
     };
 
-    // Set initial category
     if (!activeCategory && categories.length > 0) {
       setActiveCategory(categories[0].name);
     }
@@ -177,7 +198,6 @@ const Index = () => {
     };
   }, [categories, calculateActiveCategory, activeCategory]);
 
-  // Register section ref
   const setSectionRef = useCallback((name: string, el: HTMLElement | null) => {
     if (el) {
       sectionRefs.current.set(name, el);
@@ -186,35 +206,40 @@ const Index = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="min-h-screen bg-background">
+        <div className="container mx-auto px-4 pt-6 space-y-4">
+          <Skeleton className="h-[240px] w-full rounded-2xl" />
+          <Skeleton className="h-11 w-full rounded-xl" />
+          <div className="grid gap-4 md:grid-cols-2">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <Skeleton key={index} className="h-[148px] w-full rounded-2xl" />
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
 
   if (!categories || categories.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
+      <div className="min-h-screen flex items-center justify-center bg-background text-muted-foreground">Nenhuma categoria disponível.</div>
     );
   }
 
   return (
     <div className="min-h-screen bg-background">
-      <MenuHeader />
+      <MenuHeader isSearchActive={Boolean(searchQuery.trim())} />
       <CategoryChips
-        categories={categories.map((cat) => ({ 
-          name: cat.name, 
+        categories={categories.map((cat) => ({
+          name: cat.name,
           emoji: cat.emoji,
           highlight: cat.highlight,
-          highlight_level: cat.highlight_level as 'Leve' | 'Destaque' | 'Super Destaque'
+          highlight_level: cat.highlight_level as "Leve" | "Destaque" | "Super Destaque",
         }))}
         activeCategory={activeCategory}
         onCategoryClick={handleCategoryClick}
       />
 
-      {/* Search Field */}
       <div className="container mx-auto px-4 pt-4">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -226,10 +251,7 @@ const Index = () => {
             className="pl-10 pr-10 bg-black/50 border-border/50 text-foreground placeholder:text-muted-foreground rounded-xl"
           />
           {searchQuery && (
-            <button
-              onClick={() => setSearchQuery("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-            >
+            <button onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
               <X className="h-4 w-4" />
             </button>
           )}
@@ -238,55 +260,46 @@ const Index = () => {
 
       <main className="container mx-auto px-4 py-6">
         {categories.map((category) => {
-          const items = groupedItems?.[category.name] || [];
-          
-          // Hide category completely if no items match during search
+          const items = limitedGroupedItems?.[category.name] || [];
+
           if (searchQuery.trim() && items.length === 0) {
             return null;
           }
 
           return (
-            <section
-              key={category.name}
-              ref={(el) => setSectionRef(category.name, el)}
-              data-category={category.name}
-              className="mb-10"
-              style={{ scrollMarginTop: "72px" }}
-            >
+            <section key={category.name} ref={(el) => setSectionRef(category.name, el)} data-category={category.name} className="mb-10" style={{ scrollMarginTop: "72px" }}>
               {(() => {
-                // Get emoji animation class for section header
                 const getEmojiClass = () => {
-                  if (!category.highlight) return '';
+                  if (!category.highlight) return "";
                   switch (category.highlight_level) {
-                    case 'Super Destaque': return 'animate-emoji-super';
-                    case 'Destaque': return 'animate-emoji-destaque';
-                    case 'Leve':
-                    default: return 'animate-emoji-leve';
+                    case "Super Destaque":
+                      return "animate-emoji-super";
+                    case "Destaque":
+                      return "animate-emoji-destaque";
+                    case "Leve":
+                    default:
+                      return "animate-emoji-leve";
                   }
                 };
-                
-                // Get section header glow class based on highlight level
+
                 const getSectionGlowClass = () => {
-                  if (!category.highlight) return '';
+                  if (!category.highlight) return "";
                   switch (category.highlight_level) {
-                    case 'Super Destaque': return 'animate-category-glow-super rounded-lg px-3 py-1';
-                    case 'Destaque': return 'animate-category-glow-destaque rounded-lg px-3 py-1';
-                    case 'Leve':
-                    default: return 'animate-category-glow-leve rounded-lg px-3 py-1';
+                    case "Super Destaque":
+                      return "animate-category-glow-super rounded-lg px-3 py-1";
+                    case "Destaque":
+                      return "animate-category-glow-destaque rounded-lg px-3 py-1";
+                    case "Leve":
+                    default:
+                      return "animate-category-glow-leve rounded-lg px-3 py-1";
                   }
                 };
-                
+
                 const emojiClass = getEmojiClass();
                 const sectionGlowClass = getSectionGlowClass();
-                
+
                 return (
-                  <h2
-                    className={cn(
-                      "text-xl font-extrabold text-white mb-5 uppercase tracking-wide flex items-center gap-2 w-fit",
-                      sectionGlowClass
-                    )}
-                    style={{ fontWeight: 800 }}
-                  >
+                  <h2 className={cn("text-xl font-extrabold text-white mb-5 uppercase tracking-wide flex items-center gap-2 w-fit", sectionGlowClass)} style={{ fontWeight: 800 }}>
                     <span className={`text-2xl ${emojiClass}`}>{category.emoji}</span>
                     {category.name}
                     <span className={`text-2xl ${emojiClass}`}>{category.emoji}</span>
@@ -297,30 +310,23 @@ const Index = () => {
               {items.length > 0 ? (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
                   {items.map((item) => {
-                    // Check if this product has an active promotion
                     const promotion = activePromotions?.get(item.id);
                     const displayPrice = promotion ? promotion.discounted_price : Number(item.price);
-                    const displayOldPrice = promotion ? promotion.original_price : (item.old_price ? Number(item.old_price) : undefined);
+                    const displayOldPrice = promotion ? promotion.original_price : item.old_price ? Number(item.old_price) : undefined;
                     const promotionName = promotion ? promotion.name : undefined;
                     const promotionEndDate = promotion ? promotion.end_date : undefined;
-                    
-                    // Category highlight is the primary rule - if category has highlight, product inherits it
+
                     const categoryHasHighlight = category.highlight === true;
                     const categoryHighlightLevel = category.highlight_level as HighlightLevel;
-                    
-                    // If product has active promotion, highlight is ALWAYS applied
-                    // Use promotion's highlight level when there's an active promotion
-                    // Otherwise use category's highlight level (if category has highlight)
-                    // Otherwise use product's own highlight level
-                    const effectiveHighlightLevel: HighlightLevel = promotion 
+
+                    const effectiveHighlightLevel: HighlightLevel = promotion
                       ? (promotion.highlight_level as HighlightLevel)
-                      : categoryHasHighlight 
-                        ? categoryHighlightLevel 
+                      : categoryHasHighlight
+                        ? categoryHighlightLevel
                         : (item.highlight_level as HighlightLevel);
-                    
-                    // Active promotion forces highlight to be visible
+
                     const forceHighlightFromPromotion = !!promotion;
-                    
+
                     return (
                       <ProductCard
                         key={item.id}
@@ -343,13 +349,22 @@ const Index = () => {
                   })}
                 </div>
               ) : (
-                <p className="text-[#b3b3b3] text-sm text-center py-8">
-                  Nenhum produto disponível nesta categoria no momento.
-                </p>
+                <p className="text-[#b3b3b3] text-sm text-center py-8">Nenhum produto disponível nesta categoria no momento.</p>
               )}
             </section>
           );
         })}
+
+        {hasMoreProducts && (
+          <div className="flex justify-center pt-2 pb-6">
+            <button
+              onClick={() => setVisibleProductsCount((prev) => prev + LOAD_MORE_STEP)}
+              className="px-4 py-2 rounded-lg bg-secondary text-foreground hover:bg-secondary/80 transition-colors"
+            >
+              Carregar mais produtos
+            </button>
+          </div>
+        )}
       </main>
 
       <MenuFooter />
