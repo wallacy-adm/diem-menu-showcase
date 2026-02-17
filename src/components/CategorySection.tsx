@@ -72,6 +72,8 @@ export const CategorySection = memo(({ category, items, activePromotions, deboun
   }, [category.highlight, category.highlight_level]);
 
   const skeletonCount = useMemo(() => Math.min(4, items.length || 2), [items.length]);
+  const categoryHasHighlight = category.highlight === true;
+  const categoryHighlightLevel = category.highlight_level as HighlightLevel;
 
   const renderProductItem = useCallback(
     (item: Product) => {
@@ -80,9 +82,6 @@ export const CategorySection = memo(({ category, items, activePromotions, deboun
       const displayOldPrice = promotion ? promotion.original_price : (item.old_price ? Number(item.old_price) : undefined);
       const promotionName = promotion ? promotion.name : undefined;
       const promotionEndDate = promotion ? promotion.end_date : undefined;
-
-      const categoryHasHighlight = category.highlight === true;
-      const categoryHighlightLevel = category.highlight_level as HighlightLevel;
 
       const effectiveHighlightLevel: HighlightLevel = promotion
         ? (promotion.highlight_level as HighlightLevel)
@@ -109,7 +108,7 @@ export const CategorySection = memo(({ category, items, activePromotions, deboun
         />
       );
     },
-    [activePromotions, category.highlight, category.highlight_level],
+    [activePromotions, categoryHasHighlight, categoryHighlightLevel],
   );
 
   return (

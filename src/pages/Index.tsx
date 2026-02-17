@@ -152,19 +152,21 @@ const Index = () => {
     [debouncedSearch],
   );
 
+  const safeCategories = categories ?? [];
+
   const categoryChips = useMemo(
     () =>
-      (categories ?? []).map((cat) => ({
+      safeCategories.map((cat) => ({
         name: cat.name,
         emoji: cat.emoji,
         highlight: cat.highlight,
         highlight_level: cat.highlight_level as "Leve" | "Destaque" | "Super Destaque",
       })),
-    [categories],
+    [safeCategories],
   );
 
   const isListLoading = categoriesLoading || itemsLoading;
-  const hasCategories = (categories?.length ?? 0) > 0;
+  const hasCategories = safeCategories.length > 0;
 
   return (
     <div className="min-h-screen bg-background">
@@ -198,7 +200,7 @@ const Index = () => {
         </div>
       ) : hasCategories ? (
         <HomeProductContent
-          categories={categories}
+          categories={safeCategories}
           groupedItems={groupedItems}
           activePromotions={activePromotions}
           debouncedSearch={debouncedSearch}

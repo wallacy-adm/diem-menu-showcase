@@ -77,6 +77,8 @@ export const ProductCard = memo(({
     }
   };
 
+  const shouldShowModal = isModalOpen;
+
   return (
     <>
       <div
@@ -154,7 +156,7 @@ export const ProductCard = memo(({
         </div>
       </div>
 
-      {isModalOpen ? (
+      {shouldShowModal ? (
         <Suspense fallback={null}>
           <ProductModal
             isOpen={isModalOpen}
