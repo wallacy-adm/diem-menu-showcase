@@ -3,13 +3,14 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { MenuHeader } from "@/components/MenuHeader";
 import { CategoryChips } from "@/components/CategoryChips";
+import { MenuFooter } from "@/components/MenuFooter";
 import { Loader2, Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useActivePromotions } from "@/hooks/useActivePromotions";
 import { useDebounce } from "@/hooks/useDebounce";
 import { HomeProductContent } from "@/components/HomeProductContent";
 
-const MenuFooter = lazy(() => import("@/components/MenuFooter").then((module) => ({ default: module.MenuFooter })));
+const MenuFooterLazy = lazy(() => import("@/components/MenuFooter").then((module) => ({ default: module.MenuFooter })));
 
 const Index = () => {
   const firstRenderLoggedRef = useRef(false);
@@ -194,29 +195,32 @@ const Index = () => {
         </div>
       </div>
 
-      {isListLoading ? (
-        <div className="min-h-[35vh] flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      ) : hasCategories ? (
-        <HomeProductContent
-          categories={safeCategories}
-          groupedItems={groupedItems}
-          activePromotions={activePromotions}
-          debouncedSearch={debouncedSearch}
-          setSectionRef={setSectionRef}
-        />
-      ) : (
-        <div className="min-h-[35vh] flex items-center justify-center">
-          <p className="text-muted-foreground">Nenhuma categoria disponível no momento.</p>
-        </div>
-      )}
+      <div className="container mx-auto px-4">
+        {isListLoading ? (
+          <div className="min-h-[35vh] flex items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : hasCategories ? (
+          <HomeProductContent
+            categories={safeCategories}
+            groupedItems={groupedItems}
+            activePromotions={activePromotions}
+            debouncedSearch={debouncedSearch}
+            setSectionRef={setSectionRef}
+          />
+        ) : (
+          <div className="min-h-[35vh] flex items-center justify-center">
+            <p className="text-muted-foreground">Nenhuma categoria disponível no momento.</p>
+          </div>
+        )}
+      </div>
 
       <Suspense fallback={<div className="h-24" />}>
-        <MenuFooter />
+        <MenuFooterLazy />
       </Suspense>
     </div>
   );
 };
 
 export default Index;
+

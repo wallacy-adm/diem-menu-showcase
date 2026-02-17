@@ -44,7 +44,7 @@ export const ProductCard = memo(({
   const { timeRemaining, isExpired } = useCountdown(promotionEndDate);
 
   const hasPromotion = oldPrice && oldPrice > 0 && oldPrice > price && !isExpired;
-  const discountPercentage = hasPromotion ? Math.round(((oldPrice - price) / oldPrice) * 100) : 0;
+  const discountPercentage = hasPromotion ? Math.round(((oldPrice! - price) / oldPrice!) * 100) : 0;
 
   const displayPrice = isExpired && oldPrice ? oldPrice : price;
   const isHighlightActive = hasPromotion || categoryHighlight || (featured && highlightLevel !== "Desligado");
@@ -89,7 +89,7 @@ export const ProductCard = memo(({
           "border border-white/[0.06]",
           "active:scale-[0.99] active:opacity-95",
           "[content-visibility:auto] [contain-intrinsic-size:172px]",
-          getProductPulseClass(),
+          getProductPulseClass()
         )}
         onClick={() => setIsModalOpen(true)}
       >
@@ -182,3 +182,4 @@ export const ProductCard = memo(({
 });
 
 ProductCard.displayName = "ProductCard";
+

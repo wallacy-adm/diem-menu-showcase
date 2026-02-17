@@ -4,7 +4,11 @@ import { useOnScreen } from "@/hooks/useOnScreen";
 import { cn } from "@/lib/utils";
 import { VirtualProductGrid } from "@/components/VirtualProductGrid";
 
-const ProductCard = lazy(() => import("@/components/ProductCard").then((module) => ({ default: module.ProductCard })));
+const ProductCard = lazy(() =>
+  import("@/components/ProductCard").then((module) => ({
+    default: module.ProductCard,
+  }))
+);
 
 type Category = {
   name: string;
@@ -79,15 +83,15 @@ export const CategorySection = memo(({ category, items, activePromotions, deboun
     (item: Product) => {
       const promotion = activePromotions?.get(item.id);
       const displayPrice = promotion ? promotion.discounted_price : Number(item.price);
-      const displayOldPrice = promotion ? promotion.original_price : (item.old_price ? Number(item.old_price) : undefined);
-      const promotionName = promotion ? promotion.name : undefined;
-      const promotionEndDate = promotion ? promotion.end_date : undefined;
+      const displayOldPrice = promotion ? promotion.original_price : item.old_price ? Number(item.old_price) : undefined;
+      const promotionName = promotion?.name;
+      const promotionEndDate = promotion?.end_date;
 
       const effectiveHighlightLevel: HighlightLevel = promotion
         ? (promotion.highlight_level as HighlightLevel)
         : categoryHasHighlight
-          ? categoryHighlightLevel
-          : (item.highlight_level as HighlightLevel);
+        ? categoryHighlightLevel
+        : (item.highlight_level as HighlightLevel);
 
       return (
         <ProductCard
@@ -168,3 +172,4 @@ export const CategorySection = memo(({ category, items, activePromotions, deboun
 });
 
 CategorySection.displayName = "CategorySection";
+
