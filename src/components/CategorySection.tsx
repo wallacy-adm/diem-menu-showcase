@@ -1,9 +1,10 @@
-import { memo, useCallback, useMemo, useRef } from "react";
-import { ProductCard } from "@/components/ProductCard";
+import { lazy, memo, Suspense, useCallback, useMemo, useRef } from "react";
 import type { HighlightLevel } from "@/hooks/useActivePromotions";
 import { useOnScreen } from "@/hooks/useOnScreen";
 import { cn } from "@/lib/utils";
 import { VirtualProductGrid } from "@/components/VirtualProductGrid";
+
+const ProductCard = lazy(() => import("@/components/ProductCard").then((module) => ({ default: module.ProductCard })));
 
 type Category = {
   name: string;
@@ -133,7 +134,20 @@ export const CategorySection = memo(({ category, items, activePromotions, deboun
       </h2>
 
       {shouldRenderProducts || debouncedSearch.trim() ? (
-        <VirtualProductGrid items={items} renderItem={renderProductItem} />
+        <Suspense
+          fallback={
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
+              {Array.from({ length: Math.min(4, items.length || 2) }).map((_, index) => (
+                <div
+                  key={`${category.name}-loading-${index}`}
+                  className="h-[172px] rounded-2xl border border-white/[0.06] bg-[#0a0a0a]/70 animate-pulse"
+                />
+              ))}
+            </div>
+          }
+        >
+          <VirtualProductGrid items={items} renderItem={renderProductItem} />
+        </Suspense>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
           {Array.from({ length: Math.min(4, items.length || 2) }).map((_, index) => (

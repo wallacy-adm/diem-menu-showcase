@@ -1,16 +1,23 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { lazy, Suspense, useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { MenuHeader } from "@/components/MenuHeader";
 import { CategoryChips } from "@/components/CategoryChips";
-import { MenuFooter } from "@/components/MenuFooter";
 import { Loader2, Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useActivePromotions } from "@/hooks/useActivePromotions";
 import { useDebounce } from "@/hooks/useDebounce";
-import { CategorySection } from "@/components/CategorySection";
+import { HomeProductContent } from "@/components/HomeProductContent";
+
+const MenuFooter = lazy(() => import("@/components/MenuFooter").then((module) => ({ default: module.MenuFooter })));
 
 const Index = () => {
+  const firstRenderLoggedRef = useRef(false);
+  if (!firstRenderLoggedRef.current) {
+    console.time("first-render");
+    firstRenderLoggedRef.current = true;
+  }
+
   const [activeCategory, setActiveCategory] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [isPostPaint, setIsPostPaint] = useState(false);
@@ -19,6 +26,12 @@ const Index = () => {
   const isManualScrollRef = useRef(false);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
+
+  useEffect(() => {
+    requestAnimationFrame(() => {
+      console.timeEnd("first-render");
+    });
+  }, []);
 
   const { data: categories, isLoading: categoriesLoading } = useQuery({
     queryKey: ["categories"],
@@ -54,8 +67,6 @@ const Index = () => {
   }, []);
 
   const { data: activePromotions } = useActivePromotions(isPostPaint);
-
-  const isLoading = categoriesLoading || itemsLoading;
 
   const filteredItems = useMemo(() => {
     if (!menuItems) return [];
@@ -141,40 +152,23 @@ const Index = () => {
     [debouncedSearch],
   );
 
+  const categoryChips = useMemo(
+    () =>
+      (categories ?? []).map((cat) => ({
+        name: cat.name,
+        emoji: cat.emoji,
+        highlight: cat.highlight,
+        highlight_level: cat.highlight_level as "Leve" | "Destaque" | "Super Destaque",
+      })),
+    [categories],
+  );
 
-  const categoryChips = useMemo(() =>
-    (categories ?? []).map((cat) => ({
-      name: cat.name,
-      emoji: cat.emoji,
-      highlight: cat.highlight,
-      highlight_level: cat.highlight_level as "Leve" | "Destaque" | "Super Destaque",
-    })),
-  [categories]);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  if (!categories || categories.length === 0) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
+  const isListLoading = categoriesLoading || itemsLoading;
 
   return (
     <div className="min-h-screen bg-background">
       <MenuHeader />
-      <CategoryChips
-        categories={categoryChips}
-        activeCategory={activeCategory}
-        onCategoryClick={handleCategoryClick}
-      />
+      <CategoryChips categories={categoryChips} activeCategory={activeCategory} onCategoryClick={handleCategoryClick} />
 
       <div className="container mx-auto px-4 pt-4">
         <div className="relative">
@@ -197,25 +191,27 @@ const Index = () => {
         </div>
       </div>
 
-      <main className="container mx-auto px-4 py-6">
-        {categories.map((category) => {
-          const items = groupedItems?.[category.name] || [];
-          if (debouncedSearch.trim() && items.length === 0) return null;
+      {isListLoading ? (
+        <div className="min-h-[35vh] flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      ) : categories && categories.length > 0 ? (
+        <HomeProductContent
+          categories={categories}
+          groupedItems={groupedItems}
+          activePromotions={activePromotions}
+          debouncedSearch={debouncedSearch}
+          setSectionRef={setSectionRef}
+        />
+      ) : (
+        <div className="min-h-[35vh] flex items-center justify-center">
+          <p className="text-muted-foreground">Nenhuma categoria disponível no momento.</p>
+        </div>
+      )}
 
-          return (
-            <CategorySection
-              key={category.name}
-              category={category}
-              items={items}
-              activePromotions={activePromotions}
-              debouncedSearch={debouncedSearch}
-              setSectionRef={setSectionRef}
-            />
-          );
-        })}
-      </main>
-
-      <MenuFooter />
+      <Suspense fallback={<div className="h-24" />}>
+        <MenuFooter />
+      </Suspense>
     </div>
   );
 };

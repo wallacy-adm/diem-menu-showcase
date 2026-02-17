@@ -1,10 +1,11 @@
-import { useState, memo } from "react";
+import { useEffect, useState, memo, lazy, Suspense } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { InfoModal } from "./InfoModal";
 import { Button } from "./ui/button";
 import fallbackHeroImage from "@/assets/carpe-diem-hero.jpg";
 import fallbackLogoImage from "@/assets/carpe-diem-logo.png";
+
+const InfoModal = lazy(() => import("./InfoModal").then((module) => ({ default: module.InfoModal })));
 
 export const MenuHeader = memo(() => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -24,6 +25,20 @@ export const MenuHeader = memo(() => {
   const showLogo = settings?.show_logo !== false;
   const backgroundImage = showBackground ? (settings?.bg_url || fallbackHeroImage) : null;
   const logoImage = showLogo ? (settings?.logo_url || fallbackLogoImage) : null;
+
+  useEffect(() => {
+    if (!backgroundImage) return;
+
+    const preload = document.createElement("link");
+    preload.rel = "preload";
+    preload.as = "image";
+    preload.href = backgroundImage;
+    document.head.appendChild(preload);
+
+    return () => {
+      document.head.removeChild(preload);
+    };
+  }, [backgroundImage]);
 
   return (
     <>
@@ -83,7 +98,11 @@ export const MenuHeader = memo(() => {
         </div>
       </header>
 
-      <InfoModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} settings={settings} />
+      {isModalOpen ? (
+        <Suspense fallback={null}>
+          <InfoModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} settings={settings} />
+        </Suspense>
+      ) : null}
     </>
   );
 });
