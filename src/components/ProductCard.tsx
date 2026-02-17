@@ -48,7 +48,7 @@ export const ProductCard = memo(({
 
   const displayPrice = isExpired && oldPrice ? oldPrice : price;
   const isHighlightActive = hasPromotion || categoryHighlight || (featured && highlightLevel !== "Desligado");
-  const effectiveHighlightLevel = hasPromotion ? highlightLevel : highlightLevel;
+  const effectiveHighlightLevel = highlightLevel;
 
   const getProductPulseClass = () => {
     if (!isHighlightActive) return "";

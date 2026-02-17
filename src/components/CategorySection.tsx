@@ -71,6 +71,8 @@ export const CategorySection = memo(({ category, items, activePromotions, deboun
     }
   }, [category.highlight, category.highlight_level]);
 
+  const skeletonCount = useMemo(() => Math.min(4, items.length || 2), [items.length]);
+
   const renderProductItem = useCallback(
     (item: Product) => {
       const promotion = activePromotions?.get(item.id);
@@ -137,7 +139,7 @@ export const CategorySection = memo(({ category, items, activePromotions, deboun
         <Suspense
           fallback={
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
-              {Array.from({ length: Math.min(4, items.length || 2) }).map((_, index) => (
+              {Array.from({ length: skeletonCount }).map((_, index) => (
                 <div
                   key={`${category.name}-loading-${index}`}
                   className="h-[172px] rounded-2xl border border-white/[0.06] bg-[#0a0a0a]/70 animate-pulse"
@@ -150,7 +152,7 @@ export const CategorySection = memo(({ category, items, activePromotions, deboun
         </Suspense>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
-          {Array.from({ length: Math.min(4, items.length || 2) }).map((_, index) => (
+          {Array.from({ length: skeletonCount }).map((_, index) => (
             <div
               key={`${category.name}-placeholder-${index}`}
               className="h-[172px] rounded-2xl border border-white/[0.06] bg-[#0a0a0a]/70 animate-pulse"

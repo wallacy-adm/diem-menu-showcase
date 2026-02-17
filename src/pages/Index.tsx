@@ -164,6 +164,7 @@ const Index = () => {
   );
 
   const isListLoading = categoriesLoading || itemsLoading;
+  const hasCategories = (categories?.length ?? 0) > 0;
 
   return (
     <div className="min-h-screen bg-background">
@@ -195,7 +196,7 @@ const Index = () => {
         <div className="min-h-[35vh] flex items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
-      ) : categories && categories.length > 0 ? (
+      ) : hasCategories ? (
         <HomeProductContent
           categories={categories}
           groupedItems={groupedItems}
