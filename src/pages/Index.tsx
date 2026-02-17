@@ -3,29 +3,21 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { MenuHeader } from "@/components/MenuHeader";
 import { CategoryChips } from "@/components/CategoryChips";
-import { ProductCard } from "@/components/ProductCard";
 import { MenuFooter } from "@/components/MenuFooter";
 import { Loader2, Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { useActivePromotions, HighlightLevel } from "@/hooks/useActivePromotions";
-import { cn } from "@/lib/utils";
+import { useActivePromotions } from "@/hooks/useActivePromotions";
+import { useDebounce } from "@/hooks/useDebounce";
+import { CategorySection } from "@/components/CategorySection";
 
 const Index = () => {
   const [activeCategory, setActiveCategory] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const debouncedSearch = useDebounce(searchQuery, 300);
   const sectionRefs = useRef<Map<string, HTMLElement>>(new Map());
   const isManualScrollRef = useRef(false);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
-
-  // Debounce para a busca - evita re-renderizações pesadas a cada tecla
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchQuery);
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
 
   const { data: categories, isLoading: categoriesLoading } = useQuery({
     queryKey: ["categories"],
@@ -59,14 +51,12 @@ const Index = () => {
 
   const isLoading = categoriesLoading || itemsLoading;
 
-  // Filter items by debounced search query
   const filteredItems = useMemo(() => {
     if (!menuItems) return [];
     if (!debouncedSearch.trim()) return menuItems;
     const query = debouncedSearch.toLowerCase().trim();
-    return menuItems.filter(item => 
-      item.name.toLowerCase().includes(query) || 
-      (item.description && item.description.toLowerCase().includes(query))
+    return menuItems.filter(
+      (item) => item.name.toLowerCase().includes(query) || (item.description && item.description.toLowerCase().includes(query)),
     );
   }, [menuItems, debouncedSearch]);
 
@@ -80,13 +70,12 @@ const Index = () => {
     }, {} as Record<string, typeof filteredItems>);
   }, [filteredItems]);
 
-  // Intersection Observer para detectar categoria ativa (muito mais performático que scroll event)
   useEffect(() => {
     if (!categories || categories.length === 0 || debouncedSearch) return;
 
     const options = {
-      rootMargin: '-80px 0px -70% 0px',
-      threshold: 0
+      rootMargin: "-80px 0px -70% 0px",
+      threshold: 0,
     };
 
     observerRef.current = new IntersectionObserver((entries) => {
@@ -94,7 +83,7 @@ const Index = () => {
 
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
-          const category = entry.target.getAttribute('data-category');
+          const category = entry.target.getAttribute("data-category");
           if (category) setActiveCategory(category);
         }
       });
@@ -132,16 +121,19 @@ const Index = () => {
     }, 800);
   }, []);
 
-  const setSectionRef = useCallback((name: string, el: HTMLElement | null) => {
-    if (el) {
-      sectionRefs.current.set(name, el);
-      if (observerRef.current && !debouncedSearch) {
-        observerRef.current.observe(el);
+  const setSectionRef = useCallback(
+    (name: string, el: HTMLElement | null) => {
+      if (el) {
+        sectionRefs.current.set(name, el);
+        if (observerRef.current && !debouncedSearch) {
+          observerRef.current.observe(el);
+        }
+      } else {
+        sectionRefs.current.delete(name);
       }
-    } else {
-      sectionRefs.current.delete(name);
-    }
-  }, [debouncedSearch]);
+    },
+    [debouncedSearch],
+  );
 
   if (isLoading) {
     return (
@@ -163,11 +155,11 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <MenuHeader />
       <CategoryChips
-        categories={categories.map((cat) => ({ 
-          name: cat.name, 
+        categories={categories.map((cat) => ({
+          name: cat.name,
           emoji: cat.emoji,
           highlight: cat.highlight,
-          highlight_level: cat.highlight_level as 'Leve' | 'Destaque' | 'Super Destaque'
+          highlight_level: cat.highlight_level as "Leve" | "Destaque" | "Super Destaque",
         }))}
         activeCategory={activeCategory}
         onCategoryClick={handleCategoryClick}
@@ -200,98 +192,14 @@ const Index = () => {
           if (debouncedSearch.trim() && items.length === 0) return null;
 
           return (
-            <section
+            <CategorySection
               key={category.name}
-              ref={(el) => setSectionRef(category.name, el)}
-              data-category={category.name}
-              className="mb-10"
-              style={{ scrollMarginTop: "72px" }}
-            >
-              {(() => {
-                const getEmojiClass = () => {
-                  if (!category.highlight) return '';
-                  switch (category.highlight_level) {
-                    case 'Super Destaque': return 'animate-emoji-super';
-                    case 'Destaque': return 'animate-emoji-destaque';
-                    case 'Leve':
-                    default: return 'animate-emoji-leve';
-                  }
-                };
-                
-                const getSectionGlowClass = () => {
-                  if (!category.highlight) return '';
-                  switch (category.highlight_level) {
-                    case 'Super Destaque': return 'animate-category-glow-super rounded-lg px-3 py-1';
-                    case 'Destaque': return 'animate-category-glow-destaque rounded-lg px-3 py-1';
-                    case 'Leve':
-                    default: return 'animate-category-glow-leve rounded-lg px-3 py-1';
-                  }
-                };
-                
-                const emojiClass = getEmojiClass();
-                const sectionGlowClass = getSectionGlowClass();
-                
-                return (
-                  <h2
-                    className={cn(
-                      "text-xl font-extrabold text-white mb-5 uppercase tracking-wide flex items-center gap-2 w-fit",
-                      sectionGlowClass
-                    )}
-                    style={{ fontWeight: 800 }}
-                  >
-                    <span className={`text-2xl ${emojiClass}`}>{category.emoji}</span>
-                    {category.name}
-                    <span className={`text-2xl ${emojiClass}`}>{category.emoji}</span>
-                  </h2>
-                );
-              })()}
-
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
-                {items.map((item) => {
-                  const promotion = activePromotions?.get(item.id);
-                  const displayPrice = promotion ? promotion.discounted_price : Number(item.price);
-                  const displayOldPrice = promotion ? promotion.original_price : (item.old_price ? Number(item.old_price) : undefined);
-                  const promotionName = promotion ? promotion.name : undefined;
-                  const promotionEndDate = promotion ? promotion.end_date : undefined;
-                  
-                  const categoryHasHighlight = category.highlight === true;
-                  const categoryHighlightLevel = category.highlight_level as HighlightLevel;
-                  
-                  const effectiveHighlightLevel: HighlightLevel = promotion 
-                    ? (promotion.highlight_level as HighlightLevel)
-                    : categoryHasHighlight 
-                      ? categoryHighlightLevel 
-                      : (item.highlight_level as HighlightLevel);
-                  
-                  const forceHighlightFromPromotion = !!promotion;
-                  
-                  return (
-                    <ProductCard
-                      key={item.id}
-                      id={item.id}
-                      name={item.name}
-                      description={item.description}
-                      price={displayPrice}
-                      oldPrice={displayOldPrice}
-                      image={item.image}
-                      category={item.category}
-                      promotionName={promotionName}
-                      promotionEndDate={promotionEndDate}
-                      featured={item.featured}
-                      highlightLevel={effectiveHighlightLevel}
-                      categoryHighlight={categoryHasHighlight || forceHighlightFromPromotion}
-                      imagePositionY={item.image_position_y ?? 50}
-                      imageZoom={item.image_zoom ?? 1.0}
-                    />
-                  );
-                })}
-              </div>
-              {items.length === 0 && !debouncedSearch && (
-                <p className="text-[#b3b3b3] text-sm text-center py-8">
-                  Nenhum produto disponível nesta categoria no momento.
-                </p>
-              )}
-            </section>
+              category={category}
+              items={items}
+              activePromotions={activePromotions}
+              debouncedSearch={debouncedSearch}
+              setSectionRef={setSectionRef}
+            />
           );
         })}
       </main>
