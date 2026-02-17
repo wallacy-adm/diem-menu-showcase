@@ -15,7 +15,7 @@ export interface ActivePromotion {
   sort_order: number;
 }
 
-export function useActivePromotions() {
+export function useActivePromotions(enabled = true) {
   return useQuery({
     queryKey: ['active-promotions'],
     queryFn: async () => {
@@ -64,6 +64,7 @@ export function useActivePromotions() {
 
       return promotionsMap;
     },
-    refetchInterval: 30000, // Refetch every 30 seconds to update status
+    enabled,
+    refetchInterval: 120000, // Refetch every 2 minutes to reduce work on initial load
   });
 }

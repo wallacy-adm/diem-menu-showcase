@@ -1,9 +1,10 @@
-import { useState, memo } from "react";
-import { ProductModal } from "./ProductModal";
+import { useState, memo, lazy, Suspense } from "react";
 import { cn } from "@/lib/utils";
 import { useCountdown } from "@/hooks/useCountdown";
 import { Clock } from "lucide-react";
 import type { HighlightLevel } from "@/hooks/useActivePromotions";
+
+const ProductModal = lazy(() => import("./ProductModal").then((module) => ({ default: module.ProductModal })));
 
 interface ProductCardProps {
   id: string;
@@ -22,7 +23,6 @@ interface ProductCardProps {
   imageZoom?: number;
 }
 
-// Usando memo para evitar re-renderizações desnecessárias durante a busca
 export const ProductCard = memo(({
   id,
   name,
@@ -34,7 +34,7 @@ export const ProductCard = memo(({
   promotionName,
   promotionEndDate,
   featured,
-  highlightLevel = 'Leve',
+  highlightLevel = "Leve",
   categoryHighlight = false,
   imagePositionY = 50,
   imageZoom = 1.0,
@@ -44,45 +44,50 @@ export const ProductCard = memo(({
   const { timeRemaining, isExpired } = useCountdown(promotionEndDate);
 
   const hasPromotion = oldPrice && oldPrice > 0 && oldPrice > price && !isExpired;
-  const discountPercentage = hasPromotion 
-    ? Math.round(((oldPrice - price) / oldPrice) * 100)
-    : 0;
+  const discountPercentage = hasPromotion ? Math.round(((oldPrice - price) / oldPrice) * 100) : 0;
 
   const displayPrice = isExpired && oldPrice ? oldPrice : price;
-  const isHighlightActive = hasPromotion || categoryHighlight || (featured && highlightLevel !== 'Desligado');
+  const isHighlightActive = hasPromotion || categoryHighlight || (featured && highlightLevel !== "Desligado");
   const effectiveHighlightLevel = hasPromotion ? highlightLevel : highlightLevel;
 
   const getProductPulseClass = () => {
-    if (!isHighlightActive) return '';
-    if (effectiveHighlightLevel === 'Desligado' && !hasPromotion) return '';
+    if (!isHighlightActive) return "";
+    if (effectiveHighlightLevel === "Desligado" && !hasPromotion) return "";
     switch (effectiveHighlightLevel) {
-      case 'Super Destaque': return 'animate-product-pulse-super';
-      case 'Destaque': return 'animate-product-pulse-destaque';
-      case 'Leve':
-      default: return 'animate-product-pulse-leve';
+      case "Super Destaque":
+        return "animate-product-pulse-super";
+      case "Destaque":
+        return "animate-product-pulse-destaque";
+      case "Leve":
+      default:
+        return "animate-product-pulse-leve";
     }
   };
 
   const getTimerPulseClass = () => {
-    if (effectiveHighlightLevel === 'Desligado') return 'animate-timer-pulse-leve';
+    if (effectiveHighlightLevel === "Desligado") return "animate-timer-pulse-leve";
     switch (effectiveHighlightLevel) {
-      case 'Super Destaque': return 'animate-timer-pulse-super';
-      case 'Destaque': return 'animate-timer-pulse-destaque';
-      case 'Leve':
-      default: return 'animate-timer-pulse-leve';
+      case "Super Destaque":
+        return "animate-timer-pulse-super";
+      case "Destaque":
+        return "animate-timer-pulse-destaque";
+      case "Leve":
+      default:
+        return "animate-timer-pulse-leve";
     }
   };
 
   return (
     <>
-      <div 
+      <div
         className={cn(
           "bg-[#0a0a0a] rounded-2xl overflow-hidden transition-all duration-300 cursor-pointer touch-manipulation",
           "shadow-[0_2px_12px_rgba(0,0,0,0.4),0_1px_3px_rgba(0,0,0,0.3)]",
           "hover:shadow-[0_4px_20px_rgba(0,0,0,0.5),0_2px_8px_rgba(0,212,132,0.1)]",
           "border border-white/[0.06]",
           "active:scale-[0.99] active:opacity-95",
-          getProductPulseClass()
+          "[content-visibility:auto] [contain-intrinsic-size:172px]",
+          getProductPulseClass(),
         )}
         onClick={() => setIsModalOpen(true)}
       >
@@ -92,41 +97,33 @@ export const ProductCard = memo(({
               <h3 className="text-[16px] md:text-[18px] font-extrabold text-white leading-snug line-clamp-2 tracking-[-0.01em]">
                 {name}
               </h3>
-              <p className="text-[13px] md:text-sm text-muted-foreground leading-relaxed line-clamp-3">
-                {description}
-              </p>
+              <p className="text-[13px] md:text-sm text-muted-foreground leading-relaxed line-clamp-3">{description}</p>
             </div>
 
             <div className="flex flex-col gap-1.5 mt-3">
               {hasPromotion && (
                 <>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-[13px] text-muted-foreground/70 line-through">
-                      R$ {oldPrice?.toFixed(2)}
-                    </span>
-                    <span className="bg-white text-[#ff8c00] text-[11px] font-bold px-2 py-0.5 rounded">
-                      -{discountPercentage}%
-                    </span>
+                    <span className="text-[13px] text-muted-foreground/70 line-through">R$ {oldPrice?.toFixed(2)}</span>
+                    <span className="bg-white text-[#ff8c00] text-[11px] font-bold px-2 py-0.5 rounded">-{discountPercentage}%</span>
                     {promotionName && (
-                      <span className="bg-primary text-primary-foreground text-[11px] font-bold px-2 py-0.5 rounded">
-                        {promotionName}
-                      </span>
+                      <span className="bg-primary text-primary-foreground text-[11px] font-bold px-2 py-0.5 rounded">{promotionName}</span>
                     )}
                   </div>
                   {timeRemaining && (
-                    <div className={cn(
-                      "inline-flex items-center gap-1.5 bg-[#ff8c00]/15 text-[#ff8c00] text-[11px] font-semibold px-2.5 py-1 rounded-full",
-                      getTimerPulseClass()
-                    )}>
+                    <div
+                      className={cn(
+                        "inline-flex items-center gap-1.5 bg-[#ff8c00]/15 text-[#ff8c00] text-[11px] font-semibold px-2.5 py-1 rounded-full",
+                        getTimerPulseClass(),
+                      )}
+                    >
                       <Clock className="h-3 w-3" />
                       <span>Termina em {timeRemaining}</span>
                     </div>
                   )}
                 </>
               )}
-              <div className="text-xl md:text-2xl font-extrabold text-primary tracking-tight">
-                R$ {displayPrice.toFixed(2)}
-              </div>
+              <div className="text-xl md:text-2xl font-extrabold text-primary tracking-tight">R$ {displayPrice.toFixed(2)}</div>
             </div>
           </div>
 
@@ -141,44 +138,45 @@ export const ProductCard = memo(({
                 src={image || "/placeholder.svg"}
                 alt={name}
                 loading="lazy"
-                decoding="async" // Otimização de decodificação de imagem
+                decoding="async"
                 width="120"
                 height="120"
                 onLoad={() => setImageLoaded(true)}
-                style={{ 
+                style={{
                   objectPosition: `center ${imagePositionY}%`,
                   transform: `scale(${imageZoom})`,
                   transformOrigin: `center ${imagePositionY}%`,
                 }}
-                className={cn(
-                  "w-full h-full object-cover transition-opacity duration-300",
-                  imageLoaded ? "opacity-100" : "opacity-0"
-                )}
+                className={cn("w-full h-full object-cover transition-opacity duration-300", imageLoaded ? "opacity-100" : "opacity-0")}
               />
             </div>
           </div>
         </div>
       </div>
 
-      <ProductModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        product={{ 
-          id, 
-          name, 
-          description, 
-          price: displayPrice, 
-          oldPrice: hasPromotion ? oldPrice : undefined, 
-          image, 
-          category, 
-          promotionName: hasPromotion ? promotionName : undefined,
-          promotionEndDate: hasPromotion ? promotionEndDate : undefined,
-          highlightLevel: isHighlightActive ? highlightLevel : undefined,
-          categoryHighlight
-        }}
-      />
+      {isModalOpen ? (
+        <Suspense fallback={null}>
+          <ProductModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            product={{
+              id,
+              name,
+              description,
+              price: displayPrice,
+              oldPrice: hasPromotion ? oldPrice : undefined,
+              image,
+              category,
+              promotionName: hasPromotion ? promotionName : undefined,
+              promotionEndDate: hasPromotion ? promotionEndDate : undefined,
+              highlightLevel: isHighlightActive ? highlightLevel : undefined,
+              categoryHighlight,
+            }}
+          />
+        </Suspense>
+      ) : null}
     </>
   );
 });
-// Adicionando displayName para melhor debug
+
 ProductCard.displayName = "ProductCard";
