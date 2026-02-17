@@ -82,6 +82,7 @@ export const ProductCard = memo(({
           "hover:shadow-[0_4px_20px_rgba(0,0,0,0.5),0_2px_8px_rgba(0,212,132,0.1)]",
           "border border-white/[0.06]",
           "active:scale-[0.99] active:opacity-95",
+          "[content-visibility:auto] [contain-intrinsic-size:172px]",
           getProductPulseClass()
         )}
         onClick={() => setIsModalOpen(true)}
