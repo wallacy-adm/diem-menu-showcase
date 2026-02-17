@@ -1,4 +1,4 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, memo } from "react";
 import { cn } from "@/lib/utils";
 
 type HighlightLevel = 'Leve' | 'Destaque' | 'Super Destaque';
@@ -14,7 +14,7 @@ interface CategoryChipsProps {
   onCategoryClick: (category: string) => void;
 }
 
-export const CategoryChips = ({
+export const CategoryChips = memo(({
   categories,
   activeCategory,
   onCategoryClick,
@@ -22,7 +22,6 @@ export const CategoryChips = ({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const chipRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
 
-  // Auto-scroll to center the active chip
   useEffect(() => {
     if (!activeCategory || !scrollContainerRef.current) return;
 
@@ -43,7 +42,6 @@ export const CategoryChips = ({
     });
   }, [activeCategory]);
 
-  // Get emoji animation class based on highlight level
   const getEmojiAnimationClass = (highlight?: boolean, level?: HighlightLevel) => {
     if (!highlight) return '';
     switch (level) {
@@ -54,7 +52,6 @@ export const CategoryChips = ({
     }
   };
 
-  // Get chip glow class based on highlight level
   const getChipGlowClass = (highlight?: boolean, level?: HighlightLevel) => {
     if (!highlight) return '';
     switch (level) {
@@ -113,4 +110,6 @@ export const CategoryChips = ({
       </div>
     </nav>
   );
-};
+});
+
+CategoryChips.displayName = "CategoryChips";

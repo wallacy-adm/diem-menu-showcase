@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, memo } from "react";
 import { ProductModal } from "./ProductModal";
 import { cn } from "@/lib/utils";
 import { useCountdown } from "@/hooks/useCountdown";
@@ -22,7 +22,8 @@ interface ProductCardProps {
   imageZoom?: number;
 }
 
-export const ProductCard = ({
+// Usando memo para evitar re-renderizações desnecessárias durante a busca
+export const ProductCard = memo(({
   id,
   name,
   description,
@@ -47,19 +48,10 @@ export const ProductCard = ({
     ? Math.round(((oldPrice - price) / oldPrice) * 100)
     : 0;
 
-  // If promotion expired, show original price
   const displayPrice = isExpired && oldPrice ? oldPrice : price;
-
-  // Determine if highlight should be active
-  // If product has active promotion, highlight is ALWAYS applied (overrides "Desligado")
-  // Category highlight can also activate highlight independently
-  // "Desligado" means no highlight UNLESS there's an active promotion
   const isHighlightActive = hasPromotion || categoryHighlight || (featured && highlightLevel !== 'Desligado');
-
-  // Use promotion's highlight level when there's an active promotion, otherwise use product's level
   const effectiveHighlightLevel = hasPromotion ? highlightLevel : highlightLevel;
 
-  // Determine animation classes based on highlight level
   const getProductPulseClass = () => {
     if (!isHighlightActive) return '';
     if (effectiveHighlightLevel === 'Desligado' && !hasPromotion) return '';
@@ -72,7 +64,7 @@ export const ProductCard = ({
   };
 
   const getTimerPulseClass = () => {
-    if (effectiveHighlightLevel === 'Desligado') return 'animate-timer-pulse-leve'; // Default for promotions
+    if (effectiveHighlightLevel === 'Desligado') return 'animate-timer-pulse-leve';
     switch (effectiveHighlightLevel) {
       case 'Super Destaque': return 'animate-timer-pulse-super';
       case 'Destaque': return 'animate-timer-pulse-destaque';
@@ -95,9 +87,7 @@ export const ProductCard = ({
         onClick={() => setIsModalOpen(true)}
       >
         <div className="flex gap-3 p-4 md:p-5 min-h-[140px]">
-          {/* Content Left */}
           <div className="flex-1 flex flex-col justify-between min-w-0">
-            {/* Product Info */}
             <div className="space-y-1.5">
               <h3 className="text-[16px] md:text-[18px] font-extrabold text-white leading-snug line-clamp-2 tracking-[-0.01em]">
                 {name}
@@ -107,7 +97,6 @@ export const ProductCard = ({
               </p>
             </div>
 
-            {/* Price Section */}
             <div className="flex flex-col gap-1.5 mt-3">
               {hasPromotion && (
                 <>
@@ -141,7 +130,6 @@ export const ProductCard = ({
             </div>
           </div>
 
-          {/* Image Right */}
           <div className="w-[100px] h-[100px] md:w-[120px] md:h-[120px] flex-shrink-0 self-center">
             <div className="relative w-full h-full rounded-xl overflow-hidden bg-secondary/50">
               {!imageLoaded && (
@@ -153,6 +141,7 @@ export const ProductCard = ({
                 src={image || "/placeholder.svg"}
                 alt={name}
                 loading="lazy"
+                decoding="async" // Otimização de decodificação de imagem
                 width="120"
                 height="120"
                 onLoad={() => setImageLoaded(true)}
@@ -190,4 +179,6 @@ export const ProductCard = ({
       />
     </>
   );
-};
+});
+// Adicionando displayName para melhor debug
+ProductCard.displayName = "ProductCard";

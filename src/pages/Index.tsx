@@ -13,9 +13,19 @@ import { cn } from "@/lib/utils";
 const Index = () => {
   const [activeCategory, setActiveCategory] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const sectionRefs = useRef<Map<string, HTMLElement>>(new Map());
   const isManualScrollRef = useRef(false);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+
+  // Debounce para a busca - evita re-renderizações pesadas a cada tecla
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   const { data: categories, isLoading: categoriesLoading } = useQuery({
     queryKey: ["categories"],
@@ -49,54 +59,60 @@ const Index = () => {
 
   const isLoading = categoriesLoading || itemsLoading;
 
-  // Filter items by search query
+  // Filter items by debounced search query
   const filteredItems = useMemo(() => {
     if (!menuItems) return [];
-    if (!searchQuery.trim()) return menuItems;
-    const query = searchQuery.toLowerCase().trim();
+    if (!debouncedSearch.trim()) return menuItems;
+    const query = debouncedSearch.toLowerCase().trim();
     return menuItems.filter(item => 
-      item.name.toLowerCase().includes(query)
+      item.name.toLowerCase().includes(query) || 
+      (item.description && item.description.toLowerCase().includes(query))
     );
-  }, [menuItems, searchQuery]);
+  }, [menuItems, debouncedSearch]);
 
-  const groupedItems = filteredItems?.reduce((acc, item) => {
-    if (!acc[item.category]) {
-      acc[item.category] = [];
-    }
-    acc[item.category].push(item);
-    return acc;
-  }, {} as Record<string, typeof filteredItems>);
-
-  // Calculate active category based on scroll position
-  const calculateActiveCategory = useCallback(() => {
-    if (!categories || categories.length === 0) return;
-
-    const navHeight = 72; // header + category bar height
-    const scrollPosition = window.scrollY + navHeight + 20;
-
-    let currentCategory = categories[0].name;
-
-    for (const category of categories) {
-      const element = sectionRefs.current.get(category.name);
-      if (element) {
-        const rect = element.getBoundingClientRect();
-        const elementTop = rect.top + window.scrollY;
-        
-        if (elementTop <= scrollPosition) {
-          currentCategory = category.name;
-        }
+  const groupedItems = useMemo(() => {
+    return filteredItems?.reduce((acc, item) => {
+      if (!acc[item.category]) {
+        acc[item.category] = [];
       }
-    }
+      acc[item.category].push(item);
+      return acc;
+    }, {} as Record<string, typeof filteredItems>);
+  }, [filteredItems]);
 
-    setActiveCategory(currentCategory);
-  }, [categories]);
+  // Intersection Observer para detectar categoria ativa (muito mais performático que scroll event)
+  useEffect(() => {
+    if (!categories || categories.length === 0 || debouncedSearch) return;
 
-  // Click handler - scroll to section
+    const options = {
+      rootMargin: '-80px 0px -70% 0px',
+      threshold: 0
+    };
+
+    observerRef.current = new IntersectionObserver((entries) => {
+      if (isManualScrollRef.current) return;
+
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const category = entry.target.getAttribute('data-category');
+          if (category) setActiveCategory(category);
+        }
+      });
+    }, options);
+
+    sectionRefs.current.forEach((el) => {
+      if (el) observerRef.current?.observe(el);
+    });
+
+    return () => {
+      observerRef.current?.disconnect();
+    };
+  }, [categories, debouncedSearch]);
+
   const handleCategoryClick = useCallback((category: string) => {
     const element = sectionRefs.current.get(category);
     if (!element) return;
 
-    // Set manual scroll flag
     isManualScrollRef.current = true;
     setActiveCategory(category);
 
@@ -110,79 +126,22 @@ const Index = () => {
       behavior: "smooth",
     });
 
-    // Clear manual scroll flag after animation completes
-    if (scrollTimeoutRef.current) {
-      clearTimeout(scrollTimeoutRef.current);
-    }
+    if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
     scrollTimeoutRef.current = setTimeout(() => {
       isManualScrollRef.current = false;
-      // Recalculate to sync with actual position
-      calculateActiveCategory();
-    }, 600);
-  }, [calculateActiveCategory]);
-
-  // Touch/wheel event - immediately release manual scroll lock
-  useEffect(() => {
-    const releaseManualScroll = () => {
-      if (isManualScrollRef.current) {
-        isManualScrollRef.current = false;
-        if (scrollTimeoutRef.current) {
-          clearTimeout(scrollTimeoutRef.current);
-          scrollTimeoutRef.current = null;
-        }
-      }
-    };
-
-    // Listen for user-initiated scroll gestures
-    window.addEventListener("touchmove", releaseManualScroll, { passive: true });
-    window.addEventListener("wheel", releaseManualScroll, { passive: true });
-
-    return () => {
-      window.removeEventListener("touchmove", releaseManualScroll);
-      window.removeEventListener("wheel", releaseManualScroll);
-    };
+    }, 800);
   }, []);
 
-  // Scroll event handler with throttle
-  useEffect(() => {
-    if (!categories || categories.length === 0) return;
-
-    let ticking = false;
-
-    const handleScroll = () => {
-      // Skip only if manual scroll is active
-      if (isManualScrollRef.current) return;
-
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          calculateActiveCategory();
-          ticking = false;
-        });
-        ticking = true;
-      }
-    };
-
-    // Set initial category
-    if (!activeCategory && categories.length > 0) {
-      setActiveCategory(categories[0].name);
-    }
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
-      }
-    };
-  }, [categories, calculateActiveCategory, activeCategory]);
-
-  // Register section ref
   const setSectionRef = useCallback((name: string, el: HTMLElement | null) => {
     if (el) {
       sectionRefs.current.set(name, el);
+      if (observerRef.current && !debouncedSearch) {
+        observerRef.current.observe(el);
+      }
+    } else {
+      sectionRefs.current.delete(name);
     }
-  }, []);
+  }, [debouncedSearch]);
 
   if (isLoading) {
     return (
@@ -214,7 +173,6 @@ const Index = () => {
         onCategoryClick={handleCategoryClick}
       />
 
-      {/* Search Field */}
       <div className="container mx-auto px-4 pt-4">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -223,7 +181,7 @@ const Index = () => {
             placeholder="Buscar produtos..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 pr-10 bg-black/50 border-border/50 text-foreground placeholder:text-muted-foreground rounded-xl"
+            className="pl-10 pr-10 bg-black/50 border-border/50 text-foreground placeholder:text-muted-foreground rounded-xl focus:ring-primary/50"
           />
           {searchQuery && (
             <button
@@ -239,11 +197,7 @@ const Index = () => {
       <main className="container mx-auto px-4 py-6">
         {categories.map((category) => {
           const items = groupedItems?.[category.name] || [];
-          
-          // Hide category completely if no items match during search
-          if (searchQuery.trim() && items.length === 0) {
-            return null;
-          }
+          if (debouncedSearch.trim() && items.length === 0) return null;
 
           return (
             <section
@@ -254,7 +208,6 @@ const Index = () => {
               style={{ scrollMarginTop: "72px" }}
             >
               {(() => {
-                // Get emoji animation class for section header
                 const getEmojiClass = () => {
                   if (!category.highlight) return '';
                   switch (category.highlight_level) {
@@ -265,7 +218,6 @@ const Index = () => {
                   }
                 };
                 
-                // Get section header glow class based on highlight level
                 const getSectionGlowClass = () => {
                   if (!category.highlight) return '';
                   switch (category.highlight_level) {
@@ -294,55 +246,47 @@ const Index = () => {
                 );
               })()}
 
-              {items.length > 0 ? (
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
-                  {items.map((item) => {
-                    // Check if this product has an active promotion
-                    const promotion = activePromotions?.get(item.id);
-                    const displayPrice = promotion ? promotion.discounted_price : Number(item.price);
-                    const displayOldPrice = promotion ? promotion.original_price : (item.old_price ? Number(item.old_price) : undefined);
-                    const promotionName = promotion ? promotion.name : undefined;
-                    const promotionEndDate = promotion ? promotion.end_date : undefined;
-                    
-                    // Category highlight is the primary rule - if category has highlight, product inherits it
-                    const categoryHasHighlight = category.highlight === true;
-                    const categoryHighlightLevel = category.highlight_level as HighlightLevel;
-                    
-                    // If product has active promotion, highlight is ALWAYS applied
-                    // Use promotion's highlight level when there's an active promotion
-                    // Otherwise use category's highlight level (if category has highlight)
-                    // Otherwise use product's own highlight level
-                    const effectiveHighlightLevel: HighlightLevel = promotion 
-                      ? (promotion.highlight_level as HighlightLevel)
-                      : categoryHasHighlight 
-                        ? categoryHighlightLevel 
-                        : (item.highlight_level as HighlightLevel);
-                    
-                    // Active promotion forces highlight to be visible
-                    const forceHighlightFromPromotion = !!promotion;
-                    
-                    return (
-                      <ProductCard
-                        key={item.id}
-                        id={item.id}
-                        name={item.name}
-                        description={item.description}
-                        price={displayPrice}
-                        oldPrice={displayOldPrice}
-                        image={item.image}
-                        category={item.category}
-                        promotionName={promotionName}
-                        promotionEndDate={promotionEndDate}
-                        featured={item.featured}
-                        highlightLevel={effectiveHighlightLevel}
-                        categoryHighlight={categoryHasHighlight || forceHighlightFromPromotion}
-                        imagePositionY={item.image_position_y ?? 50}
-                        imageZoom={item.image_zoom ?? 1.0}
-                      />
-                    );
-                  })}
-                </div>
-              ) : (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
+                {items.map((item) => {
+                  const promotion = activePromotions?.get(item.id);
+                  const displayPrice = promotion ? promotion.discounted_price : Number(item.price);
+                  const displayOldPrice = promotion ? promotion.original_price : (item.old_price ? Number(item.old_price) : undefined);
+                  const promotionName = promotion ? promotion.name : undefined;
+                  const promotionEndDate = promotion ? promotion.end_date : undefined;
+                  
+                  const categoryHasHighlight = category.highlight === true;
+                  const categoryHighlightLevel = category.highlight_level as HighlightLevel;
+                  
+                  const effectiveHighlightLevel: HighlightLevel = promotion 
+                    ? (promotion.highlight_level as HighlightLevel)
+                    : categoryHasHighlight 
+                      ? categoryHighlightLevel 
+                      : (item.highlight_level as HighlightLevel);
+                  
+                  const forceHighlightFromPromotion = !!promotion;
+                  
+                  return (
+                    <ProductCard
+                      key={item.id}
+                      id={item.id}
+                      name={item.name}
+                      description={item.description}
+                      price={displayPrice}
+                      oldPrice={displayOldPrice}
+                      image={item.image}
+                      category={item.category}
+                      promotionName={promotionName}
+                      promotionEndDate={promotionEndDate}
+                      featured={item.featured}
+                      highlightLevel={effectiveHighlightLevel}
+                      categoryHighlight={categoryHasHighlight || forceHighlightFromPromotion}
+                      imagePositionY={item.image_position_y ?? 50}
+                      imageZoom={item.image_zoom ?? 1.0}
+                    />
+                  );
+                })}
+              </div>
+              {items.length === 0 && !debouncedSearch && (
                 <p className="text-[#b3b3b3] text-sm text-center py-8">
                   Nenhum produto disponível nesta categoria no momento.
                 </p>

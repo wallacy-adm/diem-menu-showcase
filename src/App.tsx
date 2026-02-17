@@ -8,7 +8,17 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AdminLogin from "./pages/AdminLogin";
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
+// Configuração avançada do QueryClient para performance máxima
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutos de cache "fresco"
+      gcTime: 1000 * 60 * 30, // 30 minutos de coleta de lixo
+      retry: 1,
+      refetchOnWindowFocus: false, // Evita refetch ao trocar de aba
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
