@@ -39,7 +39,7 @@ const Index = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("categories")
-        .select("*")
+        .select("id, name, emoji, highlight, highlight_level, sort_order") // OTIMIZAÇÃO: Campos específicos
         .eq("visible", true)
         .order("sort_order", { ascending: true });
 
@@ -51,15 +51,17 @@ const Index = () => {
   const { data: menuItems, isLoading: itemsLoading } = useQuery({
     queryKey: ["menuItems"],
     queryFn: async () => {
+      // OTIMIZAÇÃO CRÍTICA: Selecionamos campos específicos para reduzir o payload de 30MB.
       const { data, error } = await supabase
         .from("menu_items")
-        .select("*")
+        .select("id, name, description, price, old_price, image, category, visible, sort_order, featured, highlight_level, image_position_y, image_zoom")
         .eq("visible", true)
         .order("sort_order", { ascending: true });
 
       if (error) throw error;
       return data;
     },
+    staleTime: 1000 * 60 * 10, // 10 minutos de cache
   });
 
   useEffect(() => {
@@ -198,7 +200,10 @@ const Index = () => {
       <div className="container mx-auto px-4">
         {isListLoading ? (
           <div className="min-h-[35vh] flex items-center justify-center">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <div className="flex flex-col items-center gap-4">
+              <Loader2 className="h-10 w-10 animate-spin text-primary" />
+              <p className="text-muted-foreground animate-pulse text-sm">Carregando cardápio...</p>
+            </div>
           </div>
         ) : hasCategories ? (
           <HomeProductContent
@@ -223,4 +228,3 @@ const Index = () => {
 };
 
 export default Index;
-
