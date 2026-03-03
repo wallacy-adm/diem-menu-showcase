@@ -1,10 +1,13 @@
-import { useState, memo, lazy, Suspense } from "react";
+import { useEffect, useRef, useState, memo, lazy, Suspense } from "react";
 import { cn } from "@/lib/utils";
 import { useCountdown } from "@/hooks/useCountdown";
 import { Clock } from "lucide-react";
 import type { HighlightLevel } from "@/hooks/useActivePromotions";
+import { supabase } from "@/integrations/supabase/client";
 
 const ProductModal = lazy(() => import("./ProductModal").then((module) => ({ default: module.ProductModal })));
+
+const imageCache = new Map<string, string | null>();
 
 interface ProductCardProps {
   id: string;
@@ -12,7 +15,7 @@ interface ProductCardProps {
   description: string;
   price: number;
   oldPrice?: number;
-  image: string;
+  image?: string;
   category: string;
   promotionName?: string;
   promotionEndDate?: string;
@@ -41,7 +44,82 @@ export const ProductCard = memo(({
 }: ProductCardProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const cachedImage = imageCache.get(id);
+  const [loadedImage, setLoadedImage] = useState<string | null>(image ?? cachedImage ?? null);
+  const [shouldLoadImage, setShouldLoadImage] = useState(Boolean(image ?? cachedImage));
+  const [hasFetchedImage, setHasFetchedImage] = useState(Boolean(image ?? cachedImage));
+  const cardRef = useRef<HTMLDivElement | null>(null);
   const { timeRemaining, isExpired } = useCountdown(promotionEndDate);
+
+  useEffect(() => {
+    if (image) {
+      imageCache.set(id, image);
+      setLoadedImage(image);
+      setShouldLoadImage(true);
+      setHasFetchedImage(true);
+      return;
+    }
+
+    if (cachedImage !== undefined) {
+      setLoadedImage(cachedImage);
+      setShouldLoadImage(true);
+      setHasFetchedImage(true);
+      return;
+    }
+
+    if (!cardRef.current || hasFetchedImage) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setShouldLoadImage(true);
+            observer.disconnect();
+          }
+        });
+      },
+      {
+        root: null,
+        threshold: 0.01,
+      },
+    );
+
+    observer.observe(cardRef.current);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [cachedImage, hasFetchedImage, id, image]);
+
+  useEffect(() => {
+    if (!shouldLoadImage || hasFetchedImage) return;
+
+    let isCancelled = false;
+
+    const fetchImage = async () => {
+      const { data, error } = await supabase
+        .from("menu_items")
+        .select("image")
+        .eq("id", id)
+        .single();
+
+      if (isCancelled) return;
+
+      if (!error) {
+        const nextImage = data?.image ?? null;
+        imageCache.set(id, nextImage);
+        setLoadedImage(nextImage);
+      }
+
+      setHasFetchedImage(true);
+    };
+
+    void fetchImage();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [hasFetchedImage, id, shouldLoadImage]);
 
   const hasPromotion = oldPrice && oldPrice > 0 && oldPrice > price && !isExpired;
   const discountPercentage = hasPromotion ? Math.round(((oldPrice! - price) / oldPrice!) * 100) : 0;
@@ -82,6 +160,7 @@ export const ProductCard = memo(({
   return (
     <>
       <div
+        ref={cardRef}
         className={cn(
           "bg-[#0a0a0a] rounded-2xl overflow-hidden transition-all duration-300 cursor-pointer touch-manipulation",
           "shadow-[0_2px_12px_rgba(0,0,0,0.4),0_1px_3px_rgba(0,0,0,0.3)]",
@@ -131,26 +210,24 @@ export const ProductCard = memo(({
 
           <div className="w-[100px] h-[100px] md:w-[120px] md:h-[120px] flex-shrink-0 self-center">
             <div className="relative w-full h-full rounded-xl overflow-hidden bg-secondary/50">
-              {!imageLoaded && (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-6 h-6 border-3 border-primary border-t-transparent rounded-full animate-spin" />
-                </div>
-              )}
-              <img
-                src={image || "/placeholder.svg"}
-                alt={name}
-                loading="lazy"
-                decoding="async"
-                width="120"
-                height="120"
-                onLoad={() => setImageLoaded(true)}
-                style={{
-                  objectPosition: `center ${imagePositionY}%`,
-                  transform: `scale(${imageZoom})`,
-                  transformOrigin: `center ${imagePositionY}%`,
-                }}
-                className={cn("w-full h-full object-cover transition-opacity duration-300", imageLoaded ? "opacity-100" : "opacity-0")}
-              />
+              {!imageLoaded && <div className="absolute inset-0 animate-pulse bg-muted/35" />}
+              {shouldLoadImage ? (
+                <img
+                  src={loadedImage || "/placeholder.svg"}
+                  alt={name}
+                  loading="lazy"
+                  decoding="async"
+                  width="120"
+                  height="120"
+                  onLoad={() => setImageLoaded(true)}
+                  style={{
+                    objectPosition: `center ${imagePositionY}%`,
+                    transform: `scale(${imageZoom})`,
+                    transformOrigin: `center ${imagePositionY}%`,
+                  }}
+                  className={cn("w-full h-full object-cover transition-opacity duration-300", imageLoaded ? "opacity-100" : "opacity-0")}
+                />
+              ) : null}
             </div>
           </div>
         </div>
@@ -167,7 +244,7 @@ export const ProductCard = memo(({
               description,
               price: displayPrice,
               oldPrice: hasPromotion ? oldPrice : undefined,
-              image,
+              image: loadedImage || "/placeholder.svg",
               category,
               promotionName: hasPromotion ? promotionName : undefined,
               promotionEndDate: hasPromotion ? promotionEndDate : undefined,
@@ -182,4 +259,3 @@ export const ProductCard = memo(({
 });
 
 ProductCard.displayName = "ProductCard";
-

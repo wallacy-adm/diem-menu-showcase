@@ -14,7 +14,7 @@ type Product = {
   description: string;
   price: number;
   old_price?: number;
-  image: string;
+  image?: string;
   category: string;
   featured?: boolean;
   highlight_level?: string;
