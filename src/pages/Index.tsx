@@ -54,7 +54,7 @@ const Index = () => {
       // OTIMIZAÇÃO CRÍTICA: Selecionamos campos específicos para reduzir o payload de 30MB.
       const { data, error } = await supabase
         .from("menu_items")
-        .select("id, name, description, price, old_price, image, category, visible, sort_order, featured, highlight_level, image_position_y, image_zoom")
+        .select("id, name, description, price, old_price, category, visible, sort_order, featured, highlight_level")
         .eq("visible", true)
         .order("sort_order", { ascending: true });
 
