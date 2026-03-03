@@ -1,5 +1,6 @@
 import { useState, memo, lazy, Suspense } from "react";
 import { cn } from "@/lib/utils";
+import { getOptimizedImageUrl } from "@/lib/image-utils";
 import { useCountdown } from "@/hooks/useCountdown";
 import { Clock } from "lucide-react";
 import type { HighlightLevel } from "@/hooks/useActivePromotions";
@@ -78,6 +79,7 @@ export const ProductCard = memo(({
   };
 
   const shouldShowModal = isModalOpen;
+  const optimizedImage = getOptimizedImageUrl(image || "/placeholder.svg");
 
   return (
     <>
@@ -137,12 +139,12 @@ export const ProductCard = memo(({
                 </div>
               )}
               <img
-                src={image || "/placeholder.svg"}
+                src={optimizedImage}
                 alt={name}
                 loading="lazy"
                 decoding="async"
-                width="120"
-                height="120"
+                width={120}
+                height={120}
                 onLoad={() => setImageLoaded(true)}
                 style={{
                   objectPosition: `center ${imagePositionY}%`,

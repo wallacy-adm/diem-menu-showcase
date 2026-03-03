@@ -1,9 +1,10 @@
-import { useEffect, useState, memo, lazy, Suspense } from "react";
+import { useState, memo, lazy, Suspense } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "./ui/button";
 import fallbackHeroImage from "@/assets/carpe-diem-hero.jpg";
 import fallbackLogoImage from "@/assets/carpe-diem-logo.png";
+import { getOptimizedImageUrl } from "@/lib/image-utils";
 
 const InfoModal = lazy(() => import("./InfoModal").then((module) => ({ default: module.InfoModal })));
 
@@ -23,22 +24,8 @@ export const MenuHeader = memo(() => {
 
   const showBackground = settings?.show_bg !== false;
   const showLogo = settings?.show_logo !== false;
-  const backgroundImage = showBackground ? (settings?.bg_url || fallbackHeroImage) : null;
-  const logoImage = showLogo ? (settings?.logo_url || fallbackLogoImage) : null;
-
-  useEffect(() => {
-    if (!backgroundImage) return;
-
-    const preload = document.createElement("link");
-    preload.rel = "preload";
-    preload.as = "image";
-    preload.href = backgroundImage;
-    document.head.appendChild(preload);
-
-    return () => {
-      document.head.removeChild(preload);
-    };
-  }, [backgroundImage]);
+  const backgroundImage = showBackground ? getOptimizedImageUrl(settings?.bg_url || fallbackHeroImage, 1280, 70) : null;
+  const logoImage = showLogo ? getOptimizedImageUrl(settings?.logo_url || fallbackLogoImage, 240, 75) : null;
 
   return (
     <>
@@ -84,7 +71,10 @@ export const MenuHeader = memo(() => {
                 alt={settings?.brand_name || "Carpe Diem Motel"}
                 className="w-[120px] h-[120px] rounded-xl object-cover border-2 border-white shadow-[0_8px_20px_rgba(0,0,0,0.35)]"
                 loading="eager"
+                fetchPriority="high"
                 decoding="async"
+                width={120}
+                height={120}
               />
             )}
           </div>

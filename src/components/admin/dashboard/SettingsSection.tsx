@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { useSettings } from "@/hooks/useSettings";
+import { compressImageFile } from "@/lib/image-utils";
 
 export function SettingsSection() {
   const { toast } = useToast();
@@ -50,7 +51,7 @@ export function SettingsSection() {
     }
   }, [settings]);
 
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -72,15 +73,11 @@ export function SettingsSection() {
       return;
     }
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const base64String = reader.result as string;
-      setLogoPreview(base64String);
-    };
-    reader.readAsDataURL(file);
+    const compressedImage = await compressImageFile(file, { maxWidth: 1200, quality: 0.7 });
+    setLogoPreview(compressedImage);
   };
 
-  const handleBgUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleBgUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -102,15 +99,11 @@ export function SettingsSection() {
       return;
     }
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const base64String = reader.result as string;
-      setBgPreview(base64String);
-    };
-    reader.readAsDataURL(file);
+    const compressedImage = await compressImageFile(file, { maxWidth: 1920, quality: 0.7 });
+    setBgPreview(compressedImage);
   };
 
-  const handleAdminLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAdminLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -132,12 +125,8 @@ export function SettingsSection() {
       return;
     }
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const base64String = reader.result as string;
-      setAdminLogoPreview(base64String);
-    };
-    reader.readAsDataURL(file);
+    const compressedImage = await compressImageFile(file, { maxWidth: 1200, quality: 0.7 });
+    setAdminLogoPreview(compressedImage);
   };
 
   const handleSave = async () => {
@@ -241,7 +230,7 @@ export function SettingsSection() {
             </div>
             {logoPreview && (
               <div className="w-32 h-32 border border-border rounded-lg overflow-hidden flex items-center justify-center bg-muted">
-                <img src={logoPreview} alt="Logo preview" className="max-w-full max-h-full object-contain" />
+                <img src={logoPreview} alt="Logo preview" loading="lazy" decoding="async" width={180} height={180} className="max-w-full max-h-full object-contain" />
               </div>
             )}
           </div>
@@ -286,7 +275,7 @@ export function SettingsSection() {
             </div>
             {bgPreview && (
               <div className="w-32 h-32 border border-border rounded-lg overflow-hidden bg-muted">
-                <img src={bgPreview} alt="Background preview" className="w-full h-full object-cover" />
+                <img src={bgPreview} alt="Background preview" loading="lazy" decoding="async" width={640} height={192} className="w-full h-full object-cover" />
               </div>
             )}
           </div>
@@ -322,7 +311,7 @@ export function SettingsSection() {
             </div>
             {adminLogoPreview && (
               <div className="w-32 h-32 border border-border rounded-lg overflow-hidden flex items-center justify-center bg-muted">
-                <img src={adminLogoPreview} alt="Admin logo preview" className="max-w-full max-h-full object-contain" />
+                <img src={adminLogoPreview} alt="Admin logo preview" loading="lazy" decoding="async" width={180} height={180} className="max-w-full max-h-full object-contain" />
               </div>
             )}
           </div>

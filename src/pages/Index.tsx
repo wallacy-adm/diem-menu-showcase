@@ -3,12 +3,12 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { MenuHeader } from "@/components/MenuHeader";
 import { CategoryChips } from "@/components/CategoryChips";
-import { MenuFooter } from "@/components/MenuFooter";
 import { Loader2, Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useActivePromotions } from "@/hooks/useActivePromotions";
 import { useDebounce } from "@/hooks/useDebounce";
 import { HomeProductContent } from "@/components/HomeProductContent";
+import { getOptimizedImageUrl } from "@/lib/image-utils";
 
 const MenuFooterLazy = lazy(() => import("@/components/MenuFooter").then((module) => ({ default: module.MenuFooter })));
 
@@ -153,7 +153,7 @@ const Index = () => {
     [debouncedSearch],
   );
 
-  const safeCategories = categories ?? [];
+  const safeCategories = useMemo(() => categories ?? [], [categories]);
 
   const categoryChips = useMemo(
     () =>
@@ -168,6 +168,24 @@ const Index = () => {
 
   const isListLoading = categoriesLoading || itemsLoading;
   const hasCategories = safeCategories.length > 0;
+
+  useEffect(() => {
+    if (!safeCategories.length || !groupedItems) return;
+
+    const firstCategoryName = safeCategories[0]?.name;
+    const firstItemImage = firstCategoryName ? groupedItems[firstCategoryName]?.[0]?.image : undefined;
+    if (!firstItemImage) return;
+
+    const preload = document.createElement("link");
+    preload.rel = "preload";
+    preload.as = "image";
+    preload.href = getOptimizedImageUrl(firstItemImage);
+    document.head.appendChild(preload);
+
+    return () => {
+      document.head.removeChild(preload);
+    };
+  }, [safeCategories, groupedItems]);
 
   return (
     <div className="min-h-screen bg-background">

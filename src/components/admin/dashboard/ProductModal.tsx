@@ -23,6 +23,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { Product, HighlightLevel } from "@/hooks/useAdminProducts";
 import { Category } from "@/hooks/useAdminCategories";
+import { compressImageFile } from "@/lib/image-utils";
 
 interface ProductModalProps {
   isOpen: boolean;
@@ -78,7 +79,7 @@ export function ProductModal({ isOpen, onClose, onSave, product, categories }: P
     }
   }, [product, isOpen]);
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -100,13 +101,17 @@ export function ProductModal({ isOpen, onClose, onSave, product, categories }: P
       return;
     }
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const base64String = reader.result as string;
-      setImageUrl(base64String);
-      setImagePreview(base64String);
-    };
-    reader.readAsDataURL(file);
+    try {
+      const compressedImage = await compressImageFile(file, { maxWidth: 1600, quality: 0.7 });
+      setImageUrl(compressedImage);
+      setImagePreview(compressedImage);
+    } catch {
+      toast({
+        title: "Erro",
+        description: "Não foi possível processar a imagem selecionada.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleSave = () => {
@@ -205,6 +210,10 @@ export function ProductModal({ isOpen, onClose, onSave, product, categories }: P
                           <img
                             src={imagePreview}
                             alt="Preview"
+                            loading="lazy"
+                            decoding="async"
+                            width={120}
+                            height={120}
                             className="w-full h-full object-cover"
                             style={{
                               objectPosition: `center ${imagePositionY}%`,

@@ -10,6 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCountdown } from "@/hooks/useCountdown";
 import { cn } from "@/lib/utils";
+import { getOptimizedImageUrl } from "@/lib/image-utils";
 import type { HighlightLevel } from "@/hooks/useActivePromotions";
 
 interface ProductModalProps {
@@ -54,6 +55,7 @@ export const ProductModal = ({ isOpen, onClose, product }: ProductModalProps) =>
   };
 
   const hasPromo = product.oldPrice && product.oldPrice > 0 && product.oldPrice > product.price && !isExpired;
+  const optimizedImage = getOptimizedImageUrl(product.image);
   const discountPercentage = hasPromo 
     ? Math.round(((product.oldPrice! - product.price) / product.oldPrice!) * 100)
     : 0;
@@ -85,9 +87,12 @@ export const ProductModal = ({ isOpen, onClose, product }: ProductModalProps) =>
           <div className="space-y-1">
             <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-secondary">
               <img
-                src={product.image}
+                src={optimizedImage}
                 alt={product.name}
                 loading="lazy"
+                decoding="async"
+                width={1280}
+                height={720}
                 className="w-full h-full object-cover"
               />
             </div>
