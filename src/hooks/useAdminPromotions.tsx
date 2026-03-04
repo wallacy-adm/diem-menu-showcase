@@ -86,6 +86,7 @@ export function useAdminPromotions() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-promotions'] });
       queryClient.invalidateQueries({ queryKey: ['active-promotions'] });
+      queryClient.invalidateQueries(["menuItems"]);
     },
   });
 
@@ -104,6 +105,7 @@ export function useAdminPromotions() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-promotions'] });
       queryClient.invalidateQueries({ queryKey: ['active-promotions'] });
+      queryClient.invalidateQueries(["menuItems"]);
     },
   });
 
@@ -119,6 +121,7 @@ export function useAdminPromotions() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-promotions'] });
       queryClient.invalidateQueries({ queryKey: ['active-promotions'] });
+      queryClient.invalidateQueries(["menuItems"]);
     },
   });
 

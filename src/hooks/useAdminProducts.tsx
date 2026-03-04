@@ -49,6 +49,7 @@ export function useAdminProducts() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+      queryClient.invalidateQueries(["menuItems"]);
     },
   });
 
@@ -66,6 +67,7 @@ export function useAdminProducts() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+      queryClient.invalidateQueries(["menuItems"]);
     },
   });
 
@@ -80,6 +82,7 @@ export function useAdminProducts() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+      queryClient.invalidateQueries(["menuItems"]);
     },
   });
 
@@ -97,6 +100,7 @@ export function useAdminProducts() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+      queryClient.invalidateQueries(["menuItems"]);
     },
   });
 
@@ -124,6 +128,7 @@ export function useAdminProducts() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+      queryClient.invalidateQueries(["menuItems"]);
     },
   });
 
