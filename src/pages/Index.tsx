@@ -1,3 +1,6 @@
+// ⚠️ Este projeto utiliza lazy image loading.
+// Nunca incluir campo "image" na query principal.
+// Imagens devem ser carregadas apenas via ProductCard (viewport-based).
 import { lazy, Suspense, useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { useActivePromotions } from "@/hooks/useActivePromotions";
 import { useDebounce } from "@/hooks/useDebounce";
 import { HomeProductContent } from "@/components/HomeProductContent";
+import { fetchMenuItemsSafe } from "@/services/menuService";
 
 const MenuFooterLazy = lazy(() => import("@/components/MenuFooter").then((module) => ({ default: module.MenuFooter })));
 
@@ -51,12 +55,7 @@ const Index = () => {
   const { data: menuItems, isLoading: itemsLoading } = useQuery({
     queryKey: ["menuItems"],
     queryFn: async () => {
-      // OTIMIZAÇÃO CRÍTICA: Selecionamos campos específicos para reduzir o payload de 30MB.
-      const { data, error } = await supabase
-        .from("menu_items")
-        .select("id, name, description, price, old_price, category, visible, sort_order, featured, highlight_level")
-        .eq("visible", true)
-        .order("sort_order", { ascending: true });
+      const { data, error } = await fetchMenuItemsSafe();
 
       if (error) throw error;
       return data;
