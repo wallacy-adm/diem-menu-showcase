@@ -1,0 +1,164 @@
+{
+  "metadata": {
+    "project": "diem-menu-showcase",
+    "extracted_at": "2026-03-08",
+    "source_summary": {
+      "seeds": [
+        "supabase/migrations/20251022203035_01c494a3-0a4e-417b-a332-15ddff73b0e5.sql",
+        "supabase/migrations/20251023213447_2a6685fb-1c48-438f-944f-ff8de5248484.sql"
+      ],
+      "supabase_queries": [
+        "src/services/menuService.ts",
+        "src/hooks/useAdminProducts.tsx",
+        "src/hooks/useAdminCategories.tsx",
+        "src/hooks/useActivePromotions.tsx",
+        "src/hooks/useSettings.tsx"
+      ],
+      "catalog_data_files": [
+        "supabase/migrations/20251022203035_01c494a3-0a4e-417b-a332-15ddff73b0e5.sql",
+        "supabase/migrations/20251023213447_2a6685fb-1c48-438f-944f-ff8de5248484.sql",
+        "src/pages/OLD-Admin.tsx"
+      ]
+    },
+    "notes": [
+      "Não há seed explícito para tabela public.promotions nas migrations; promoções explícitas estão vazias.",
+      "As promoções inferidas abaixo foram calculadas a partir de old_price > price nos produtos seed de menu_items.",
+      "Os UUIDs dos produtos seed não são definidos nas migrations (DEFAULT gen_random_uuid), então product_id de promoção explícita não pode ser reconstituído offline."
+    ]
+  },
+  "categorias": [
+    { "nome": "Promoção em Dobro", "emoji": "🔥", "ordem": 1, "visivel": true },
+    { "nome": "Promoção do Dia", "emoji": "😍", "ordem": 2, "visivel": true },
+    { "nome": "Campeões de Vendas", "emoji": "🏆", "ordem": 3, "visivel": true },
+    { "nome": "Indicação do Chef", "emoji": "👨‍🍳", "ordem": 4, "visivel": true },
+    { "nome": "Espumantes", "emoji": "🍾", "ordem": 5, "visivel": true },
+    { "nome": "Vinhos Nacionais", "emoji": "🍷", "ordem": 6, "visivel": true },
+    { "nome": "Vinhos Importados", "emoji": "🍇", "ordem": 7, "visivel": true },
+    { "nome": "Petiscos", "emoji": "🍢", "ordem": 8, "visivel": true },
+    { "nome": "Carnes", "emoji": "🥩", "ordem": 9, "visivel": true },
+    { "nome": "Frangos", "emoji": "🍗", "ordem": 10, "visivel": true },
+    { "nome": "Peixes", "emoji": "🐟", "ordem": 11, "visivel": true },
+    { "nome": "Massas", "emoji": "🍝", "ordem": 12, "visivel": true },
+    { "nome": "Porções Extras", "emoji": "🍟", "ordem": 13, "visivel": true },
+    { "nome": "Sanduíches", "emoji": "🥪", "ordem": 14, "visivel": true },
+    { "nome": "Sobremesas", "emoji": "🍰", "ordem": 15, "visivel": true },
+    { "nome": "Bebidas", "emoji": "🥤", "ordem": 16, "visivel": true },
+    { "nome": "Licores", "emoji": "🍸", "ordem": 17, "visivel": true },
+    { "nome": "Sucos", "emoji": "🧃", "ordem": 18, "visivel": true },
+    { "nome": "Whisky", "emoji": "🥃", "ordem": 19, "visivel": true },
+    { "nome": "Bomboniere", "emoji": "🍬", "ordem": 20, "visivel": true },
+    { "nome": "Perfumaria", "emoji": "🌸", "ordem": 21, "visivel": true }
+  ],
+  "produtos": [
+    {
+      "categoria": "Promoção em Dobro",
+      "nome": "Dupla de Cerveja Heineken",
+      "descricao": "Duas latas de Heineken geladas",
+      "preco": 25.0,
+      "preco_antigo": 35.0,
+      "imagem": "https://images.unsplash.com/photo-1608270586620-248524c67de9?w=400",
+      "destaque": true,
+      "ordem": 1,
+      "visivel": true
+    },
+    {
+      "categoria": "Promoção em Dobro",
+      "nome": "Combo Espumante + Morangos",
+      "descricao": "Espumante Chandon + Morangos com chocolate",
+      "preco": 89.0,
+      "preco_antigo": 120.0,
+      "imagem": "https://images.unsplash.com/photo-1547595628-c61a29f496f0?w=400",
+      "destaque": true,
+      "ordem": 2,
+      "visivel": true
+    },
+    {
+      "categoria": "Promoção do Dia",
+      "nome": "Filé Mignon Especial",
+      "descricao": "Filé mignon grelhado com molho madeira",
+      "preco": 65.0,
+      "preco_antigo": 85.0,
+      "imagem": "https://images.unsplash.com/photo-1600891964092-4316c288032e?w=400",
+      "destaque": true,
+      "ordem": 1,
+      "visivel": true
+    },
+    {
+      "categoria": "Promoção do Dia",
+      "nome": "Risoto de Camarão",
+      "descricao": "Risoto cremoso com camarões frescos",
+      "preco": 55.0,
+      "preco_antigo": 75.0,
+      "imagem": "https://images.unsplash.com/photo-1476124369491-c59e312f1d44?w=400",
+      "destaque": true,
+      "ordem": 2,
+      "visivel": true
+    },
+    {
+      "categoria": "Campeões de Vendas",
+      "nome": "Fondue de Chocolate",
+      "descricao": "Fondue de chocolate belga com frutas",
+      "preco": 45.0,
+      "preco_antigo": null,
+      "imagem": "https://images.unsplash.com/photo-1588195538326-c5b1e5b80daf?w=400",
+      "destaque": true,
+      "ordem": 1,
+      "visivel": true
+    },
+    {
+      "categoria": "Campeões de Vendas",
+      "nome": "Picanha ao Molho",
+      "descricao": "Picanha grelhada com molho especial",
+      "preco": 78.0,
+      "preco_antigo": null,
+      "imagem": "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?w=400",
+      "destaque": true,
+      "ordem": 2,
+      "visivel": true
+    },
+    {
+      "categoria": "Campeões de Vendas",
+      "nome": "Salmão Grelhado",
+      "descricao": "Salmão grelhado com legumes",
+      "preco": 68.0,
+      "preco_antigo": null,
+      "imagem": "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=400",
+      "destaque": true,
+      "ordem": 3,
+      "visivel": true
+    }
+  ],
+  "promocoes": {
+    "explicitas_tabela_promotions": [],
+    "inferidas_de_preco_antigo": [
+      {
+        "produto_nome": "Dupla de Cerveja Heineken",
+        "categoria": "Promoção em Dobro",
+        "preco_original": 35.0,
+        "preco_promocional": 25.0,
+        "desconto_percentual": 28.57
+      },
+      {
+        "produto_nome": "Combo Espumante + Morangos",
+        "categoria": "Promoção em Dobro",
+        "preco_original": 120.0,
+        "preco_promocional": 89.0,
+        "desconto_percentual": 25.83
+      },
+      {
+        "produto_nome": "Filé Mignon Especial",
+        "categoria": "Promoção do Dia",
+        "preco_original": 85.0,
+        "preco_promocional": 65.0,
+        "desconto_percentual": 23.53
+      },
+      {
+        "produto_nome": "Risoto de Camarão",
+        "categoria": "Promoção do Dia",
+        "preco_original": 75.0,
+        "preco_promocional": 55.0,
+        "desconto_percentual": 26.67
+      }
+    ]
+  }
+}
