@@ -153,4 +153,8 @@
   .transition-smooth { transition: var(--transition-smooth); }
   .shadow-card { box-shadow: var(--shadow-card); }
   .shadow-card-hover { box-shadow: var(--shadow-card-hover); }
+
+  #lovable-badge { 
+  display: none !important; 
+  }
 }
